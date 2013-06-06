@@ -1,0 +1,26 @@
+﻿<Window x:Class="TransmissionLossViewer.AboutView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Misc="clr-namespace:ESME.Views.Misc;assembly=ESME.Views"
+        Title="About Transmission Loss Viewer"
+        ResizeMode="NoResize"
+        SizeToContent="WidthAndHeight">
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition SharedSizeGroup="Left" />
+			<ColumnDefinition SharedSizeGroup="Right" />
+		</Grid.ColumnDefinitions>
+        <Misc:ProjectCredits Grid.Column="0"/>
+		<GroupBox Grid.Column="1"
+		          Header="Components">
+			<StackPanel Grid.Column="1"
+			            Orientation="Vertical"
+			            Margin="2 5 5 5"
+			            HorizontalAlignment="Stretch">
+                     <Misc:ModuleBuildInfoView DataContext="{Binding BuildInfo}"/>
+
+
+            </StackPanel>
+		</GroupBox>
+	</Grid>
+</Window>

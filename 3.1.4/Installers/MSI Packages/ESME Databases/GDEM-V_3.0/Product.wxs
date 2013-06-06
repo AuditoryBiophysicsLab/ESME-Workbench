@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?define ProductName = "GDEM-V for ESME" ?>
+  <?define ProductFullVersion = "3.0.1.0" ?>
+  <?define ProductAuthor = "Hearing Research Center" ?>
+  <?define Manufacturer="Boston University"?>
+  <?define ProductAppFolder = "InstallLocation" ?>
+  <?define OAMLRoot="S:\OAML Data Sources"?>
+  <?define DataPath="$(var.OAMLRoot)\GDEM-V"?>
+  <?define ProductDisplayName = "$(var.ProductName)" ?>
+  <?define ProductId = "B64956A3-9395-4DDF-A8CA-FA2CB9F69D7F" ?>
+  <?define ProductUpgradeCode = "6CF4B387-F95B-44C5-BC3A-E28E40570025" ?>
+  <Product Id="$(var.ProductId)"
+           Name="$(var.ProductDisplayName)"
+           Language="1033"
+           Version="$(var.ProductFullVersion)"
+           Manufacturer="$(var.Manufacturer)"
+           UpgradeCode="$(var.ProductUpgradeCode)">
+    <Package InstallerVersion="300"
+             Compressed="yes"
+             InstallScope="perMachine"
+             Manufacturer="$(var.ProductAuthor)"/>
+
+    <Media Id="1" Cabinet="temperature.cab" EmbedCab="yes" />
+    <Media Id="2" Cabinet="salinity.cab" EmbedCab="yes" />
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="CommonAppDataFolder">
+        <Directory Id="BostonUniversity" Name="Boston University">
+          <Directory Id="ESMEWorkbench" Name="ESME Workbench">
+            <Directory Id="EnvironmentalDatabases" Name="Environmental Databases">
+              <Directory Id="INSTALLLOCATION" Name="GDEM-V 3.0">
+                <Component Id="GDEMFiles" Guid="EE4BD309-A177-451E-91AC-BD90F5069187">
+                  <File Id="tgdemv3s01.nc"
+                        Name="tgdemv3s01.nc"
+                        Source="$(var.DataPath)\tgdemv3s01.nc"
+                        DiskId="1"
+                        KeyPath="yes"/>
+                  <File Id="tgdemv3s02.nc"
+                        Name="tgdemv3s02.nc"
+                        Source="$(var.DataPath)\tgdemv3s02.nc"
+                        DiskId="1"/>
+                  <File Id="tgdemv3s03.nc"
+                        Name="tgdemv3s03.nc"
+                        Source="$(var.DataPath)\tgdemv3s03.nc"
+                        DiskId="1"/>
+                  <File Id="tgdemv3s04.nc"
+                        Name="tgdemv3s04.nc"
+                        Source="$(var.DataPath)\tgdemv3s04.nc"
+                        DiskId="1"/>
+                  <File Id="tgdemv3s05.nc"
+                        Name="tgdemv3s05.nc"
+                        Source="$(var.DataPath)\tgdemv3s05.nc"
+                        DiskId="1"/>
+                  <File Id="tgdemv3s06.nc"
+                        Name="tgdemv3s06.nc"
+                        Source="$(var.DataPath)\tgdemv3s06.nc"
+                        DiskId="1"/>
+                  <File Id="tgdemv3s07.nc"
+                        Name="tgdemv3s07.nc"
+                        Source="$(var.DataPath)\tgdemv3s07.nc"
+                        DiskId="1"/>
+                  <File Id="tgdemv3s08.nc"
+                        Name="tgdemv3s08.nc"
+                        Source="$(var.DataPath)\tgdemv3s08.nc"
+                        DiskId="1"/>
+                  <File Id="tgdemv3s09.nc"
+                        Name="tgdemv3s09.nc"
+                        Source="$(var.DataPath)\tgdemv3s09.nc"
+                        DiskId="1"/>
+                  <File Id="tgdemv3s10.nc"
+                        Name="tgdemv3s10.nc"
+                        Source="$(var.DataPath)\tgdemv3s10.nc"
+                        DiskId="1"/>
+                  <File Id="tgdemv3s11.nc"
+                        Name="tgdemv3s11.nc"
+                        Source="$(var.DataPath)\tgdemv3s11.nc"
+                        DiskId="1"/>
+                  <File Id="tgdemv3s12.nc"
+                        Name="tgdemv3s12.nc"
+                        Source="$(var.DataPath)\tgdemv3s12.nc"
+                        DiskId="1"/>
+                  <File Id="sgdemv3s01.nc"
+                        Name="sgdemv3s01.nc"
+                        Source="$(var.DataPath)\sgdemv3s01.nc"
+                        DiskId="2"/>
+                  <File Id="sgdemv3s02.nc"
+                        Name="sgdemv3s02.nc"
+                        Source="$(var.DataPath)\sgdemv3s02.nc"
+                        DiskId="2"/>
+                  <File Id="sgdemv3s03.nc"
+                        Name="sgdemv3s03.nc"
+                        Source="$(var.DataPath)\sgdemv3s03.nc"
+                        DiskId="2"/>
+                  <File Id="sgdemv3s04.nc"
+                        Name="sgdemv3s04.nc"
+                        Source="$(var.DataPath)\sgdemv3s04.nc"
+                        DiskId="2"/>
+                  <File Id="sgdemv3s05.nc"
+                        Name="sgdemv3s05.nc"
+                        Source="$(var.DataPath)\sgdemv3s05.nc"
+                        DiskId="2"/>
+                  <File Id="sgdemv3s06.nc"
+                        Name="sgdemv3s06.nc"
+                        Source="$(var.DataPath)\sgdemv3s06.nc"
+                        DiskId="2"/>
+                  <File Id="sgdemv3s07.nc"
+                        Name="sgdemv3s07.nc"
+                        Source="$(var.DataPath)\sgdemv3s07.nc"
+                        DiskId="2"/>
+                  <File Id="sgdemv3s08.nc"
+                        Name="sgdemv3s08.nc"
+                        Source="$(var.DataPath)\sgdemv3s08.nc"
+                        DiskId="2"/>
+                  <File Id="sgdemv3s09.nc"
+                        Name="sgdemv3s09.nc"
+                        Source="$(var.DataPath)\sgdemv3s09.nc"
+                        DiskId="2"/>
+                  <File Id="sgdemv3s10.nc"
+                        Name="sgdemv3s10.nc"
+                        Source="$(var.DataPath)\sgdemv3s10.nc"
+                        DiskId="2"/>
+                  <File Id="sgdemv3s11.nc"
+                        Name="sgdemv3s11.nc"
+                        Source="$(var.DataPath)\sgdemv3s11.nc"
+                        DiskId="2"/>
+                  <File Id="sgdemv3s12.nc"
+                        Name="sgdemv3s12.nc"
+                        Source="$(var.DataPath)\sgdemv3s12.nc"
+                        DiskId="2"/>
+                </Component>
+              </Directory>
+            </Directory>
+          </Directory>
+        </Directory>
+      </Directory>
+    </Directory>
+
+    <DirectoryRef Id="TARGETDIR">
+      <Component Id="RegistryEntries" Guid="9892BF56-DEE1-4759-B851-196620878162">
+        <RegistryKey Root="HKLM"
+                     Key="Software\Boston University\ESME Workbench\Data Sources\GDEM-V 3.0">
+          <RegistryValue Type="string" Value="[INSTALLLOCATION]"/>
+        </RegistryKey>
+      </Component>
+    </DirectoryRef>
+
+    <Feature Id="ProductFeature" Title="$(var.ProductName)" Level="1">
+      <ComponentRef Id="GDEMFiles" />
+      <ComponentRef Id="RegistryEntries" />
+    </Feature>
+  </Product>
+</Wix>
