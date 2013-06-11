@@ -68,7 +68,7 @@ namespace ESME.Views.TransmissionLossViewer
                                            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving VisibleRangeChanged", DateTime.Now));
                                        }));
             _instanceObservers.Add(Observable.FromEventPattern<PropertyChangedEventArgs>(this, "PropertyChanged")
-                                       .ObserveOnDispatcher()
+                                       .ObserveOn(TaskPoolScheduler.Default)
                                        .Where(e => e.EventArgs.PropertyName == "AxisRange")
                                        .Select(e => AxisRange)
                                        .DistinctUntilChanged()
@@ -85,7 +85,7 @@ namespace ESME.Views.TransmissionLossViewer
                                                Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving (1) AxisRangeChanged", DateTime.Now));
                                                return;
                                            }
-                                           _axisRangeObserver = axisRange.ObserveOnDispatcher().Subscribe(r =>
+                                           _axisRangeObserver = axisRange.ObserveOn(TaskPoolScheduler.Default).Subscribe(r =>
                                            {
                                                if (FullRange == null) FullRange = new Range(axisRange);
                                                else FullRange.Update(axisRange);
@@ -94,7 +94,7 @@ namespace ESME.Views.TransmissionLossViewer
                                            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving AxisRangeChanged", DateTime.Now));
                                        }));
             _instanceObservers.Add(Observable.FromEventPattern<PropertyChangedEventArgs>(AxisSeriesViewModel, "PropertyChanged")
-                                       .ObserveOnDispatcher()
+                                       .ObserveOn(TaskPoolScheduler.Default)
                                        .Where(e => (e.EventArgs.PropertyName == "ActualWidth" || e.EventArgs.PropertyName == "ActualHeight"))
                                        .Select(e => new { AxisSeriesViewModel.ActualWidth, AxisSeriesViewModel.ActualHeight })
                                        .Sample(TimeSpan.FromMilliseconds(100))
@@ -294,6 +294,7 @@ namespace ESME.Views.TransmissionLossViewer
 
         void UpdateStatusProperties()
         {
+            if (_mouseTransmissionLossMarker != null) AxisMarkers.Remove(_mouseTransmissionLossMarker);
             if (AxisSeriesViewModel.IsMouseOver && _transmissionLossRadial != null)
             {
                 MouseRange = string.Format("Range: {0:0.0}m", AxisSeriesViewModel.XAxis.MouseDataLocation);
@@ -302,16 +303,23 @@ namespace ESME.Views.TransmissionLossViewer
                 var py = AxisSeriesViewModel.MouseLocation.Y / AxisSeriesViewModel.ActualHeight;
                 var rangeIndex = Math.Max(0, Math.Min((int)(_transmissionLossRadial.Ranges.Count * px), _transmissionLossRadial.Ranges.Count - 1));
                 var depthIndex = Math.Max(0, Math.Min((int)(_transmissionLossRadial.Depths.Count * py), _transmissionLossRadial.Depths.Count - 1)); MouseTransmissionLossInfo = string.Format("Transmission Loss: {0:0.0}dB", _transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
-                if (float.IsInfinity(_transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]))
+                if (float.IsInfinity(_transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]) || double.IsNaN(AxisSeriesViewModel.YAxis.MouseDataLocation) || (AxisSeriesViewModel.YAxis.MouseDataLocation > Radial.BottomDepths[rangeIndex]))
                 {
                     MouseTransmissionLossInfo = "Transmission Loss: N/A";
                     MouseSPLInfo = "Sound Pressure: N/A";
                 }
                 else
                 {
-                    if (_mouseTransmissionLossMarker != null) AxisMarkers.Remove(_mouseTransmissionLossMarker);
-                    _mouseTransmissionLossMarker = new DataAxisTick(_transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex], string.Format("{0:0}", _transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]), true, Brushes.Black, Brushes.LightGray, Brushes.White);
-                    AxisMarkers.Add(_mouseTransmissionLossMarker);
+                    if (FullRange.Contains(_transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]))
+                    {
+                        _mouseTransmissionLossMarker = new DataAxisTick(_transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex],
+                                                                        string.Format("{0:0}", _transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]),
+                                                                        true,
+                                                                        Brushes.Black,
+                                                                        Brushes.LightGray,
+                                                                        Brushes.White);
+                        AxisMarkers.Add(_mouseTransmissionLossMarker);
+                    }
                     MouseTransmissionLossInfo = string.Format("Transmission Loss: {0:0.0}dB", _transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
                     MouseSPLInfo = string.Format("Sound Pressure: {0:0.0}dB", SelectedMode.SourceLevel - _transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
                 }

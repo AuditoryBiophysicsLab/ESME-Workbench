@@ -199,6 +199,16 @@ namespace ESME.Scenarios
 
         [NotMapped] public bool IsDeleted { get; private set; }
 
+        [NotMapped] public float[] BottomDepths
+        {
+            get
+            {
+                if (_bottomDepths == null) ReadAxisFile();
+                return _bottomDepths;
+            }
+        }
+        float[] _bottomDepths;
+
         [NotMapped] public float[] MinimumTransmissionLossValues
         {
             get
@@ -279,6 +289,7 @@ namespace ESME.Scenarios
                 _minimumTransmissionLossValues = new float[Ranges.Length];
                 _maximumTransmissionLossValues = new float[Ranges.Length];
                 _meanTransmissionLossValues = new float[Ranges.Length];
+                _bottomDepths = new float[Ranges.Length];
                 for (var rangeIndex = 0; rangeIndex < Ranges.Length; rangeIndex++)
                 {
                     //if (debugIndex >= 0 && rangeIndex == debugIndex) Debugger.Break();
@@ -288,6 +299,7 @@ namespace ESME.Scenarios
                                             let desiredRange = Math.Abs((profilePoint.Range * 1000) - curRange)
                                             orderby desiredRange
                                             select profilePoint.Depth).Take(2).Min();
+                    _bottomDepths[rangeIndex] = (float)depthAtThisRange;
                     if (depthAtThisRange <= _depths[0])
                     {
                         MinimumTransmissionLossValues[rangeIndex] = float.NaN;
@@ -336,6 +348,8 @@ namespace ESME.Scenarios
                     foreach (var tl in _maximumTransmissionLossValues) writer.Write(tl);
                     writer.Write(_meanTransmissionLossValues.Length);
                     foreach (var tl in _meanTransmissionLossValues) writer.Write(tl);
+                    writer.Write(_bottomDepths.Length);
+                    foreach (var depth in _bottomDepths) writer.Write(depth);
                 }
                 //MediatorMessage.Send(MediatorMessage.TransmissionLossLayerChanged, TransmissionLoss);
                 return true;
@@ -359,21 +373,31 @@ namespace ESME.Scenarios
         void ReadAxisFile()
         {
             if (!File.Exists(BasePath + ".axs")) ExtractAxisData();
-            using (var reader = new BinaryReader(new FileStream(BasePath + ".axs", FileMode.Open)))
+            try
             {
-                _ranges = new float[reader.ReadInt32()];
-                for (var i = 0; i < _ranges.Length; i++) _ranges[i] = reader.ReadSingle();
-                _depths = new float[reader.ReadInt32()];
-                for (var i = 0; i < _depths.Length; i++) _depths[i] = reader.ReadSingle();
+                using (var reader = new BinaryReader(new FileStream(BasePath + ".axs", FileMode.Open)))
+                {
+                    _ranges = new float[reader.ReadInt32()];
+                    for (var i = 0; i < _ranges.Length; i++) _ranges[i] = reader.ReadSingle();
+                    _depths = new float[reader.ReadInt32()];
+                    for (var i = 0; i < _depths.Length; i++) _depths[i] = reader.ReadSingle();
 
-                _minimumTransmissionLossValues = new float[reader.ReadInt32()];
-                for (var i = 0; i < _minimumTransmissionLossValues.Length; i++) _minimumTransmissionLossValues[i] = reader.ReadSingle();
+                    _minimumTransmissionLossValues = new float[reader.ReadInt32()];
+                    for (var i = 0; i < _minimumTransmissionLossValues.Length; i++) _minimumTransmissionLossValues[i] = reader.ReadSingle();
 
-                _maximumTransmissionLossValues = new float[reader.ReadInt32()];
-                for (var i = 0; i < _maximumTransmissionLossValues.Length; i++) _maximumTransmissionLossValues[i] = reader.ReadSingle();
+                    _maximumTransmissionLossValues = new float[reader.ReadInt32()];
+                    for (var i = 0; i < _maximumTransmissionLossValues.Length; i++) _maximumTransmissionLossValues[i] = reader.ReadSingle();
 
-                _meanTransmissionLossValues = new float[reader.ReadInt32()];
-                for (var i = 0; i < _meanTransmissionLossValues.Length; i++) _meanTransmissionLossValues[i] = reader.ReadSingle();
+                    _meanTransmissionLossValues = new float[reader.ReadInt32()];
+                    for (var i = 0; i < _meanTransmissionLossValues.Length; i++) _meanTransmissionLossValues[i] = reader.ReadSingle();
+
+                    _bottomDepths = new float[reader.ReadInt32()];
+                    for (var i = 0; i < _bottomDepths.Length; i++) _bottomDepths[i] = reader.ReadSingle();
+                }
+            }
+            catch (EndOfStreamException)
+            {
+                ExtractAxisData();
             }
         }
 
