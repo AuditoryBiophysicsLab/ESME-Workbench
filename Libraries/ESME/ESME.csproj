@@ -291,9 +291,6 @@
     <Compile Include="TransmissionLoss\Bellhop\BottomProfile.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossCache.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossCalculatorService.cs" />
-    <Compile Include="TransmissionLoss\TransmissionLossProcess.cs">
-      <SubType>Component</SubType>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
