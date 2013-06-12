@@ -208,19 +208,23 @@ namespace ESME.Simulator
                             var tlTask = _transmissionLossCache[closestRadial];
                             await tlTask;
                             // Look up the TL value at the actor's range and depth
-                            var peakSPL = mode.SourceLevel - tlTask.Result.TransmissionLossRadial[Geo.RadiansToMeters(radiansToActor), -record.Depth];
-                            //Debug.Assert(platformState != null, "platformState != null");
-                            //Debug.Assert(platformState.ModeActiveTimes != null, "platformState.ModeActiveTimes != null");
-                            //Debug.Assert(platformState.ModeActiveTimes.ContainsKey(mode), "platformState.ModeActiveTimes does not contain key");
-                            //Debug.Assert(record != null, "record != null");
-                            //Debug.Assert(record.Exposures != null, "record.Exposures != null");
-                            var energy = (float)(peakSPL + (10 * Math.Log10(platformState.ModeActiveTimes[mode].TotalSeconds)));
-                            record.Expose(new ActorExposureRecord(index, mode, peakSPL, energy));
-                            Interlocked.Increment(ref _totalExposureCount);
-                            for (var i = 0; i < Scenario.ScenarioSpecies.Count; i++)
-                                if (_speciesActorIDStart[i] <= index && index <= _speciesActorIDEnd[i]) Interlocked.Increment(ref _exposuresBySpecies[i]);
-                            //var actorRecord = SimulationLog.RecordFromActorID(index) as SpeciesNameGuid;
-                            //if (actorRecord != null) Interlocked.Increment(ref _exposuresBySpecies[SimulationLog.SpeciesRecords.IndexOf(actorRecord)]);
+                            var transmissionLoss = tlTask.Result.ShadeFile[Geo.RadiansToMeters(radiansToActor), -record.Depth];
+                            // Only generate an exposure record if the appropriate transmissionLoss is not NaN
+                            if (!float.IsNaN(transmissionLoss))
+                            {
+                                var peakSPL = mode.SourceLevel - transmissionLoss;
+                                //Debug.Assert(platformState != null, "platformState != null");
+                                //Debug.Assert(platformState.ModeActiveTimes != null, "platformState.ModeActiveTimes != null");
+                                //Debug.Assert(platformState.ModeActiveTimes.ContainsKey(mode), "platformState.ModeActiveTimes does not contain key");
+                                //Debug.Assert(record != null, "record != null");
+                                //Debug.Assert(record.Exposures != null, "record.Exposures != null");
+                                var energy = (float)(peakSPL + (10 * Math.Log10(platformState.ModeActiveTimes[mode].TotalSeconds)));
+                                record.Expose(new ActorExposureRecord(index, mode, peakSPL, energy));
+                                Interlocked.Increment(ref _totalExposureCount);
+                                for (var i = 0; i < Scenario.ScenarioSpecies.Count; i++) if (_speciesActorIDStart[i] <= index && index <= _speciesActorIDEnd[i]) Interlocked.Increment(ref _exposuresBySpecies[i]);
+                                //var actorRecord = SimulationLog.RecordFromActorID(index) as SpeciesNameGuid;
+                                //if (actorRecord != null) Interlocked.Increment(ref _exposuresBySpecies[SimulationLog.SpeciesRecords.IndexOf(actorRecord)]);
+                            }
                         }, new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = -1 });
                         var bufferBlock = new BufferBlock<int>();
                         bufferBlock.LinkTo(actionBlock);

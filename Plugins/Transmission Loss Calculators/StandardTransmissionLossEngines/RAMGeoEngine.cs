@@ -454,7 +454,9 @@ namespace StandardTransmissionLossEngines
                 //                Path.GetFileNameWithoutExtension(radial.BasePath),
                 //                zmplt / zstep,
                 //                depthCount);
-                BellhopOutput.WriteShadeFile(radial.BasePath + ".shd", sourceDepth, frequency, rd, rr, pressures);
+                var shadeFile = new ShadeFile(sourceDepth, frequency, rd, rr, pressures);
+                shadeFile.Write(radial.BasePath + ".shd");
+                //BellhopOutput.WriteShadeFile(radial.BasePath + ".shd", sourceDepth, frequency, rd, rr, pressures);
             }
             else
             {

@@ -14,9 +14,7 @@ using System.Threading.Tasks.Dataflow;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Threading;
 using ESME.Scenarios;
-using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 using ESME.Views.Controls;
 using HRC;
@@ -102,7 +100,6 @@ namespace ESME.Views.TransmissionLossViewer
                                        .Subscribe(e =>
                                        {
                                            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Entering ActualHeightWidthChanged", DateTime.Now));
-                                           WriteableBitmap = null;
                                            Render();
                                            //CalculateBottomProfileGeometry();
                                            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving ActualHeightWidthChanged", DateTime.Now));
@@ -116,7 +113,6 @@ namespace ESME.Views.TransmissionLossViewer
                                            _radialObservers.ForEach(o => o.Dispose());
                                            _radialObservers.Clear();
                                            WriteableBitmapVisibility = Visibility.Collapsed;
-                                           WriteableBitmap = null;
                                            if (Radial == null || !Radial.IsCalculated)
                                            {
                                                WriteableBitmapVisibility = Visibility.Collapsed;
@@ -131,19 +127,18 @@ namespace ESME.Views.TransmissionLossViewer
                                                        WaitToRenderText = sb.ToString();
                                                    }
                                                    else WaitToRenderText = "This radial has not yet been calculated";
-                                                   WriteableBitmap = null;
                                                }
                                                Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving (1) RadialChanged", DateTime.Now));
                                                return;
                                            }
                                            try
                                            {
-                                               _transmissionLossRadial = new TransmissionLossRadial((float)Radial.Bearing, new BellhopOutput(Radial.BasePath + ".shd"));
+                                               _shadeFile = ShadeFile.Read(Radial.BasePath + ".shd", (float)Radial.Bearing, Radial.BottomDepths);
                                                _imageSeriesViewModel.Top = Radial.Depths.First();
                                                _imageSeriesViewModel.Left = Radial.Ranges.First();
                                                _imageSeriesViewModel.Bottom = Radial.Depths.Last();
                                                _imageSeriesViewModel.Right = Radial.Ranges.Last();
-                                               StatisticalRange.Update(_transmissionLossRadial.StatMin, _transmissionLossRadial.StatMax);
+                                               StatisticalRange.Update(_shadeFile.StatMin, _shadeFile.StatMax);
                                                ColorMapViewModel.Range.Update(StatisticalRange);
                                                AxisSeriesViewModel.XAxis.DataRange.Update(_imageSeriesViewModel.Left, _imageSeriesViewModel.Right);
                                                AxisSeriesViewModel.YAxis.DataRange.Update(_imageSeriesViewModel.Top, _imageSeriesViewModel.Bottom);
@@ -155,7 +150,7 @@ namespace ESME.Views.TransmissionLossViewer
                                            {
                                                WriteableBitmapVisibility = Visibility.Collapsed;
                                                WaitToRenderText = ex.Message;
-                                               _transmissionLossRadial = null;
+                                               _shadeFile = null;
                                            }
                                            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving RadialChanged", DateTime.Now));
                                        }));
@@ -184,16 +179,14 @@ namespace ESME.Views.TransmissionLossViewer
                     var renderRect = result.Item2;
                     var sequenceNumber = result.Item3;
                     //Debug.WriteLine(string.Format("Got completed event for sequence number {0} completed", sequenceNumber));
-                    if (sequenceNumber < _displayedSequenceNumber || WriteableBitmap == null || WriteableBitmap.PixelWidth != renderRect.Width || WriteableBitmap.PixelHeight != renderRect.Height)
+                    if (sequenceNumber < _displayedSequenceNumber)
                     {
-                        Debug.WriteLine(string.Format("Discarding image buffer:{0}{1}",
-                                                      sequenceNumber < _displayedSequenceNumber ? " Old image sequence" : "",
-                                                      WriteableBitmap == null
-                                                          ? " No bitmap"
-                                                          : WriteableBitmap.PixelWidth != renderRect.Width || WriteableBitmap.PixelHeight != renderRect.Height ? " Size mismatch" : ""));
+                        Debug.WriteLine("Discarding image buffer: Old image sequence");
                         Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving (1) DisplayQueue", DateTime.Now));
                         return;
                     }
+                    if (WriteableBitmap == null || Math.Abs(renderRect.Width - WriteableBitmap.Width) > double.Epsilon || Math.Abs(renderRect.Height - WriteableBitmap.Height) > double.Epsilon)
+                        WriteableBitmap = new WriteableBitmap(renderRect.Width, renderRect.Height, 96, 96, PixelFormats.Bgr32, null);
                     _displayedSequenceNumber = sequenceNumber;
                     WriteableBitmap.Lock();
                     WriteableBitmap.WritePixels(renderRect, pixelBuffer, WriteableBitmap.BackBufferStride, 0, 0);
@@ -212,26 +205,25 @@ namespace ESME.Views.TransmissionLossViewer
         public RadialView RadialView { get; set; }
         void Render()
         {
-            if (_transmissionLossRadial == null || (int)AxisSeriesViewModel.ActualWidth == 0 || (int)AxisSeriesViewModel.ActualHeight == 0)
+            if (_shadeFile == null || (int)AxisSeriesViewModel.ActualWidth == 0 || (int)AxisSeriesViewModel.ActualHeight == 0)
             {
                 Debug.WriteLine(string.Format("Skipping render:{0}{1}",
-                    _transmissionLossRadial == null ? " No radial" : "",
+                    _shadeFile == null ? " No radial" : "",
                     (int)AxisSeriesViewModel.ActualWidth == 0 || (int)AxisSeriesViewModel.ActualHeight == 0 ? " Invalid render size" : ""));
                 return;
             }
-            var width = (int)Math.Min(_transmissionLossRadial.Ranges.Count, AxisSeriesViewModel.ActualWidth);
-            var height = (int)Math.Min(_transmissionLossRadial.Depths.Count, AxisSeriesViewModel.ActualHeight);
-            if (WriteableBitmap == null) _dispatcher.InvokeIfRequired(() => WriteableBitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgr32, null));
+            var width = (int)Math.Min(_shadeFile.ReceiverRanges.Length, AxisSeriesViewModel.ActualWidth);
+            var height = (int)Math.Min(_shadeFile.ReceiverDepths.Length, AxisSeriesViewModel.ActualHeight);
             var renderRect = new Int32Rect(0, 0, width, height);
             Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} Rendering radial {1:0.0}deg at width {2} and height {3}", DateTime.Now, Radial.Bearing, width, height));
-            if (Radial != null && _transmissionLossRadial != null) _renderQueue.Post(Tuple.Create(_transmissionLossRadial, ColorMapViewModel, renderRect, new Range(ColorMapViewModel.Range), _sourceSequenceNumber, _displayQueue));
+            if (Radial != null && _shadeFile != null) _renderQueue.Post(Tuple.Create(_shadeFile, ColorMapViewModel, renderRect, new Range(ColorMapViewModel.Range), _sourceSequenceNumber, _displayQueue));
             else WaitToRenderText = "This radial has not yet been calculated";
             Interlocked.Increment(ref _sourceSequenceNumber);
         }
 
         readonly Subject<Tuple<int[], Int32Rect, long>> _displayQueue = new Subject<Tuple<int[], Int32Rect, long>>();
         long _sourceSequenceNumber, _displayedSequenceNumber;
-        readonly ActionBlock<Tuple<TransmissionLossRadial, ColorMapViewModel, Int32Rect, Range, long, Subject<Tuple<int[], Int32Rect, long>>>> _renderQueue = new ActionBlock<Tuple<TransmissionLossRadial, ColorMapViewModel, Int32Rect, Range, long, Subject<Tuple<int[], Int32Rect, long>>>>(job =>
+        readonly ActionBlock<Tuple<ShadeFile, ColorMapViewModel, Int32Rect, Range, long, Subject<Tuple<int[], Int32Rect, long>>>> _renderQueue = new ActionBlock<Tuple<ShadeFile, ColorMapViewModel, Int32Rect, Range, long, Subject<Tuple<int[], Int32Rect, long>>>>(job =>
         {
             var tlRadial = job.Item1;
             var colorMap = job.Item2;
@@ -240,7 +232,7 @@ namespace ESME.Views.TransmissionLossViewer
             var sequenceNumber = job.Item5;
             var displayQueue = job.Item6;
             //Debug.WriteLine(string.Format("Begin rendering sequence number {0}", sequenceNumber));
-            var buffer = tlRadial.RenderToPixelBuffer(v => float.IsInfinity(v) ? colorMap.Colors[0] : colorMap.Lookup(v, range), renderRect.Width, renderRect.Height);
+            var buffer = tlRadial.RenderToPixelBuffer(v => float.IsInfinity(v) || float.IsNaN(v) ? colorMap.Colors[0] : colorMap.Lookup(v, range), renderRect.Width, renderRect.Height);
             //var buffer = tlRadial.RenderToPixelBuffer(v => float.IsInfinity(v) ? Colors.Gray : colorMap.Lookup(v, range), renderRect.Width, renderRect.Height);
             //Debug.WriteLine(string.Format("Done rendering sequence number {0}", sequenceNumber));
             displayQueue.OnNext(Tuple.Create(buffer, renderRect, sequenceNumber));
@@ -255,10 +247,9 @@ namespace ESME.Views.TransmissionLossViewer
         [UsedImplicitly] PropertyObserver<DataAxisViewModel> _yAxisPropertyObserver;
         [UsedImplicitly] PropertyObserver<FourAxisSeriesViewModel> _fourAxisSeriesObserver;
 
-        readonly Dispatcher _dispatcher = Dispatcher.CurrentDispatcher;
         readonly ImageSeriesViewModel _imageSeriesViewModel = new ImageSeriesViewModel();
         readonly LineSeriesViewModel _bottomProfileViewModel = new LineSeriesViewModel();
-        TransmissionLossRadial _transmissionLossRadial;
+        ShadeFile _shadeFile;
 
         [Initialize("Please wait...")]public string WaitToRenderText { get; set; }
         [Initialize] public FourAxisSeriesViewModel AxisSeriesViewModel { get; set; }
@@ -295,33 +286,33 @@ namespace ESME.Views.TransmissionLossViewer
         void UpdateStatusProperties()
         {
             if (_mouseTransmissionLossMarker != null) AxisMarkers.Remove(_mouseTransmissionLossMarker);
-            if (AxisSeriesViewModel.IsMouseOver && _transmissionLossRadial != null)
+            if (AxisSeriesViewModel.IsMouseOver && _shadeFile != null)
             {
                 MouseRange = string.Format("Range: {0:0.0}m", AxisSeriesViewModel.XAxis.MouseDataLocation);
                 MouseDepth = string.Format("Depth: {0:0.0}m", AxisSeriesViewModel.YAxis.MouseDataLocation);
                 var px = AxisSeriesViewModel.MouseLocation.X / AxisSeriesViewModel.ActualWidth;
                 var py = AxisSeriesViewModel.MouseLocation.Y / AxisSeriesViewModel.ActualHeight;
-                var rangeIndex = Math.Max(0, Math.Min((int)(_transmissionLossRadial.Ranges.Count * px), _transmissionLossRadial.Ranges.Count - 1));
-                var depthIndex = Math.Max(0, Math.Min((int)(_transmissionLossRadial.Depths.Count * py), _transmissionLossRadial.Depths.Count - 1)); MouseTransmissionLossInfo = string.Format("Transmission Loss: {0:0.0}dB", _transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
-                if (float.IsInfinity(_transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]) || double.IsNaN(AxisSeriesViewModel.YAxis.MouseDataLocation) || (AxisSeriesViewModel.YAxis.MouseDataLocation > Radial.BottomDepths[rangeIndex]))
+                var rangeIndex = Math.Max(0, Math.Min((int)(_shadeFile.ReceiverRanges.Length * px), _shadeFile.ReceiverRanges.Length - 1));
+                var depthIndex = Math.Max(0, Math.Min((int)(_shadeFile.ReceiverDepths.Length * py), _shadeFile.ReceiverDepths.Length - 1)); MouseTransmissionLossInfo = string.Format("Transmission Loss: {0:0.0}dB", _shadeFile.TransmissionLoss[depthIndex, rangeIndex]);
+                if (float.IsInfinity(_shadeFile.TransmissionLoss[depthIndex, rangeIndex]) || double.IsNaN(AxisSeriesViewModel.YAxis.MouseDataLocation) || (AxisSeriesViewModel.YAxis.MouseDataLocation > Radial.BottomDepths[rangeIndex]))
                 {
                     MouseTransmissionLossInfo = "Transmission Loss: N/A";
                     MouseSPLInfo = "Sound Pressure: N/A";
                 }
                 else
                 {
-                    if (FullRange.Contains(_transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]))
+                    if (FullRange.Contains(_shadeFile.TransmissionLoss[depthIndex, rangeIndex]))
                     {
-                        _mouseTransmissionLossMarker = new DataAxisTick(_transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex],
-                                                                        string.Format("{0:0}", _transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]),
+                        _mouseTransmissionLossMarker = new DataAxisTick(_shadeFile.TransmissionLoss[depthIndex, rangeIndex],
+                                                                        string.Format("{0:0}", _shadeFile.TransmissionLoss[depthIndex, rangeIndex]),
                                                                         true,
                                                                         Brushes.Black,
                                                                         Brushes.LightGray,
                                                                         Brushes.White);
                         AxisMarkers.Add(_mouseTransmissionLossMarker);
                     }
-                    MouseTransmissionLossInfo = string.Format("Transmission Loss: {0:0.0}dB", _transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
-                    MouseSPLInfo = string.Format("Sound Pressure: {0:0.0}dB", SelectedMode.SourceLevel - _transmissionLossRadial.TransmissionLoss[depthIndex, rangeIndex]);
+                    MouseTransmissionLossInfo = string.Format("Transmission Loss: {0:0.0}dB", _shadeFile.TransmissionLoss[depthIndex, rangeIndex]);
+                    MouseSPLInfo = string.Format("Sound Pressure: {0:0.0}dB", SelectedMode.SourceLevel - _shadeFile.TransmissionLoss[depthIndex, rangeIndex]);
                 }
             }
             else
@@ -361,17 +352,17 @@ namespace ESME.Views.TransmissionLossViewer
             sb.AppendLine("Vertical Transmission Loss (dB)");
             sb.Append(",Range (m),");
 
-            foreach (var t in _transmissionLossRadial.Ranges) sb.Append(string.Format(CultureInfo.InvariantCulture,"{0},",t)); //write out the X axis values.
+            foreach (var t in _shadeFile.ReceiverRanges) sb.Append(string.Format(CultureInfo.InvariantCulture,"{0},",t)); //write out the X axis values.
             sb.AppendLine(); // Terminate the line
             sb.AppendLine("Depth (m)");
             // Write the slice data
-            for (var i = 0; i < _transmissionLossRadial.Depths.Count; i++)
+            for (var i = 0; i < _shadeFile.ReceiverDepths.Length; i++)
             {
                 // Write out the Y axis value
-                sb.Append(string.Format(CultureInfo.InvariantCulture,"{0},,",_transmissionLossRadial.Depths[i]));
-                for (var j = 0; j < _transmissionLossRadial.Ranges.Count; j++)
+                sb.Append(string.Format(CultureInfo.InvariantCulture,"{0},,",_shadeFile.ReceiverDepths[i]));
+                for (var j = 0; j < _shadeFile.ReceiverRanges.Length; j++)
                 {
-                    var tl = _transmissionLossRadial.TransmissionLoss[i, j];
+                    var tl = _shadeFile.TransmissionLoss[i, j];
                     sb.Append(float.IsInfinity(tl) ? "," : string.Format(CultureInfo.InvariantCulture,"{0},",tl));
                 }
                 sb.AppendLine();

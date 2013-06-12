@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Media.Imaging;
 using ESME.Database;
 using ESME.Locations;
 using ESME.TransmissionLoss;
@@ -248,33 +247,34 @@ namespace ESME.Scenarios
             {
                 if (_bottomProfile == null) _bottomProfile = ESME.TransmissionLoss.Bellhop.BottomProfile.FromBellhopFile(BasePath + ".bty");
                 if (_ranges == null || _depths == null) ReadAxisFile();
-                if (_transmissionLossRadial == null) _transmissionLossRadial = new TransmissionLossRadial((float)Bearing, new BellhopOutput(BasePath + ".shd"));
+                if (_shadeFile == null) _shadeFile = ShadeFile.Read(BasePath + ".shd", (float)Bearing, _bottomDepths);
             });
             result.Start();
             await TaskEx.WhenAll(result);
             return this;
         }
 
-        TransmissionLossRadial _transmissionLossRadial;
+        ShadeFile _shadeFile;
 
-        [NotMapped] public TransmissionLossRadial TransmissionLossRadial
+        [NotMapped]
+        public ShadeFile ShadeFile
         {
             get
             {
-                if (_transmissionLossRadial != null) return _transmissionLossRadial;
-                _transmissionLossRadial = new TransmissionLossRadial((float)Bearing, new BellhopOutput(BasePath + ".shd"));
-                return _transmissionLossRadial;
+                if (_shadeFile != null) return _shadeFile;
+                _shadeFile = ShadeFile.Read(BasePath + ".shd", (float)Bearing, _bottomDepths);
+                return _shadeFile;
             }
         }
 
-        public bool ExtractAxisData(TransmissionLossRadial transmissionLoss = null, int debugIndex = -1)
+        public bool ExtractAxisData(ShadeFile shadeFile = null, int debugIndex = -1)
         {
             try
             {
                 try
                 {
                     if (BasePath == null || File.Exists(BasePath + ".axs") || !File.Exists(BasePath + ".shd")) return false;
-                    if (transmissionLoss == null) transmissionLoss = new TransmissionLossRadial((float)Bearing, new BellhopOutput(BasePath + ".shd"));
+                    if (shadeFile == null) shadeFile = ShadeFile.Read(BasePath + ".shd", (float)Bearing);
                 }
                 catch (EndOfStreamException)
                 {
@@ -282,8 +282,8 @@ namespace ESME.Scenarios
                     TransmissionLossCalculator.Add(this);
                     return false;
                 }
-                _ranges = transmissionLoss.Ranges.ToArray();
-                _depths = transmissionLoss.Depths.ToArray();
+                _ranges = shadeFile.ReceiverRanges.ToArray();
+                _depths = shadeFile.ReceiverDepths.ToArray();
                 IsCalculated = true;
                 _bottomProfile = ESME.TransmissionLoss.Bellhop.BottomProfile.FromBellhopFile(BasePath + ".bty");
                 _minimumTransmissionLossValues = new float[Ranges.Length];
@@ -312,7 +312,7 @@ namespace ESME.Scenarios
                                                                      where curDepth > 0
                                                                      orderby curDepth
                                                                      select depth).First());
-                    var tlValuesAboveBottom = transmissionLoss[rangeIndex].Take(bottomDepthIndex).Where(v => !float.IsNaN(v) && !float.IsInfinity(v)).ToList();
+                    var tlValuesAboveBottom = shadeFile[rangeIndex].Take(bottomDepthIndex).Where(v => !float.IsNaN(v) && !float.IsInfinity(v)).ToList();
                     if (tlValuesAboveBottom.Count == 0)
                     {
                         MinimumTransmissionLossValues[rangeIndex] = float.NaN;
@@ -323,7 +323,7 @@ namespace ESME.Scenarios
                     if (debugIndex >= 0 && rangeIndex == debugIndex)
                     {
                         var maxTransmissionLoss = tlValuesAboveBottom.Max();
-                        var maxTransmissionLossDepthIndex = transmissionLoss[rangeIndex].IndexOf(maxTransmissionLoss);
+                        var maxTransmissionLossDepthIndex = shadeFile[rangeIndex].IndexOf(maxTransmissionLoss);
                         var maxTransmissionLossDepth = _depths[maxTransmissionLossDepthIndex];
                         Debug.WriteLine(string.Format("Maximum TL value for this field found at radial bearing {0}, range {1}, depth {2}, TL {3}, bottom depth at this range {4}",
                                                       Bearing,
@@ -405,7 +405,7 @@ namespace ESME.Scenarios
         {
             IsCalculated = false;
             _bottomProfile = null;
-            _transmissionLossRadial = null;
+            _shadeFile = null;
             _depths = _ranges = null;
             _minimumTransmissionLossValues = _maximumTransmissionLossValues = _meanTransmissionLossValues = null;
             var files = Directory.GetFiles(Path.GetDirectoryName(BasePath), Path.GetFileNameWithoutExtension(BasePath) + ".*");

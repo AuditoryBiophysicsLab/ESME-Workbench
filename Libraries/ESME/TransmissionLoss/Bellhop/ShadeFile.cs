@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Threading;
+using System.Windows.Media;
 
 namespace ESME.TransmissionLoss.Bellhop
 {
+#if false
     public class BellhopOutput
     {
         public BellhopOutput(string bellhopFilename)
@@ -33,7 +34,7 @@ namespace ESME.TransmissionLoss.Bellhop
                 SourceDepths = new float[reader.ReadInt32()];
                 ReceiverDepths = new float[reader.ReadInt32()];
                 ReceiverRanges = new float[reader.ReadInt32()];
-                TransmissionLoss = new float[ReceiverDepths.Length,ReceiverRanges.Length];
+                TransmissionLoss = new float[ReceiverDepths.Length, ReceiverRanges.Length];
 
                 reader.BaseStream.Seek(3*recordLength, SeekOrigin.Begin);
                 for (var curTheta = 0; curTheta < thetaCount; curTheta++) reader.ReadSingle();
@@ -58,8 +59,8 @@ namespace ESME.TransmissionLoss.Bellhop
                             reader.BaseStream.Seek(recordNumber*recordLength, SeekOrigin.Begin);
                             for (range = 0; range < ReceiverRanges.Length; range++)
                             {
-                                var real = reader.ReadSingle();
-                                var imag = reader.ReadSingle();
+                                double real = reader.ReadSingle();
+                                double imag = reader.ReadSingle();
                                 if (double.IsNaN(real)) real = 0;
                                 if (double.IsNaN(imag)) imag = 0;
                                 if (source == 0) // Currently we only support a single source with this code
@@ -75,6 +76,8 @@ namespace ESME.TransmissionLoss.Bellhop
             DataMin = StatMin = float.MaxValue;
             DataMax = StatMax = float.MinValue;
             ProcessRawData();
+            var shadeFile = ShadeFile.Read(bellhopFilename);
+            if (shadeFile.Equals(this)) Debug.WriteLine(string.Format("ShadeFile != BellhopOutput for {0}", bellhopFilename));
         }
 
         public static void WriteShadeFile(string fileName, double sourceDepth, double frequency, double[] receiverDepths, double[] receiverRanges, List<Complex[]> pressures)
@@ -162,8 +165,9 @@ namespace ESME.TransmissionLoss.Bellhop
                             total += curData;
                             statValues.Add(curData);
                         }
+                        TransmissionLoss[depth, range] = curData;
                     }
-                    TransmissionLoss[depth, range] = curData;
+                    else TransmissionLoss[depth, range] = float.NaN;
                 } // for (Range)
             } // for (Receiver)
             if (statValues.Count > 0)
@@ -192,8 +196,9 @@ namespace ESME.TransmissionLoss.Bellhop
             }
         }
     }
+#endif
 
-    public class ShadeFile
+    public class ShadeFile // : IEquatable<BellhopOutput>
     {
         private ShadeFile() {}
         public ShadeFile(double sourceDepth, double frequency, double[] receiverDepths, double[] receiverRanges, IList<Complex[]> pressures)
@@ -207,20 +212,20 @@ namespace ESME.TransmissionLoss.Bellhop
             Array.Copy(receiverDepths, ReceiverDepths, receiverDepths.Length);
             ReceiverRanges = new float[receiverRanges.Length];
             Array.Copy(receiverRanges, ReceiverRanges, receiverRanges.Length);
-            Pressures = new Complex[ReceiverDepths.Length, ReceiverRanges.Length];
+            _pressure = new Complex[ReceiverDepths.Length, ReceiverRanges.Length];
             for (var depthIndex = 0; depthIndex < ReceiverDepths.Length; depthIndex++)
             {
                 for (var rangeIndex = 0; rangeIndex < ReceiverRanges.Length; rangeIndex++)
                 {
                     var curPressure = pressures[rangeIndex][depthIndex];
-                    Pressures[depthIndex, rangeIndex] = new Complex(curPressure.Real, curPressure.Imaginary);
+                    _pressure[depthIndex, rangeIndex] = new Complex(curPressure.Real, curPressure.Imaginary);
                 }
             }
         }
 
-        public static ShadeFile Read(string bellhopFilename)
+        public static ShadeFile Read(string bellhopFilename, float bearingFromSource, float[] bottomDepths = null)
         {
-            var shadeFile = new ShadeFile();
+            var shadeFile = new ShadeFile { BearingFromSource = bearingFromSource };
             var retry = 20;
             while (!File.Exists(bellhopFilename) && retry > 0)
             {
@@ -242,7 +247,6 @@ namespace ESME.TransmissionLoss.Bellhop
                 shadeFile.SourceDepths = new float[reader.ReadInt32()];
                 shadeFile.ReceiverDepths = new float[reader.ReadInt32()];
                 shadeFile.ReceiverRanges = new float[reader.ReadInt32()];
-                shadeFile.TransmissionLoss = new float[shadeFile.ReceiverDepths.Length, shadeFile.ReceiverRanges.Length];
 
                 reader.BaseStream.Seek(3 * recordLength, SeekOrigin.Begin);
                 for (var curTheta = 0; curTheta < thetaCount; curTheta++) reader.ReadSingle();
@@ -257,7 +261,7 @@ namespace ESME.TransmissionLoss.Bellhop
                 int range;
                 for (range = 0; range < shadeFile.ReceiverRanges.Length; range++) shadeFile.ReceiverRanges[range] = reader.ReadSingle();
 
-                shadeFile.Pressures = new Complex[shadeFile.ReceiverDepths.Length, shadeFile.ReceiverRanges.Length];
+                shadeFile._pressure = new Complex[shadeFile.ReceiverDepths.Length, shadeFile.ReceiverRanges.Length];
                 for (var curTheta = 0; curTheta < thetaCount; curTheta++)
                 {
                     for (var source = 0; source < shadeFile.SourceDepths.Length; source++)
@@ -267,14 +271,14 @@ namespace ESME.TransmissionLoss.Bellhop
                             var recordNumber = 7 + (curTheta * shadeFile.SourceDepths.Length * shadeFile.ReceiverDepths.Length) + (source * shadeFile.ReceiverDepths.Length) + depth;
                             reader.BaseStream.Seek(recordNumber * recordLength, SeekOrigin.Begin);
                             for (range = 0; range < shadeFile.ReceiverRanges.Length; range++)
-                                shadeFile.Pressures[depth, range] = new Complex(reader.ReadSingle(), reader.ReadSingle());
+                                shadeFile._pressure[depth, range] = new Complex(reader.ReadSingle(), reader.ReadSingle());
                         } // for Depth
                     } // for Source
                 } // for CurTheta
             } // using
             shadeFile.DataMin = shadeFile.StatMin = float.MaxValue;
             shadeFile.DataMax = shadeFile.StatMax = float.MinValue;
-            shadeFile.ProcessRawData();
+            shadeFile.ExtractStatisticalData(bottomDepths);
             return shadeFile;
         }
 
@@ -308,14 +312,34 @@ namespace ESME.TransmissionLoss.Bellhop
                     writer.BaseStream.Seek((7 + depthIndex) * recordLength, SeekOrigin.Begin);
                     for (var rangeIndex = 0; rangeIndex < ReceiverRanges.Length; rangeIndex++)
                     {
-                        writer.Write((float)Pressures[rangeIndex, depthIndex].Real);
-                        writer.Write((float)Pressures[rangeIndex, depthIndex].Imaginary);
+                        writer.Write((float)_pressure[rangeIndex, depthIndex].Real);
+                        writer.Write((float)_pressure[rangeIndex, depthIndex].Imaginary);
                     }
                 }
             }
         }
 
-        public Complex[,] Pressures { get; private set; }
+        public List<float> this[int rangeIndex] { get { return ReceiverDepths.Select((t, i) => TransmissionLoss[i, rangeIndex]).ToList(); } }
+        public float this[int depthCell, int rangeCell] { get { return TransmissionLoss[depthCell, rangeCell]; } }
+        public float this[double range, double depth]
+        {
+            get
+            {
+                if (range > ReceiverRanges.Last()) throw new IndexOutOfRangeException("TransmissionLossRadialData: Requested range is past the end of the radial");
+                var rangeIndex = (from r in ReceiverRanges
+                                  orderby Math.Abs(range - r)
+                                  select Array.IndexOf(ReceiverRanges, r)).First();
+                var depthIndex = ReceiverDepths.Length - 1;
+                if (depth < ReceiverDepths.Last())
+                    depthIndex = (from d in ReceiverDepths
+                                  orderby Math.Abs(depth - d)
+                                  select Array.IndexOf(ReceiverDepths, d)).First();
+                return TransmissionLoss[depthIndex, rangeIndex];
+            }
+        }
+
+        Complex[,] _pressure;
+        public float BearingFromSource { get; private set; }
         public string Title { get; private set; }
         public string PlotType { get; private set; }
         public float Xs { get; private set; }
@@ -324,7 +348,6 @@ namespace ESME.TransmissionLoss.Bellhop
         public float[] SourceDepths { get; private set; }
         public float[] ReceiverDepths { get; private set; }
         public float[] ReceiverRanges { get; private set; }
-        public float[,] TransmissionLoss { get; private set; }
         public float DataMax { get; private set; }
         public float DataMin { get; private set; }
         public float StatMax { get; private set; }
@@ -333,19 +356,20 @@ namespace ESME.TransmissionLoss.Bellhop
         public float Median { get; private set; }
         public float Variance { get; private set; }
         public float StandardDeviation { get; private set; }
+        public float[,] TransmissionLoss { get; private set; }
 
-        void ProcessRawData()
+        public void ExtractStatisticalData(float[] bottomDepths = null)
         {
             float curData;
             float total = 0;
             var statValues = new List<float>();
 
-            for (var depth = 0; depth < ReceiverDepths.Length; depth++)
+            TransmissionLoss = new float[ReceiverDepths.Length, ReceiverRanges.Length];
+            for (var range = 0; range < ReceiverRanges.Length; range++)
             {
-                for (var range = 0; range < ReceiverRanges.Length; range++)
+                for (var depth = 0; depth < ReceiverDepths.Length; depth++)
                 {
-                    TransmissionLoss[depth, range] = (float)Pressures[depth, range].Magnitude;
-                    curData = (float)(-20 * Math.Log10(TransmissionLoss[depth, range]));
+                    curData = (float)(-20 * Math.Log10(_pressure[depth, range].Magnitude));
                     if (!float.IsInfinity(curData) && !float.IsNaN(curData))
                     {
                         DataMin = Math.Min(curData, DataMin);
@@ -355,10 +379,11 @@ namespace ESME.TransmissionLoss.Bellhop
                             total += curData;
                             statValues.Add(curData);
                         }
+                        TransmissionLoss[depth, range] = curData;
                     }
-                    TransmissionLoss[depth, range] = curData;
-                } // for (Range)
-            } // for (Receiver)
+                    else TransmissionLoss[depth, range] = float.NaN;
+                } // for (Depth)
+            } // for (Range)
             if (statValues.Count > 0)
             {
                 statValues.Sort();
@@ -384,6 +409,157 @@ namespace ESME.TransmissionLoss.Bellhop
                 StatMax = DataMax;
             }
         }
+#if false
+        public bool Equals(BellhopOutput bellhopOutput)
+        {
+            var isEqual = true;
+            if (Math.Abs(Xs - bellhopOutput.Xs) > 0.0001)
+            {
+                Debug.WriteLine("ShadeFile.Xs: {0} differs from BellhopOutput.Xs: {1}", Xs, bellhopOutput.Xs);
+                isEqual = false;
+            }
+            if (Math.Abs(Ys - bellhopOutput.Ys) > 0.0001)
+            {
+                Debug.WriteLine("ShadeFile.Ys: {0} differs from BellhopOutput.Ys: {1}", Ys, bellhopOutput.Ys);
+                isEqual = false;
+            }
+            if (Math.Abs(Frequency - bellhopOutput.Frequency) > 0.0001)
+            {
+                Debug.WriteLine("ShadeFile.Frequency: {0} differs from BellhopOutput.Frequency: {1}", Frequency, bellhopOutput.Frequency);
+                isEqual = false;
+            }
+            if (SourceDepths.Length != bellhopOutput.SourceDepths.Length)
+            {
+                Debug.WriteLine("ShadeFile.SourceDepths.Length: {0} differs from BellhopOutput.SourceDepths.Length: {1}", SourceDepths.Length, bellhopOutput.SourceDepths.Length);
+                isEqual = false;
+            }
+            if (SourceDepths.Where((t, i) => Math.Abs(t - bellhopOutput.SourceDepths[i]) > 0.0001).Any())
+            {
+                Debug.WriteLine("ShadeFile.SourceDepths differs from BellhopOutput.SourceDepths");
+                isEqual = false;
+            }
+            if (ReceiverDepths.Length != bellhopOutput.ReceiverDepths.Length)
+            {
+                Debug.WriteLine("ShadeFile.ReceiverDepths.Length: {0} differs from BellhopOutput.ReceiverDepths.Length: {1}", ReceiverDepths.Length, bellhopOutput.ReceiverDepths.Length);
+                isEqual = false;
+            }
+            if (ReceiverDepths.Where((t, i) => Math.Abs(t - bellhopOutput.ReceiverDepths[i]) > 0.0001).Any())
+            {
+                Debug.WriteLine("ShadeFile.ReceiverDepths differs from BellhopOutput.ReceiverDepths");
+                isEqual = false;
+            }
+            if (ReceiverRanges.Length != bellhopOutput.ReceiverRanges.Length)
+            {
+                Debug.WriteLine("ShadeFile.ReceiverRanges.Length: {0} differs from BellhopOutput.ReceiverRanges.Length: {1}", ReceiverRanges.Length, bellhopOutput.ReceiverRanges.Length);
+                isEqual = false;
+            }
+            if (ReceiverRanges.Where((t, i) => Math.Abs(t - bellhopOutput.ReceiverRanges[i]) > 0.0001).Any())
+            {
+                Debug.WriteLine("ShadeFile.ReceiverRanges differs from BellhopOutput.ReceiverRanges");
+                isEqual = false;
+            }
+            if (Math.Abs(DataMin - bellhopOutput.DataMin) > 0.0001)
+            {
+                Debug.WriteLine("ShadeFile.DataMin: {0} differs from BellhopOutput.DataMin: {1}", DataMin, bellhopOutput.DataMin);
+                isEqual = false;
+            }
+            if (Math.Abs(DataMax - bellhopOutput.DataMax) > 0.0001)
+            {
+                Debug.WriteLine("ShadeFile.DataMax: {0} differs from BellhopOutput.DataMax: {1}", DataMax, bellhopOutput.DataMax);
+                isEqual = false;
+            }
+            if (Math.Abs(StatMin - bellhopOutput.StatMin) > 0.0001)
+            {
+                Debug.WriteLine("ShadeFile.StatMin: {0} differs from BellhopOutput.StatMin: {1}", StatMin, bellhopOutput.StatMin);
+                isEqual = false;
+            }
+            if (Math.Abs(StatMax - bellhopOutput.StatMax) > 0.0001)
+            {
+                Debug.WriteLine("ShadeFile.StatMax: {0} differs from BellhopOutput.StatMax: {1}", StatMax, bellhopOutput.StatMax);
+                isEqual = false;
+            }
+            if (Math.Abs(Median - bellhopOutput.Median) > 0.0001)
+            {
+                Debug.WriteLine("ShadeFile.Median: {0} differs from BellhopOutput.Median: {1}", Median, bellhopOutput.Median);
+                isEqual = false;
+            }
+            if (Math.Abs(Mean - bellhopOutput.Mean) > 0.0001)
+            {
+                Debug.WriteLine("ShadeFile.Mean: {0} differs from BellhopOutput.Mean: {1}", Mean, bellhopOutput.Mean);
+                isEqual = false;
+            }
+            if (Math.Abs(Variance - bellhopOutput.Variance) > 0.0001)
+            {
+                Debug.WriteLine("ShadeFile.Variance: {0} differs from BellhopOutput.Variance: {1}", Variance, bellhopOutput.Variance);
+                isEqual = false;
+            }
+            if (Math.Abs(StandardDeviation - bellhopOutput.StandardDeviation) > 0.0001)
+            {
+                Debug.WriteLine("ShadeFile.StandardDeviation: {0} differs from BellhopOutput.StandardDeviation: {1}", StandardDeviation, bellhopOutput.StandardDeviation);
+                isEqual = false;
+            }
+            if (TransmissionLoss.GetLength(0) != bellhopOutput.TransmissionLoss.GetLength(0))
+            {
+                Debug.WriteLine("ShadeFile.ReceiverRanges.GetLength(0): {0} differs from BellhopOutput.ReceiverRanges.GetLength(0): {1}", ReceiverRanges.GetLength(0), bellhopOutput.ReceiverRanges.GetLength(0));
+                isEqual = false;
+            }
+            if (TransmissionLoss.GetLength(1) != bellhopOutput.TransmissionLoss.GetLength(1))
+            {
+                Debug.WriteLine("ShadeFile.ReceiverRanges.GetLength(1): {0} differs from BellhopOutput.ReceiverRanges.GetLength(1): {1}", ReceiverRanges.GetLength(1), bellhopOutput.ReceiverRanges.GetLength(1));
+                isEqual = false;
+            }
+            for (var i = 0; i < TransmissionLoss.GetLength(0); i++)
+                for (var j = 0; j < TransmissionLoss.GetLength(1); j++)
+                {
+                    if (!float.IsNaN(TransmissionLoss[i, j]) && (Math.Abs(TransmissionLoss[i, j] - bellhopOutput.TransmissionLoss[i, j]) > 0.0001))
+                    {
+                        Debug.WriteLine("ShadeFile.TransmissionLoss[{0}, {1}]: {2} differs from BellhopOutput.TransmissionLoss[{0}, {1}]: {3}", i, j, TransmissionLoss[i, j], bellhopOutput.TransmissionLoss[i, j]);
+                        isEqual = false;
+                        break;
+                    }
+                }
+            if (!isEqual) Debugger.Break();
+            return isEqual;
+        }
+#endif
     }
 
+    public static class ShadeFileExtensions
+    {
+        public static int[] RenderToPixelBuffer(this ShadeFile shadeFile, Func<float, Color> valueToColorFunc, int width = 0, int height = 0)
+        {
+            if (width < 0) throw new ArgumentOutOfRangeException("width", "width must be non-negative");
+            if (height < 0) throw new ArgumentOutOfRangeException("height", "height must be non-negative");
+
+            if (width == 0) width = shadeFile.ReceiverRanges.Length;
+            if (height == 0) height = shadeFile.ReceiverDepths.Length;
+
+            var buffer = new int[width * height];
+            var rangeStep = shadeFile.ReceiverRanges.Length / (float)width;
+            var depthStep = shadeFile.ReceiverDepths.Length / (float)height;
+#if false
+            var yValues = Enumerable.Range(0, height).AsParallel();
+            yValues.ForAll(y =>
+            {
+                var curOffset = y * width;
+                for (var x = 0; x < width; x++)
+                {
+                    var curColor = valueToColorFunc(transmissionLossRadial[(int)(y * depthStep), (int)(x * rangeStep)]);
+                    buffer[curOffset++] = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));
+                }
+            });
+#else
+            for (var y = 0; y < height; y++)
+            {
+                var curOffset = y * width;
+                for (var x = 0; x < width; x++)
+                {
+                    var curColor = valueToColorFunc(shadeFile[(int)(y * depthStep), (int)(x * rangeStep)]);
+                    buffer[curOffset++] = ((curColor.A << 24) | (curColor.R << 16) | (curColor.G << 8) | (curColor.B));
+                }
+            }
+#endif
+            return buffer;
+        }
+    }
 }

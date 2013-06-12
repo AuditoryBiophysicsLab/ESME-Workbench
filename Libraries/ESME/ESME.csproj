@@ -289,7 +289,7 @@
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNLOutput.cs" />
     <Compile Include="TransmissionLoss\CASS\CASSOutput.cs" />
     <Compile Include="TransmissionLoss\RAM\RamOutput.cs" />
-    <Compile Include="TransmissionLoss\Bellhop\BellhopOutput.cs" />
+    <Compile Include="TransmissionLoss\Bellhop\ShadeFile.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BottomProfile.cs" />
     <Compile Include="TransmissionLoss\RAM\Ram.cs">
       <SubType>Code</SubType>
