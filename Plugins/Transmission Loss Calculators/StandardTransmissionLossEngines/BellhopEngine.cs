@@ -143,7 +143,7 @@ namespace StandardTransmissionLossEngines
             using (var writer = new StreamWriter(radial.BasePath + ".bty")) writer.Write(bottomProfile.ToBellhopString());
 
             // Now that we've got the files ready to go, we can launch bellhop to do the actual calculations
-            var bellhopProcess = new TransmissionLossProcess
+            var bellhopProcess = new Process
             {
                 StartInfo = new ProcessStartInfo(Path.Combine(AssemblyLocation, "bellhop.exe"), radial.Filename)
                 {

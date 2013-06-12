@@ -201,17 +201,17 @@ namespace ESME.TransmissionLoss.Bellhop
     public class ShadeFile // : IEquatable<BellhopOutput>
     {
         private ShadeFile() {}
-        public ShadeFile(double sourceDepth, double frequency, double[] receiverDepths, double[] receiverRanges, IList<Complex[]> pressures)
+        public ShadeFile(double sourceDepth, double frequency, IList<double> receiverDepths, IList<double> receiverRanges, IList<Complex[]> pressures)
         {
-            if (receiverRanges.Length != pressures.Count) throw new ArgumentOutOfRangeException("receiverRanges", "receiverRanges.Length must equal pressures.Count");
-            if (receiverDepths.Length != pressures[0].Length) throw new ArgumentOutOfRangeException("receiverDepths", "receiverDepths.Length must equal pressures[0].Length");
+            if (receiverRanges.Count != pressures.Count) throw new ArgumentOutOfRangeException("receiverRanges", "receiverRanges.Length must equal pressures.Count");
+            if (receiverDepths.Count != pressures[0].Length) throw new ArgumentOutOfRangeException("receiverDepths", "receiverDepths.Length must equal pressures[0].Length");
             SourceDepths = new float[1];
             SourceDepths[0] = (float)sourceDepth;
             Frequency = (float)frequency;
-            ReceiverDepths = new float[receiverDepths.Length];
-            Array.Copy(receiverDepths, ReceiverDepths, receiverDepths.Length);
-            ReceiverRanges = new float[receiverRanges.Length];
-            Array.Copy(receiverRanges, ReceiverRanges, receiverRanges.Length);
+            ReceiverDepths = new float[receiverDepths.Count];
+            for (var i = 0; i < receiverDepths.Count; i++) ReceiverDepths[i] = (float)receiverDepths[i];
+            ReceiverRanges = new float[receiverRanges.Count];
+            for (var i = 0; i < receiverRanges.Count; i++) ReceiverRanges[i] = (float)receiverRanges[i];
             _pressure = new Complex[ReceiverDepths.Length, ReceiverRanges.Length];
             for (var depthIndex = 0; depthIndex < ReceiverDepths.Length; depthIndex++)
             {
@@ -312,8 +312,8 @@ namespace ESME.TransmissionLoss.Bellhop
                     writer.BaseStream.Seek((7 + depthIndex) * recordLength, SeekOrigin.Begin);
                     for (var rangeIndex = 0; rangeIndex < ReceiverRanges.Length; rangeIndex++)
                     {
-                        writer.Write((float)_pressure[rangeIndex, depthIndex].Real);
-                        writer.Write((float)_pressure[rangeIndex, depthIndex].Imaginary);
+                        writer.Write((float)_pressure[depthIndex, rangeIndex].Real);
+                        writer.Write((float)_pressure[depthIndex, rangeIndex].Imaginary);
                     }
                 }
             }

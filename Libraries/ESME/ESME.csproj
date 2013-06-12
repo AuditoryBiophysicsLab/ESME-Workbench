@@ -287,13 +287,8 @@
     <Compile Include="SimulationAnalysis\ModeThresholdHistogram.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNLInput.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNLOutput.cs" />
-    <Compile Include="TransmissionLoss\CASS\CASSOutput.cs" />
-    <Compile Include="TransmissionLoss\RAM\RamOutput.cs" />
     <Compile Include="TransmissionLoss\Bellhop\ShadeFile.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BottomProfile.cs" />
-    <Compile Include="TransmissionLoss\RAM\Ram.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="TransmissionLoss\TransmissionLossCache.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossCalculatorService.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossProcess.cs">
@@ -321,7 +316,6 @@
     <Compile Include="NEMO\Overlay\LineReader.cs" />
     <Compile Include="NEMO\Overlay\OverlayLineSegment.cs" />
     <Compile Include="NEMO\Overlay\Tokenizer.cs" />
-    <Compile Include="TransmissionLoss\Bellhop\Bellhop.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

@@ -375,7 +375,7 @@ namespace StandardTransmissionLossEngines
             //File.Copy(Path.Combine(AssemblyLocation, "sra.in"), Path.Combine(tempDirectory, "sra.in"));
             //Debug.WriteLine(string.Format("Env File: {0} copied to: {1}", envFileName, tempDirectory));
             // Now that we've got the files ready to go, we can launch bellhop to do the actual calculations
-            var ramProcess = new TransmissionLossProcess
+            var ramProcess = new Process
             {
                 StartInfo = new ProcessStartInfo(Path.Combine(AssemblyLocation, "RAMGeo.exe"))
                 {
