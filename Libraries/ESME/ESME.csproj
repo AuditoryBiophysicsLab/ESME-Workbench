@@ -296,7 +296,6 @@
     </Compile>
     <Compile Include="TransmissionLoss\TransmissionLossCache.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossCalculatorService.cs" />
-    <Compile Include="TransmissionLoss\TransmissionLossRadial.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossProcess.cs">
       <SubType>Component</SubType>
     </Compile>
