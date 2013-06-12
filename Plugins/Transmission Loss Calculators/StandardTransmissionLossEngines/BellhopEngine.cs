@@ -111,7 +111,7 @@ namespace StandardTransmissionLossEngines
                 envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0}", rangeCellCount)); // Number of receiver ranges
                 envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "0.0 {0} /", mode.MaxPropagationRadius / 1000.0));
 
-                envFile.WriteLine(GenerateArrivalsFile ? "'AB'" : "'I'");
+                envFile.WriteLine(GenerateArrivalsFile ? "'a'" : "'I'");
                 envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0}", RayCount)); // Number of beams
                 var verticalHalfAngle = mode.VerticalBeamWidth / 2;
                 var angle1 = mode.DepressionElevationAngle - verticalHalfAngle;
