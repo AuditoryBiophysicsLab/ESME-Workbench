@@ -223,7 +223,7 @@ namespace ESME.TransmissionLoss.Bellhop
             }
         }
 
-        public static ShadeFile Read(string bellhopFilename, float bearingFromSource, float[] bottomDepths = null)
+        public static ShadeFile Read(string bellhopFilename, float bearingFromSource)
         {
             var shadeFile = new ShadeFile { BearingFromSource = bearingFromSource };
             var retry = 20;
@@ -278,7 +278,7 @@ namespace ESME.TransmissionLoss.Bellhop
             } // using
             shadeFile.DataMin = shadeFile.StatMin = float.MaxValue;
             shadeFile.DataMax = shadeFile.StatMax = float.MinValue;
-            shadeFile.ExtractStatisticalData(bottomDepths);
+            shadeFile.ExtractStatisticalData();
             return shadeFile;
         }
 
@@ -357,28 +357,41 @@ namespace ESME.TransmissionLoss.Bellhop
         public float Variance { get; private set; }
         public float StandardDeviation { get; private set; }
         public float[,] TransmissionLoss { get; private set; }
+        float[] _bottomDepths;
+        public float[] BottomDepths
+        {
+            get { return _bottomDepths; } 
+            set
+            {
+                _bottomDepths = value;
+                ExtractStatisticalData(_bottomDepths);
+            }
+        }
 
-        public void ExtractStatisticalData(float[] bottomDepths = null)
+        void ExtractStatisticalData(IList<float> bottomDepths = null)
         {
             float curData;
-            float total = 0;
             var statValues = new List<float>();
+            float? bottomDepth = null;
+            if (bottomDepths != null && bottomDepths.Count != ReceiverRanges.Length) throw new ArgumentException(string.Format("bottomDepths (length: {0}) must be the same length as ReceiverRanges (length: {1})", bottomDepths.Count, ReceiverRanges.Length), "bottomDepths");
 
+            DataMax = float.MinValue;
+            DataMin = float.MaxValue;
             TransmissionLoss = new float[ReceiverDepths.Length, ReceiverRanges.Length];
             for (var range = 0; range < ReceiverRanges.Length; range++)
             {
+                if (bottomDepths != null) bottomDepth = bottomDepths[range];
                 for (var depth = 0; depth < ReceiverDepths.Length; depth++)
                 {
                     curData = (float)(-20 * Math.Log10(_pressure[depth, range].Magnitude));
-                    if (!float.IsInfinity(curData) && !float.IsNaN(curData))
+                    // If the current value is not infinity, AND the current value is not NaN AND we either don't have a bottom depth value
+                    // OR if we do have a bottom depth value, the bottom depth at the current range is DEEPER THAN the current receiver depth
+                    // process this depth cell
+                    if (!float.IsInfinity(curData) && !float.IsNaN(curData) && (!bottomDepth.HasValue || bottomDepth.Value > ReceiverDepths[depth]))
                     {
                         DataMin = Math.Min(curData, DataMin);
                         DataMax = Math.Max(curData, DataMax);
-                        if (curData <= 120)
-                        {
-                            total += curData;
-                            statValues.Add(curData);
-                        }
+                        if (curData <= 120) statValues.Add(curData);
                         TransmissionLoss[depth, range] = curData;
                     }
                     else TransmissionLoss[depth, range] = float.NaN;
@@ -389,10 +402,10 @@ namespace ESME.TransmissionLoss.Bellhop
                 statValues.Sort();
                 Median = statValues[statValues.Count / 2];
                 Mean = statValues.Average();
-                total = 0;
-                foreach (var t in statValues)
+                var total = 0f;
+                foreach (var curValue in statValues)
                 {
-                    curData = t - Mean;
+                    curData = curValue - Mean;
                     curData *= curData;
                     total += curData;
                 }
@@ -403,8 +416,8 @@ namespace ESME.TransmissionLoss.Bellhop
             }
             else
             {
-                DataMin -= 1;
-                DataMax += 1;
+                DataMin = 0;
+                DataMax = 100;
                 StatMin = DataMin;
                 StatMax = DataMax;
             }

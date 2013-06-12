@@ -247,7 +247,8 @@ namespace ESME.Scenarios
             {
                 if (_bottomProfile == null) _bottomProfile = ESME.TransmissionLoss.Bellhop.BottomProfile.FromBellhopFile(BasePath + ".bty");
                 if (_ranges == null || _depths == null) ReadAxisFile();
-                if (_shadeFile == null) _shadeFile = ShadeFile.Read(BasePath + ".shd", (float)Bearing, _bottomDepths);
+                if (_shadeFile == null) _shadeFile = ShadeFile.Read(BasePath + ".shd", (float)Bearing);
+                if (_bottomDepths != null) _shadeFile.BottomDepths = _bottomDepths;
             });
             result.Start();
             await TaskEx.WhenAll(result);
@@ -262,7 +263,7 @@ namespace ESME.Scenarios
             get
             {
                 if (_shadeFile != null) return _shadeFile;
-                _shadeFile = ShadeFile.Read(BasePath + ".shd", (float)Bearing, _bottomDepths);
+                _shadeFile = ShadeFile.Read(BasePath + ".shd", (float)Bearing);
                 return _shadeFile;
             }
         }
@@ -275,6 +276,7 @@ namespace ESME.Scenarios
                 {
                     if (BasePath == null || File.Exists(BasePath + ".axs") || !File.Exists(BasePath + ".shd")) return false;
                     if (shadeFile == null) shadeFile = ShadeFile.Read(BasePath + ".shd", (float)Bearing);
+                    if (_bottomDepths != null) _shadeFile.BottomDepths = _bottomDepths;
                 }
                 catch (EndOfStreamException)
                 {
@@ -336,6 +338,7 @@ namespace ESME.Scenarios
                     MaximumTransmissionLossValues[rangeIndex] = tlValuesAboveBottom.Max();
                     MeanTransmissionLossValues[rangeIndex] = tlValuesAboveBottom.Average();
                 }
+                _shadeFile.BottomDepths = _bottomDepths;
                 using (var writer = new BinaryWriter(new FileStream(BasePath + ".axs", FileMode.Create)))
                 {
                     writer.Write(_ranges.Length);

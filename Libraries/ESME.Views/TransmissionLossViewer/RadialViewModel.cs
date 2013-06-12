@@ -133,7 +133,8 @@ namespace ESME.Views.TransmissionLossViewer
                                            }
                                            try
                                            {
-                                               _shadeFile = ShadeFile.Read(Radial.BasePath + ".shd", (float)Radial.Bearing, Radial.BottomDepths);
+                                               _shadeFile = ShadeFile.Read(Radial.BasePath + ".shd", (float)Radial.Bearing);
+                                               _shadeFile.BottomDepths = Radial.BottomDepths;
                                                _imageSeriesViewModel.Top = Radial.Depths.First();
                                                _imageSeriesViewModel.Left = Radial.Ranges.First();
                                                _imageSeriesViewModel.Bottom = Radial.Depths.Last();
@@ -294,7 +295,7 @@ namespace ESME.Views.TransmissionLossViewer
                 var py = AxisSeriesViewModel.MouseLocation.Y / AxisSeriesViewModel.ActualHeight;
                 var rangeIndex = Math.Max(0, Math.Min((int)(_shadeFile.ReceiverRanges.Length * px), _shadeFile.ReceiverRanges.Length - 1));
                 var depthIndex = Math.Max(0, Math.Min((int)(_shadeFile.ReceiverDepths.Length * py), _shadeFile.ReceiverDepths.Length - 1)); MouseTransmissionLossInfo = string.Format("Transmission Loss: {0:0.0}dB", _shadeFile.TransmissionLoss[depthIndex, rangeIndex]);
-                if (float.IsInfinity(_shadeFile.TransmissionLoss[depthIndex, rangeIndex]) || double.IsNaN(AxisSeriesViewModel.YAxis.MouseDataLocation) || (AxisSeriesViewModel.YAxis.MouseDataLocation > Radial.BottomDepths[rangeIndex]))
+                if (float.IsInfinity(_shadeFile.TransmissionLoss[depthIndex, rangeIndex]) || float.IsNaN(_shadeFile.TransmissionLoss[depthIndex, rangeIndex]) || double.IsNaN(AxisSeriesViewModel.YAxis.MouseDataLocation) || (AxisSeriesViewModel.YAxis.MouseDataLocation > Radial.BottomDepths[rangeIndex]))
                 {
                     MouseTransmissionLossInfo = "Transmission Loss: N/A";
                     MouseSPLInfo = "Sound Pressure: N/A";
