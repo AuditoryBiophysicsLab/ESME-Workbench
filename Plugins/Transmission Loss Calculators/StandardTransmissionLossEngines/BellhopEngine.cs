@@ -182,6 +182,23 @@ namespace StandardTransmissionLossEngines
         }
 
         static readonly string AssemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+
+        /// <summary>
+        /// References: 
+        /// Ainslie, M. A. (2010)  Principles of Sonar Performance Modeling, Springer-Verlag, Berlin (Chapters 8 and 9).
+        /// 
+        /// Dobson, F. W. (1981) Review of Reference Height for and Averaging Time of Surface Wind Measurements at Sea 
+        /// (Marine Meteorology and Related Oceanographic Activities, Report no. 3), World Meteorological Organization.
+        /// 
+        /// Weston, D. E. and Ching, P. A. (1989) Wind effects in shallow-water transmission,
+        /// J. Acoust. Soc. Am., 86, 1530-1545. http://dx.doi.org/10.1121/1.398713
+        /// </summary>
+        /// <param name="windSpeed"></param>
+        /// <param name="frequency"></param>
+        /// <param name="startAngle"></param>
+        /// <param name="endAngle"></param>
+        /// <param name="angleStep"></param>
+        /// <returns></returns>
         static double[,] GenerateReflectionCoefficients(double windSpeed, double frequency, double startAngle = 0, double endAngle = 90.0, double angleStep = 1.0)
         {
             frequency /= 1000;  // Frequency is expressed in kHz in the formula
