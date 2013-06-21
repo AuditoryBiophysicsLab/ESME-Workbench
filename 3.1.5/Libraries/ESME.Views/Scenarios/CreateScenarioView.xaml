@@ -1,0 +1,178 @@
+﻿<Window x:Class="ESME.Views.Scenarios.CreateScenarioView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Controls="clr-namespace:ESME.Views.Controls"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:l="clr-namespace:ESME.Views.Scenarios"
+        xmlns:MaskedTextBox="clr-namespace:ESME.Views.MaskedTextBox"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:NAVO="clr-namespace:ESME.Environment.NAVO;assembly=ESME"
+        xmlns:Properties="clr-namespace:ESME.Views.Properties"
+        xmlns:System="clr-namespace:System;assembly=mscorlib"
+        xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
+        Title="Create Scenario"
+        d:DataContext="{d:DesignInstance l:CreateScenarioViewModel}"
+        Grid.IsSharedSizeScope="True"
+        Left="{Binding Source={x:Static Properties:Settings.Default},
+                       Path=CreateScenarioLeft,
+                       Mode=TwoWay}"
+        SizeToContent="WidthAndHeight"
+        Top="{Binding Source={x:Static Properties:Settings.Default},
+                      Path=CreateScenarioTop,
+                      Mode=TwoWay}"
+        WindowStyle="ToolWindow"
+        mc:Ignorable="d">
+    <Window.Resources>
+        <Style TargetType="{x:Type TextBox}">
+            <Setter Property="MinWidth" Value="150" />
+            <Setter Property="Validation.ErrorTemplate">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <DockPanel LastChildFill="True">
+                            <Border BorderBrush="Red" BorderThickness="1" DockPanel.Dock="Left">
+                                <AdornedElementPlaceholder />
+                            </Border>
+                        </DockPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="true">
+                    <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="{x:Type MaskedTextBox:MaskedTextBox}">
+            <Setter Property="Validation.ErrorTemplate">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <DockPanel LastChildFill="True">
+                            <Border BorderBrush="Red" BorderThickness="1" DockPanel.Dock="Left">
+                                <AdornedElementPlaceholder />
+                            </Border>
+                        </DockPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="true">
+                    <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <WPF:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <DockPanel>
+        <Border BorderThickness="0" DockPanel.Dock="Top" Padding="5">
+            <StackPanel Orientation="Vertical">
+                <Grid Margin="5 5 5 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="PluginLabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Margin="0 0 5 0"
+                               VerticalAlignment="Center"
+                               Text="Scenario name"
+                               TextAlignment="Right" />
+                    <TextBox Grid.Column="1" Text="{Binding ScenarioName, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+                <Grid Margin="5 5 5 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="PluginLabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Margin="0 0 5 0"
+                               VerticalAlignment="Center"
+                               Text="Location"
+                               TextAlignment="Right" />
+                    <ComboBox Grid.Column="1"
+                              DisplayMemberPath="Name"
+                              IsEnabled="{Binding IsLocationSelectable}"
+                              ItemsSource="{Binding Locations}"
+                              SelectedItem="{Binding Location}" />
+                </Grid>
+                <Grid Margin="5 5 5 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="PluginLabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Margin="0 0 5 0"
+                               VerticalAlignment="Center"
+                               Text="Time Period"
+                               TextAlignment="Right" />
+                    <ComboBox Grid.Column="1" ItemsSource="{x:Static NAVO:NAVOConfiguration.AllMonths}" SelectedItem="{Binding TimePeriod}" />
+                </Grid>
+                <Grid Margin="5 5 5 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="PluginLabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Margin="0 0 5 0"
+                               VerticalAlignment="Center"
+                               Text="Comments"
+                               TextAlignment="Right" />
+                    <TextBox Grid.Column="1"
+                             Height="Auto"
+                             AcceptsReturn="True"
+                             Text="{Binding Comments,
+                                            ValidatesOnDataErrors=True,
+                                            UpdateSourceTrigger=PropertyChanged}"
+                             TextWrapping="Wrap" />
+                </Grid>
+                <Grid Margin="5 5 5 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="PluginLabelColumn" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Margin="0 0 5 0"
+                               VerticalAlignment="Center"
+                               Text="Duration"
+                               TextAlignment="Right"
+                               ToolTip="Length of simulated time the scenario runs (hh:mm)" />
+                    <MaskedTextBox:MaskedTextBox Grid.Column="1"
+                                                 HorizontalAlignment="Left"
+                                                 VerticalAlignment="Top"
+                                                 Mask="00:00"
+                                                 ValueDataType="{x:Type System:String}"
+                                                 Value="{Binding DurationString,
+                                                                 ValidatesOnDataErrors=True,
+                                                                 UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+            </StackPanel>
+        </Border>
+        <GroupBox Margin="0 10 0 0" DockPanel.Dock="Top" Header="Environmental Data Sources" IsEnabled="{Binding IsValid}">
+            <StackPanel Margin="5" DockPanel.Dock="Left" Orientation="Vertical">
+                <Controls:PluginSelector Grid.Row="0" ItemsSource="{Binding EnvironmentDataSourceViews[Wind]}" PluginTypeName="Wind" SelectedItem="{Binding SelectedPlugins[Wind]}" />
+                <Separator Margin="0 5 0 10" />
+                <Controls:PluginSelector Grid.Row="1" ItemsSource="{Binding EnvironmentDataSourceViews[SoundSpeed]}" PluginTypeName="Sound Speed" SelectedItem="{Binding SelectedPlugins[SoundSpeed]}" />
+                <Separator Margin="0 5 0 10" />
+                <Controls:PluginSelector Grid.Row="2" ItemsSource="{Binding EnvironmentDataSourceViews[Sediment]}" PluginTypeName="Sediment" SelectedItem="{Binding SelectedPlugins[Sediment]}" />
+                <Separator Margin="0 5 0 10" />
+                <Controls:PluginSelector Grid.Row="3" ItemsSource="{Binding EnvironmentDataSourceViews[Bathymetry]}" PluginTypeName="Bathymetry" SelectedItem="{Binding SelectedPlugins[Bathymetry]}" />
+            </StackPanel>
+        </GroupBox>
+        <StackPanel HorizontalAlignment="Right" DockPanel.Dock="Bottom" Orientation="Horizontal">
+            <Button Width="75"
+                    Margin="5"
+                    Command="{Binding OkCommand}"
+                    Content="OK"
+                    IsDefault="True"
+                    IsEnabled="{Binding IsValid}" />
+            <Button Width="75"
+                    Margin="5"
+                    Command="{Binding CancelCommand}"
+                    Content="Cancel"
+                    IsCancel="True" />
+        </StackPanel>
+    </DockPanel>
+</Window>
