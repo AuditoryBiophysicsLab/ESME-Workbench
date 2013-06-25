@@ -1,0 +1,33 @@
+﻿<Window x:Class="ESMEWorkbench.Views.AcousticEngineParameterConfigurationView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Views="clr-namespace:ESMEWorkbench.Views"
+        Title="Acoustic Model Parameters" 
+        SizeToContent="WidthAndHeight"
+        ResizeMode="NoResize" 
+        WindowStyle="ToolWindow">
+    <DockPanel LastChildFill="True">
+        <DockPanel LastChildFill="False"
+			           Margin="10"
+			           DockPanel.Dock="Bottom">
+            <Button Width="75"
+				        Margin="10 0 0 0"
+				        IsCancel="True"
+				        Content="Cancel"
+				        DockPanel.Dock="Right" />
+            <Button Width="75"
+				        IsDefault="True"
+				        Content="OK"
+				        DockPanel.Dock="Right"
+				        Command="{Binding OkCommand}" />
+
+        </DockPanel>
+        <TabControl>
+            <TabItem Header="Bellhop">
+                <Views:EditableLabelValueListView x:Name="BellhopConfiguration" DataContext="{Binding BellhopParameters}"/>
+            </TabItem>
+            <TabItem Header="RAM" IsEnabled="False"/>
+            <TabItem Header="CASS" IsEnabled="False"/>
+            <TabItem Header="REFMS" IsEnabled="False"/>
+        </TabControl>        
+    </DockPanel>
+</Window>

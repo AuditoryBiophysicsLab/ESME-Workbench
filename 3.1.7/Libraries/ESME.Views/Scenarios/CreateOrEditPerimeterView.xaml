@@ -1,0 +1,97 @@
+﻿<Window x:Class="ESME.Views.Scenarios.CreateOrEditPerimeterView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:hrc="clr-namespace:HRC.Utility;assembly=HRC"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:Properties="clr-namespace:ESME.Views.Properties"
+        xmlns:Scenarios="clr-namespace:ESME.Views.Scenarios"
+        xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC"
+        Title="{Binding DialogTitle}"
+        d:DataContext="{d:DesignInstance Scenarios:CreateOrEditPerimeterViewModel}"
+        Grid.IsSharedSizeScope="True"
+        Left="{Binding Source={x:Static Properties:Settings.Default},
+                       Path=CreateLocationLeft,
+                       Mode=TwoWay}"
+        SizeToContent="WidthAndHeight"
+        Top="{Binding Source={x:Static Properties:Settings.Default},
+                      Path=CreateLocationTop,
+                      Mode=TwoWay}"
+        WindowStyle="ToolWindow"
+        mc:Ignorable="d">
+    <Window.Resources>
+        <hrc:BooleanToVisibilityConverter x:Key="TrueVisibleFalseCollapsed" FalseValue="Collapsed" TrueValue="Visible" />
+        <Style TargetType="{x:Type TextBox}">
+            <Setter Property="MinWidth" Value="150" />
+            <Setter Property="Validation.ErrorTemplate">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <DockPanel LastChildFill="True">
+                            <Border BorderBrush="Red" BorderThickness="1" DockPanel.Dock="Left">
+                                <AdornedElementPlaceholder />
+                            </Border>
+                        </DockPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="true">
+                    <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <WPF:EventToCommandTrigger Command="{Binding ViewClosingCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <DockPanel LastChildFill="True">
+        <Grid Margin="5" DockPanel.Dock="Top">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition SharedSizeGroup="PluginLabelColumn" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="0"
+                       Grid.Column="0"
+                       Margin="0 0 2 0"
+                       VerticalAlignment="Center"
+                       Text="Perimeter name"
+                       TextAlignment="Right" />
+            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding PerimeterName, ValidatesOnDataErrors=True, ValidatesOnExceptions=True, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Grid.Row="1"
+                       Grid.Column="0"
+                       Margin="0 0 2 0"
+                       VerticalAlignment="Top"
+                       Text="Errors"
+                       TextAlignment="Right"
+                       Visibility="{Binding EditablePolygonOverlayViewModel.HasErrors,
+                                            Converter={StaticResource TrueVisibleFalseCollapsed}}" />
+            <TextBlock Grid.Row="1"
+                       Grid.Column="1"
+                       VerticalAlignment="Center"
+                       Foreground="Red"
+                       Text="{Binding EditablePolygonOverlayViewModel.Errors}"
+                       TextWrapping="Wrap"
+                       Visibility="{Binding EditablePolygonOverlayViewModel.HasErrors,
+                                            Converter={StaticResource TrueVisibleFalseCollapsed}}" />
+        </Grid>
+        <StackPanel HorizontalAlignment="Right" DockPanel.Dock="Bottom" Orientation="Horizontal">
+            <Button Width="75"
+                    Margin="5"
+                    Command="{Binding OkCommand}"
+                    Content="OK"
+                    IsDefault="True" />
+            <Button Width="75"
+                    Margin="5"
+                    Command="{Binding CancelCommand}"
+                    Content="Cancel"
+                    IsCancel="True" />
+        </StackPanel>
+    </DockPanel>
+</Window>
