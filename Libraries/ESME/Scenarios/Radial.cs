@@ -268,15 +268,14 @@ namespace ESME.Scenarios
             }
         }
 
-        public bool ExtractAxisData(ShadeFile shadeFile = null, int debugIndex = -1)
+        public bool ExtractAxisData(int debugIndex = -1)
         {
             try
             {
                 try
                 {
                     if (BasePath == null || File.Exists(BasePath + ".axs") || !File.Exists(BasePath + ".shd")) return false;
-                    if (shadeFile == null) shadeFile = ShadeFile.Read(BasePath + ".shd", (float)Bearing);
-                    if (_shadeFile == null) return false;
+                    if (_shadeFile == null) _shadeFile = ShadeFile.Read(BasePath + ".shd", (float)Bearing);
                     if (_bottomDepths != null) _shadeFile.BottomDepths = _bottomDepths;
                 }
                 catch (EndOfStreamException)
@@ -285,8 +284,8 @@ namespace ESME.Scenarios
                     TransmissionLossCalculator.Add(this);
                     return false;
                 }
-                _ranges = shadeFile.ReceiverRanges.ToArray();
-                _depths = shadeFile.ReceiverDepths.ToArray();
+                _ranges = _shadeFile.ReceiverRanges.ToArray();
+                _depths = _shadeFile.ReceiverDepths.ToArray();
                 IsCalculated = true;
                 _bottomProfile = ESME.TransmissionLoss.Bellhop.BottomProfile.FromBellhopFile(BasePath + ".bty");
                 _minimumTransmissionLossValues = new float[Ranges.Length];
@@ -315,7 +314,7 @@ namespace ESME.Scenarios
                                                                      where curDepth > 0
                                                                      orderby curDepth
                                                                      select depth).First());
-                    var tlValuesAboveBottom = shadeFile[rangeIndex].Take(bottomDepthIndex).Where(v => !float.IsNaN(v) && !float.IsInfinity(v)).ToList();
+                    var tlValuesAboveBottom = _shadeFile[rangeIndex].Take(bottomDepthIndex).Where(v => !float.IsNaN(v) && !float.IsInfinity(v)).ToList();
                     if (tlValuesAboveBottom.Count == 0)
                     {
                         MinimumTransmissionLossValues[rangeIndex] = float.NaN;
@@ -326,7 +325,7 @@ namespace ESME.Scenarios
                     if (debugIndex >= 0 && rangeIndex == debugIndex)
                     {
                         var maxTransmissionLoss = tlValuesAboveBottom.Max();
-                        var maxTransmissionLossDepthIndex = shadeFile[rangeIndex].IndexOf(maxTransmissionLoss);
+                        var maxTransmissionLossDepthIndex = _shadeFile[rangeIndex].IndexOf(maxTransmissionLoss);
                         var maxTransmissionLossDepth = _depths[maxTransmissionLossDepthIndex];
                         Debug.WriteLine(string.Format("Maximum TL value for this field found at radial bearing {0}, range {1}, depth {2}, TL {3}, bottom depth at this range {4}",
                                                       Bearing,
@@ -339,7 +338,7 @@ namespace ESME.Scenarios
                     MaximumTransmissionLossValues[rangeIndex] = tlValuesAboveBottom.Max();
                     MeanTransmissionLossValues[rangeIndex] = tlValuesAboveBottom.Average();
                 }
-                if (_shadeFile != null) _shadeFile.BottomDepths = _bottomDepths;
+                _shadeFile.BottomDepths = _bottomDepths;
                 using (var writer = new BinaryWriter(new FileStream(BasePath + ".axs", FileMode.Create)))
                 {
                     writer.Write(_ranges.Length);
