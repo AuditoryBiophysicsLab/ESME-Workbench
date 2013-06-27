@@ -14,6 +14,7 @@ using System.Threading.Tasks.Dataflow;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using ESME.Scenarios;
 using ESME.TransmissionLoss.Bellhop;
 using ESME.Views.Controls;
@@ -28,12 +29,12 @@ namespace ESME.Views.TransmissionLossViewer
 {
     public class RadialViewModel : ViewModelBase, IDisposable
     {
-        public RadialViewModel() 
+        public RadialViewModel()
         {
             FullRange = new Range(0, 200);
             StatisticalRange = new Range(75, 125);
             AnimationTargetRange = new Range();
-	        AnimationTime = TimeSpan.FromSeconds(0);
+            AnimationTime = TimeSpan.FromSeconds(0);
 
             AxisSeriesViewModel.DataSeriesCollection.Add(_imageSeriesViewModel);
             AxisSeriesViewModel.DataSeriesCollection.Add(_bottomProfileViewModel);
@@ -49,7 +50,7 @@ namespace ESME.Views.TransmissionLossViewer
             _yAxisPropertyObserver = new PropertyObserver<DataAxisViewModel>(AxisSeriesViewModel.YAxis)
                 .RegisterHandler(y => y.MouseDataLocation, UpdateStatusProperties);
             _instanceObservers.Add(Observable.FromEventPattern<PropertyChangedEventArgs>(AxisSeriesViewModel.YAxis, "PropertyChanged")
-                                       .ObserveOnDispatcher()
+                                       .ObserveOn(TaskPoolScheduler.Default)
                                        .Where(e => e.EventArgs.PropertyName == "VisibleRange")
                                        .Select(e => AxisSeriesViewModel.YAxis.VisibleRange)
                                        .Throttle(TimeSpan.FromMilliseconds(100))
@@ -64,6 +65,10 @@ namespace ESME.Views.TransmissionLossViewer
                                            }
                                            CalculateBottomProfileGeometry();
                                            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving VisibleRangeChanged", DateTime.Now));
+                                       }, e =>
+                                       {
+                                           Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: VisibleRangeChanged exception: {1}", DateTime.Now, e.Message));
+                                           Debugger.Break();
                                        }));
             _instanceObservers.Add(Observable.FromEventPattern<PropertyChangedEventArgs>(this, "PropertyChanged")
                                        .ObserveOn(TaskPoolScheduler.Default)
@@ -90,6 +95,10 @@ namespace ESME.Views.TransmissionLossViewer
                                            });
                                            _instanceObservers.Add(_axisRangeObserver);
                                            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving AxisRangeChanged", DateTime.Now));
+                                       }, e =>
+                                       {
+                                           Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: AxisRangeChanged exception: {1}", DateTime.Now, e.Message));
+                                           Debugger.Break();
                                        }));
             _instanceObservers.Add(Observable.FromEventPattern<PropertyChangedEventArgs>(AxisSeriesViewModel, "PropertyChanged")
                                        .ObserveOn(TaskPoolScheduler.Default)
@@ -103,9 +112,13 @@ namespace ESME.Views.TransmissionLossViewer
                                            Render();
                                            //CalculateBottomProfileGeometry();
                                            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving ActualHeightWidthChanged", DateTime.Now));
+                                       }, e =>
+                                       {
+                                           Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: ActualHeightWidthChanged exception: {1}", DateTime.Now, e.Message));
+                                           Debugger.Break();
                                        }));
             _instanceObservers.Add(Observable.FromEventPattern<PropertyChangedEventArgs>(this, "PropertyChanged")
-                                       .ObserveOnDispatcher()
+                                       .ObserveOn(TaskPoolScheduler.Default)
                                        .Where(e => e.EventArgs.PropertyName == "Radial")
                                        .Subscribe(e =>
                                        {
@@ -154,55 +167,73 @@ namespace ESME.Views.TransmissionLossViewer
                                                _shadeFile = null;
                                            }
                                            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving RadialChanged", DateTime.Now));
+                                       }, e =>
+                                       {
+                                           Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: RadialChanged exception: {1}", DateTime.Now, e.Message));
+                                           Debugger.Break();
                                        }));
             _instanceObservers.Add(
-                                   ColorMapViewModel.Range.ObserveOnDispatcher().Subscribe(
-                                                                                           r =>
-                                                                                           {
-                                                                                               Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Entering ColorMapViewModel.RangeChanged", DateTime.Now));
-                                                                                               AxisMarkers.Clear();
-                                                                                               if (ColorMapViewModel.Range != FullRange) 
-                                                                                               {
-                                                                                                   AxisMarkers.Add(new DataAxisTick(ColorMapViewModel.Range.Min, string.Format("{0:0}", ColorMapViewModel.Range.Min), true, Brushes.White, Brushes.Black, Brushes.Black));
-                                                                                                   AxisMarkers.Add(new DataAxisTick(ColorMapViewModel.Range.Max, string.Format("{0:0}", ColorMapViewModel.Range.Max), true, Brushes.White, Brushes.Black, Brushes.Black));
-                                                                                               }
-                                                                                               Debug.WriteLine("{0:HH:mm:ss.fff} ColorMapViewModel.Range changed to {1}",
-                                                                                                               DateTime.Now,
-                                                                                                               r);
-                                                                                               Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving ColorMapViewModel.RangeChanged", DateTime.Now));
-                                                                                           }));
+                ColorMapViewModel.Range.ObserveOn(TaskPoolScheduler.Default).Subscribe(
+                    r =>
+                    {
+                        Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Entering ColorMapViewModel.RangeChanged", DateTime.Now));
+                        _dispatcher.InvokeInBackgroundIfRequired(() =>
+                        {
+                            AxisMarkers.Clear();
+                            if (ColorMapViewModel.Range != FullRange)
+                            {
+                                AxisMarkers.Add(new DataAxisTick(ColorMapViewModel.Range.Min, string.Format("{0:0}", ColorMapViewModel.Range.Min), true, Brushes.White, Brushes.Black, Brushes.Black));
+                                AxisMarkers.Add(new DataAxisTick(ColorMapViewModel.Range.Max, string.Format("{0:0}", ColorMapViewModel.Range.Max), true, Brushes.White, Brushes.Black, Brushes.Black));
+                            }
+                            Debug.WriteLine("{0:HH:mm:ss.fff} ColorMapViewModel.Range changed to {1}",
+                                            DateTime.Now,
+                                            r);
+                        });
+                        Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving ColorMapViewModel.RangeChanged", DateTime.Now));
+                    }, e =>
+                    {
+                        Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: ColorMapViewModel.RangeChanged exception: {1}", DateTime.Now, e.Message));
+                        Debugger.Break();
+                    }));
             _displayQueue
-                .ObserveOnDispatcher()
+                .ObserveOn(TaskPoolScheduler.Default)
                 .Subscribe(result =>
                 {
                     Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Entering DisplayQueue", DateTime.Now));
-                    var pixelBuffer = result.Item1;
-                    var renderRect = result.Item2;
-                    var sequenceNumber = result.Item3;
-                    //Debug.WriteLine(string.Format("Got completed event for sequence number {0} completed", sequenceNumber));
-                    if (sequenceNumber < _displayedSequenceNumber)
+                    _dispatcher.InvokeInBackgroundIfRequired(() =>
                     {
-                        Debug.WriteLine("Discarding image buffer: Old image sequence");
-                        Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving (1) DisplayQueue", DateTime.Now));
-                        return;
-                    }
-                    if (WriteableBitmap == null || Math.Abs(renderRect.Width - WriteableBitmap.Width) > double.Epsilon || Math.Abs(renderRect.Height - WriteableBitmap.Height) > double.Epsilon)
-                        WriteableBitmap = new WriteableBitmap(renderRect.Width, renderRect.Height, 96, 96, PixelFormats.Bgr32, null);
-                    _displayedSequenceNumber = sequenceNumber;
-                    WriteableBitmap.Lock();
-                    WriteableBitmap.WritePixels(renderRect, pixelBuffer, WriteableBitmap.BackBufferStride, 0, 0);
-                    WriteableBitmap.AddDirtyRect(renderRect);
-                    OnPropertyChanged("WriteableBitmap");
-                    WriteableBitmap.Unlock();
-                    WriteableBitmapVisibility = Visibility.Visible;
-                    _imageSeriesViewModel.ImageSource = WriteableBitmap;
+                        var pixelBuffer = result.Item1;
+                        var renderRect = result.Item2;
+                        var sequenceNumber = result.Item3;
+                        //Debug.WriteLine(string.Format("Got completed event for sequence number {0} completed", sequenceNumber));
+                        if (sequenceNumber < _displayedSequenceNumber)
+                        {
+                            Debug.WriteLine("Discarding image buffer: Old image sequence");
+                            Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving (1) DisplayQueue", DateTime.Now));
+                            return;
+                        }
+                        if (WriteableBitmap == null || Math.Abs(renderRect.Width - WriteableBitmap.Width) > double.Epsilon || Math.Abs(renderRect.Height - WriteableBitmap.Height) > double.Epsilon) WriteableBitmap = new WriteableBitmap(renderRect.Width, renderRect.Height, 96, 96, PixelFormats.Bgr32, null);
+                        _displayedSequenceNumber = sequenceNumber;
+                        WriteableBitmap.Lock();
+                        WriteableBitmap.WritePixels(renderRect, pixelBuffer, WriteableBitmap.BackBufferStride, 0, 0);
+                        WriteableBitmap.AddDirtyRect(renderRect);
+                        OnPropertyChanged("WriteableBitmap");
+                        WriteableBitmap.Unlock();
+                        WriteableBitmapVisibility = Visibility.Visible;
+                        _imageSeriesViewModel.ImageSource = WriteableBitmap;
+                    });
                     Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: Leaving DisplayQueue", DateTime.Now));
+                }, e =>
+                {
+                    Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} RadialViewModel: DisplayQueue exception: {1}", DateTime.Now, e.Message));
+                    Debugger.Break();
                 });
         }
 
         readonly List<IDisposable> _instanceObservers = new List<IDisposable>();
         readonly List<IDisposable> _radialObservers = new List<IDisposable>();
         IDisposable _axisRangeObserver;
+        readonly Dispatcher _dispatcher = Dispatcher.CurrentDispatcher;
         public RadialView RadialView { get; set; }
         void Render()
         {
