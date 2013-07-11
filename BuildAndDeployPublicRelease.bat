@@ -13,7 +13,7 @@ echo Starting build
 for /f "usebackq" %%A in (`""C:\Projects\ESME Deliverables\Utilities\VersionInfoIncrementer\bin\Release\VersionInfoIncrementer.exe" "C:\Projects\ESME Deliverables\Solutions\ESME Workbench\VersionInfo.txt""`) do set ESMEVersion=%%A
 svn commit --message "Public release %ESMEVersion%"
 svn update
-svn copy . "https://hrcsvn.bu.edu/svn/esme/src/bu/ESME Deliverables/tags/release builds/%ESMEVersion" --message "Tag for public release %ESMEVersion%"
+svn copy . "https://hrcsvn.bu.edu/svn/esme/src/bu/ESME Deliverables/tags/release builds/%ESMEVersion%" --message "Tag for public release %ESMEVersion%"
 call "BuildAndDeploy.bat" download  %ESMEVersion%
 goto End
 :DoNotBuild
