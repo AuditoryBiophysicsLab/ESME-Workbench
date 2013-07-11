@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ExpressionBlendVersion>4.0.20421.0</ExpressionBlendVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{1CD6E800-1D60-405A-BF80-F9CAE2E411E2}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <DefaultClrNameSpace>ESMERibbonDemo</DefaultClrNameSpace>
+    <RootNamespace>ESMERibbonDemo</RootNamespace>
+    <AssemblyName>ESMERibbonDemo</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <ApplicationIcon>Application.ico</ApplicationIcon>
+    <Utf8Output>true</Utf8Output>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="RibbonControlsLibrary" />
+    <Reference Include="Microsoft.Windows.Shell" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Page Include="MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <AppDesigner Include="Properties\" />
+    <None Include="Application.ico">
+      <Visible>false</Visible>
+    </None>
+    <Resource Include="World Map.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\LargeIcons\about-icon.png" />
+    <Resource Include="Images\LargeIcons\AddFile.png" />
+    <Resource Include="Images\LargeIcons\AddShapeFile.png" />
+    <Resource Include="Images\LargeIcons\bullet-2-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-Add-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-Close-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-Delete-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-First-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-Help-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-Last-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-Next-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-Pause-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-Play-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-Previous-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-Refresh-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-Reload-icon.png" />
+    <Resource Include="Images\LargeIcons\Button-Stop-icon.png" />
+    <Resource Include="Images\LargeIcons\close-icon.png" />
+    <Resource Include="Images\LargeIcons\Distance learning.png" />
+    <Resource Include="Images\LargeIcons\Dolphin.png" />
+    <Resource Include="Images\LargeIcons\LargeIcon.png" />
+    <Resource Include="Images\LargeIcons\Layers-icon.png" />
+    <Resource Include="Images\LargeIcons\new-icon.png" />
+    <Resource Include="Images\LargeIcons\open-icon.png" />
+    <Resource Include="Images\LargeIcons\Plus.png" />
+    <Resource Include="Images\LargeIcons\save-icon.png" />
+    <Resource Include="Images\LargeIcons\Sound.png" />
+    <Resource Include="Images\LargeIcons\System-Globe-icon.png" />
+    <Resource Include="Images\LargeIcons\System-Map-icon.png" />
+    <Resource Include="Images\LargeIcons\System-Registry-icon.png" />
+    <Resource Include="Images\LargeIcons\Text-Bubble-icon.png" />
+    <Resource Include="Images\LargeIcons\web-V2-icon.png" />
+    <Resource Include="Images\LargeIcons\Yahoo-Widget-Engine-icon.png" />
+    <Resource Include="Images\SmallIcons\about-icon.png" />
+    <Resource Include="Images\SmallIcons\AddFile.png" />
+    <Resource Include="Images\SmallIcons\bullet-2-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-Add-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-Close-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-Delete-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-First-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-Help-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-Last-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-Next-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-Pause-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-Play-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-Previous-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-Refresh-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-Reload-icon.png" />
+    <Resource Include="Images\SmallIcons\Button-Stop-icon.png" />
+    <Resource Include="Images\SmallIcons\close-icon.png" />
+    <Resource Include="Images\SmallIcons\Close.png" />
+    <Resource Include="Images\SmallIcons\Distance learning.png" />
+    <Resource Include="Images\SmallIcons\Dolphin.png" />
+    <Resource Include="Images\SmallIcons\Information.png" />
+    <Resource Include="Images\SmallIcons\Layers-icon.png" />
+    <Resource Include="Images\SmallIcons\new-icon.png" />
+    <Resource Include="Images\SmallIcons\New.png" />
+    <Resource Include="Images\SmallIcons\open-icon.png" />
+    <Resource Include="Images\SmallIcons\Open.png" />
+    <Resource Include="Images\SmallIcons\options-icon.png" />
+    <Resource Include="Images\SmallIcons\Options.png" />
+    <Resource Include="Images\SmallIcons\save-icon.png" />
+    <Resource Include="Images\SmallIcons\Save.png" />
+    <Resource Include="Images\SmallIcons\SmallIcon.png" />
+    <Resource Include="Images\SmallIcons\Sound.png" />
+    <Resource Include="Images\SmallIcons\System-Globe-icon.png" />
+    <Resource Include="Images\SmallIcons\System-Map-icon.png" />
+    <Resource Include="Images\SmallIcons\System-Registry-icon.png" />
+    <Resource Include="Images\SmallIcons\Text-Bubble-icon.png" />
+    <Resource Include="Images\SmallIcons\web-V2-icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Application.ico" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath32)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+	     Other similar extension points exist, see Microsoft.Common.targets.
+	<Target Name="BeforeBuild">
+	</Target>
+	<Target Name="AfterBuild">
+	</Target>
+	-->
+</Project>
