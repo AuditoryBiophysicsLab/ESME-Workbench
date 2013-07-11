@@ -1,4 +1,3 @@
-@echo off
 echo This script will build and release the current version of ESME Workbench 
 echo to the world.
 echo.
