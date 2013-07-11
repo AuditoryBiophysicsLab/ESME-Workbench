@@ -1,0 +1,307 @@
+﻿<UserControl x:Class="ESME.Views.Scenarios.ModePropertiesControlView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:hrc="clr-namespace:HRC.Utility;assembly=HRC"
+             xmlns:l="clr-namespace:ESME.Views.Scenarios"
+             xmlns:MaskedTextBox="clr-namespace:ESME.Views.MaskedTextBox"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:System="clr-namespace:System;assembly=mscorlib"
+             Background="#fff0f0f0"
+             d:DataContext="{d:DesignInstance l:ModePropertiesViewModel}"
+             d:DesignWidth="300"
+             Grid.IsSharedSizeScope="True"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <hrc:BooleanToVisibilityConverter x:Key="FalseVisibleTrueCollapsed"
+                                          FalseValue="Visible"
+                                          TrueValue="Collapsed" />
+        <Style TargetType="{x:Type TextBox}">
+            <Setter Property="MinWidth" Value="75" />
+            <Setter Property="Validation.ErrorTemplate">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <DockPanel LastChildFill="True">
+                            <Border BorderBrush="Red"
+                                    BorderThickness="1"
+                                    DockPanel.Dock="Left">
+                                <AdornedElementPlaceholder />
+                            </Border>
+                        </DockPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="true">
+                    <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="{x:Type MaskedTextBox:MaskedTextBox}">
+            <Setter Property="Validation.ErrorTemplate">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <DockPanel LastChildFill="True">
+                            <Border BorderBrush="Red"
+                                    BorderThickness="1"
+                                    DockPanel.Dock="Left">
+                                <AdornedElementPlaceholder />
+                            </Border>
+                        </DockPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="true">
+                    <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <DockPanel Grid.IsSharedSizeScope="True" LastChildFill="True">
+        <StackPanel HorizontalAlignment="Right"
+                    DockPanel.Dock="Bottom"
+                    Orientation="Horizontal">
+            <Button Width="75"
+                    Margin="5"
+                    Command="{Binding OkCommand}"
+                    Content="OK"
+                    IsDefault="True"
+                    IsEnabled="{Binding IsValid}" />
+            <Button Width="75"
+                    Margin="5"
+                    Command="{Binding CancelCommand}"
+                    Content="Cancel" />
+        </StackPanel>
+        <Border BorderThickness="0"
+                DockPanel.Dock="Top"
+                Padding="5">
+            <StackPanel Orientation="Vertical">
+                <GroupBox Header="General properties">
+                    <StackPanel Orientation="Vertical">
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Margin="0 0 5 0"
+                                       VerticalAlignment="Center"
+                                       Text="Mode name"
+                                       TextAlignment="Right" />
+                            <TextBox Grid.Column="1" Text="{Binding ModeName}" />
+                        </Grid>
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Margin="0 0 5 0"
+                                       VerticalAlignment="Center"
+                                       Text="Mode type"
+                                       TextAlignment="Right" />
+                            <TextBox Grid.Column="1" Text="{Binding ModeType}" />
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="Acoustic simulator parameters" Padding="5">
+                    <StackPanel Orientation="Vertical">
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Margin="0 0 5 0"
+                                       VerticalAlignment="Center"
+                                       Text="Depth offset (m)"
+                                       TextAlignment="Right"
+                                       ToolTip="Depth offset from the containing platform, in meters. This field is required" />
+                            <TextBox Grid.Column="1" Text="{Binding Depth, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Margin="0 0 5 0"
+                                       VerticalAlignment="Center"
+                                       Text="Source level (dB)"
+                                       TextAlignment="Right"
+                                       ToolTip="Source level, in dB re: 1 μPa. This field is required" />
+                            <TextBox Grid.Column="1" Text="{Binding SourceLevel, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Margin="0 0 5 0"
+                                       VerticalAlignment="Center"
+                                       Text="Frequency (Hz)"
+                                       TextAlignment="Right"
+                                       ToolTip="Frequency of the source, in Hz. This field is required" />
+                            <TextBox Grid.Column="1" Text="{Binding HighFrequency, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Margin="0 0 5 0"
+                                       VerticalAlignment="Center"
+                                       Text="Number of radials"
+                                       TextAlignment="Right"
+                                       ToolTip="Number of radials to compute for this mode. 0=Auto" />
+                            <ComboBox Grid.Column="1"
+                                      ItemsSource="{Binding ValidRadialCounts}"
+                                      SelectedItem="{Binding RadialCountString}" />
+                        </Grid>
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Margin="0 0 5 0"
+                                       VerticalAlignment="Center"
+                                       Text="Maximum propagation radius (m)"
+                                       TextAlignment="Right"
+                                       ToolTip="Maximum propagation radius of this mode, in meters. This field is required" />
+                            <TextBox Grid.Column="1" Text="{Binding MaxPropagationRadius, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Margin="0 0 5 0"
+                                       VerticalAlignment="Center"
+                                       Text="Pulse Length"
+                                       TextAlignment="Right"
+                                       ToolTip="Length of time the sound emitter is actually transmitting" />
+                            <MaskedTextBox:MaskedTextBox Grid.Column="1"
+                                                         HorizontalAlignment="Left"
+                                                         VerticalAlignment="Top"
+                                                         Mask="00:00:00.000"
+                                                         ValueDataType="{x:Type System:String}"
+                                                         Value="{Binding PulseLengthString,
+                                                                         ValidatesOnDataErrors=True,
+                                                                         UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Margin="0 0 5 0"
+                                       VerticalAlignment="Center"
+                                       Text="Pulse Interval"
+                                       TextAlignment="Right"
+                                       ToolTip="The time between the start of consecutive pulses" />
+                            <MaskedTextBox:MaskedTextBox Grid.Column="1"
+                                                         HorizontalAlignment="Left"
+                                                         VerticalAlignment="Top"
+                                                         Mask="00:00:00.000"
+                                                         ValueDataType="{x:Type System:String}"
+                                                         Value="{Binding PulseIntervalString,
+                                                                         ValidatesOnDataErrors=True,
+                                                                         UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+                        <Grid Margin="5 5 5 0" Visibility="{Binding IsPSMView, Converter={StaticResource FalseVisibleTrueCollapsed}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Margin="0 0 5 0"
+                                       VerticalAlignment="Center"
+                                       Text="Acoustic simulator"
+                                       TextAlignment="Right"
+                                       ToolTip="The acoustic simulation engine that will be used to simulate the sound fields produced by this mode" />
+                            <ComboBox Grid.Column="1"
+                                      DisplayMemberPath="PluginName"
+                                      ItemsSource="{Binding AvailableTransmissionLossEngines}"
+                                      SelectedItem="{Binding SelectedTransmissionLossEngine}" />
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="Horizontal beam pattern" Padding="5">
+                    <StackPanel Orientation="Vertical">
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Margin="0,1,5,5"
+                                       VerticalAlignment="Center"
+                                       Text="Relative beam angle (deg)"
+                                       TextAlignment="Right"
+                                       ToolTip="The beam center in the horizontal plane, relative to the current heading of the platform on which this mode is hosted. This field is required" />
+                            <TextBox Grid.Column="1" Text="{Binding RelativeBeamAngle, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Margin="0,1,5,5"
+                                       VerticalAlignment="Center"
+                                       Text="Horizontal beam width (deg)"
+                                       TextAlignment="Right"
+                                       ToolTip="Beam width of this mode in the horizontal dimension, in degrees. This field is required" />
+                            <TextBox Grid.Column="1" Text="{Binding HorizontalBeamWidth, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="Vertical beam pattern" Padding="5">
+                    <StackPanel Orientation="Vertical">
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Margin="0,1,5,5"
+                                       VerticalAlignment="Center"
+                                       Text="Vertical beam width (deg)"
+                                       TextAlignment="Right"
+                                       ToolTip="Beam width of this mode in the vertical dimension, in degrees. This field is required" />
+                            <TextBox Grid.Column="1" Text="{Binding VerticalBeamWidth, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Margin="0,1,5,5"
+                                       VerticalAlignment="Center"
+                                       Text="Side lobe attenuation (dB)"
+                                       TextAlignment="Right"
+                                       ToolTip="Attenuation factor, in dB for side lobes of any beam width that might be specified" />
+                            <TextBox Grid.Column="1" Text="{Binding SideLobeAttenuation, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+                        <Grid Margin="5 5 5 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition SharedSizeGroup="LabelColumn" />
+                                <ColumnDefinition SharedSizeGroup="ValueColumn" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Margin="0 0 5 0"
+                                       VerticalAlignment="Center"
+                                       Text="Depression/Elevation angle (deg)"
+                                       TextAlignment="Right"
+                                       ToolTip="Depression/elevation angle (vertical look direction) of this source, in degrees. Positive values are toward the bottom. This field is required" />
+                            <TextBox Grid.Column="1" Text="{Binding DepressionElevationAngle, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+        </Border>
+    </DockPanel>
+</UserControl>
