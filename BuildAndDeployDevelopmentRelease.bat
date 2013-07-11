@@ -3,5 +3,5 @@ for /f "usebackq" %%A in (`""C:\Projects\ESME Deliverables\Utilities\VersionInfo
 svn commit --message "Development release %ESMEVersion%"
 svn update
 svn copy . "https://hrcsvn.bu.edu/svn/esme/src/bu/ESME Deliverables/tags/development builds/%ESMEVersion%" --message "Development release %ESMEVersion%/"
-call "BuildAndDeploy.bat" development
+call "BuildAndDeploy.bat" development %ESMEVersion%
 echo Successfully built development release %ESMEVersion%
