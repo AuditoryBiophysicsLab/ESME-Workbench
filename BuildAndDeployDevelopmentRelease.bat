@@ -7,5 +7,5 @@ git commit -a -m "Development release %ESMEVersion%"
 git tag -a %ESMEVersion% -m "Development release %ESMEVersion%"
 git push --tags
 git push
-rem call "BuildAndDeploy.bat" development %ESMEVersion%
+call "BuildAndDeploy.bat" development %ESMEVersion%
 echo Successfully built development release %ESMEVersion%
