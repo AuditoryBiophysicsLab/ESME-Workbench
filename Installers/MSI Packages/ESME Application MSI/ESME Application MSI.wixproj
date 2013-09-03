@@ -60,7 +60,7 @@ exit 0</PostBuildEvent>
   <PropertyGroup>
     <PreBuildEvent>"C:\Program Files (x86)\WiX Toolset v3.7\bin\heat" dir "$(ProjectDir)..\..\..\Utilities\3MB\Species Files" -srd -cg SpeciesDefinitionFiles -dr SpeciesDefinitionFilesFolder -gg -sfrag -out "$(ProjectDir)SpeciesFiles.wxs" -var var.SpeciesDefinitionFilesFolder
 if errorlevel 1 goto BuildEventFailed
-"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -version "$(SolutionDir)VersionInfo.txt" -wixversion "$(ProjectDir)version.wxi" -output "$(ProjectDir) "
+"$(SolutionDir)..\..\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -version "$(SolutionDir)VersionInfo.txt" -wixversion "$(ProjectDir)version.wxi" -output "$(ProjectDir) "
 if errorlevel 1 goto BuildEventFailed
 goto BuildEventOK
 :BuildEventFailed

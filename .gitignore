@@ -153,6 +153,8 @@ $RECYCLE.BIN/
 # Generated files
 BuildInformation.cs
 AssemblyVersionInfo.cs
+SpeciesFiles.wxs
+version.wxi
 
 # NuGet Packages
 packages/

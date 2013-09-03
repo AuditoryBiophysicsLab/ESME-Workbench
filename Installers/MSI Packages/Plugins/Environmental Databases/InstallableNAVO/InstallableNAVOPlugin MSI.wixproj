@@ -33,13 +33,13 @@
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" />
   <PropertyGroup>
-    <PreBuildEvent>"C:\Projects\ESME Deliverables\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -version "$(SolutionDir)VersionInfo.txt" -wixversion "$(ProjectDir)version.wxi" -output "$(ProjectDir) "</PreBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
     <PostBuildEvent>if not exist "$(ProjectDir)msi" mkdir  "$(ProjectDir)msi"
 copy "$(TargetPath)" "$(ProjectDir)msi\$(TargetName)-$(PlatformName)$(TargetExt)" /Y /V
 copy "$(TargetPath)" "\\corti.bu.edu\hrc-backup\ESME Workbench\$(TargetName)-$(PlatformName)$(TargetExt)" /Y /V 2&gt;nul 1&gt;nul
 exit 0</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>"$(SolutionDir)..\..\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -version "$(SolutionDir)VersionInfo.txt" -wixversion "$(ProjectDir)version.wxi" -output "$(ProjectDir) "</PreBuildEvent>
   </PropertyGroup>
   <!--
 	To modify your build process, add your task inside one of the targets below and uncomment it.
