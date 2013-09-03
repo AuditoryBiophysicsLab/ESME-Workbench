@@ -4,7 +4,8 @@
   <?define ProductAuthor = "Hearing Research Center" ?>
   <?define Manufacturer="Boston University"?>
   <?define ProductAppFolder = "InstallLocation" ?>
-  <?define InstallersRoot="C:\Projects\ESME Deliverables\Installers"?>
+  <?define ESMERoot="$(var.ESME.ProjectDir)\..\.."?>
+  <?define InstallersRoot="$(var.ESMERoot)\Installers"?>
   <?define MSIRoot="$(var.InstallersRoot)\MSI Packages"?>
   <?define DatabasesRoot="$(var.MSIRoot)\ESME Databases"?>
   <?define ApplicationRoot="$(var.MSIRoot)\ESME Application MSI"?>

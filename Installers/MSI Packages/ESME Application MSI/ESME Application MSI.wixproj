@@ -44,6 +44,16 @@
     <Content Include="Bitmaps\dlgbmp.bmp" />
     <Content Include="version.wxi" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Libraries\ESME\ESME.csproj">
+      <Name>ESME</Name>
+      <Project>{9be4ec87-58b9-4b9f-8c27-4132bbd4a9b3}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(WixTargetsPath)" />
   <PropertyGroup>
     <PostBuildEvent>if not exist "$(ProjectDir)msi" mkdir  "$(ProjectDir)msi"
