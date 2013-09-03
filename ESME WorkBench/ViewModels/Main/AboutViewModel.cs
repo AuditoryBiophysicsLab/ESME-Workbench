@@ -17,7 +17,12 @@ namespace ESMEWorkbench.ViewModels.Main
         public AboutViewModel()
         {
             RegisterMediator();
-            WorkbenchModuleBuildInfo = new ModuleBuildInfoViewModel("ESME Workbench", BuildInformation.BuildDateTime, BuildInformation.BuildEngineer, Assembly.GetEntryAssembly().GetName().Version.ToString());
+            var versionString = String.Format("{0}.{1}.{2}.{3}",
+                                              Assembly.GetEntryAssembly().GetName().Version.Major,
+                                              Assembly.GetEntryAssembly().GetName().Version.Minor,
+                                              Assembly.GetEntryAssembly().GetName().Version.Build,
+                                              BuildInformation.GitHash);
+            WorkbenchModuleBuildInfo = new ModuleBuildInfoViewModel("ESME Workbench", BuildInformation.BuildDateTime, BuildInformation.BuildEngineer, Assembly.GetEntryAssembly().GetName().Version);
             ESMEModuleBuildInfo = new ModuleBuildInfoViewModel("ESME.dll", ESME.BuildInformation.BuildDateTime, ESME.BuildInformation.BuildEngineer);
             HRCModuleBuildInfo = new ModuleBuildInfoViewModel("HRC.dll", HRC.BuildInformation.BuildDateTime, HRC.BuildInformation.BuildEngineer);
             ViewsModuleBuildInfo = new ModuleBuildInfoViewModel("ESME.Views.dll", ESME.Views.BuildInformation.BuildDateTime, ESME.Views.BuildInformation.BuildEngineer);

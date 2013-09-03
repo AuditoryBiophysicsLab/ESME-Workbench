@@ -9,18 +9,20 @@ namespace ESME.Views.Misc
         public ModuleBuildInfoViewModel(string moduleName, DateTime buildDateTime, string buildEngineer)
         {
             var appDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            VersionString = Assembly.LoadFile(Path.Combine(appDir, moduleName)).GetName().Version.ToString();
+            var version = Assembly.LoadFile(Path.Combine(appDir, moduleName)).GetName().Version;
+            VersionString = String.Format("{0}.{1}.{2}.{3}", version.Major, version.Minor, version.Build, BuildInformation.GitHash.Substring(0, 8));
+
             ModuleName = moduleName;
             BuildDateTime = buildDateTime;
             BuildEngineer = buildEngineer;
         }
 
-        public ModuleBuildInfoViewModel(string moduleName, DateTime buildDateTime, string buildEngineer, string versionString)
+        public ModuleBuildInfoViewModel(string moduleName, DateTime buildDateTime, string buildEngineer, Version version)
         {
             ModuleName = moduleName;
             BuildDateTime = buildDateTime;
             BuildEngineer = buildEngineer;
-            VersionString = versionString;
+            VersionString = String.Format("{0}.{1}.{2}.{3}", version.Major, version.Minor, version.Build, BuildInformation.GitHash.Substring(0, 8));
         }
         public string ModuleName { get; private set; }
         public DateTime BuildDateTime { get; private set; }
