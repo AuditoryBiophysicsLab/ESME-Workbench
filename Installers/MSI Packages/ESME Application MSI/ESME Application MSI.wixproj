@@ -21,7 +21,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <SuppressSpecificWarnings />
-    <DefineConstants>SpeciesDefinitionFilesFolder=..\..\..\Utilities\3MB\Species Files</DefineConstants>
+    <DefineConstants>SpeciesDefinitionFilesFolder=..\..\..\Utilities\3MB\Species Files;ESMERoot=..\..\..</DefineConstants>
     <WixVariables />
     <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
@@ -55,7 +55,7 @@ exit 0</PostBuildEvent>
     <DefineConstants>SpeciesDefinitionFilesFolder=..\..\..\Utilities\3MB\Species Files;ESMERoot=..\..\..</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <DefineConstants>SpeciesDefinitionFilesFolder=..\..\..\Utilities\3MB\Species Files</DefineConstants>
+    <DefineConstants>SpeciesDefinitionFilesFolder=..\..\..\Utilities\3MB\Species Files;ESMERoot=..\..\..</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>"C:\Program Files (x86)\WiX Toolset v3.7\bin\heat" dir "$(ProjectDir)..\..\..\Utilities\3MB\Species Files" -srd -cg SpeciesDefinitionFiles -dr SpeciesDefinitionFilesFolder -gg -sfrag -out "$(ProjectDir)SpeciesFiles.wxs" -var var.SpeciesDefinitionFilesFolder
