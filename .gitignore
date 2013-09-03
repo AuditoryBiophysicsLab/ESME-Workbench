@@ -149,3 +149,10 @@ $RECYCLE.BIN/
 
 # Mac crap
 .DS_Store
+
+# Generated files
+BuildInformation.cs
+AssemblyVersionInfo.cs
+
+# NuGet Packages
+packages/
