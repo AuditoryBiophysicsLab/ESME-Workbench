@@ -23,7 +23,6 @@ namespace ProjectBuildInfo
             string outputFilename = null;
             string versionFile = null;
             string versionNumber = null;
-            string versionNumberWithHash = null;
             string assemblyVersionFile = null;
             string wixVersionFile = null;
             for (var i = 0; i < args.Length; i++)
@@ -76,7 +75,6 @@ namespace ProjectBuildInfo
                                 int major, minor, build;
                                 if (!int.TryParse(versionFields[0], out major) || !int.TryParse(versionFields[1], out minor) || !int.TryParse(versionFields[2], out build) || major < 0 || minor < 0 || build < 0) throw new FormatException(string.Format("Version file not in expected format. There should be only one line that does not begin with a comment mark ('//') and that line should contain a version number template in the form 1.2.3 where 1 is the Major version number of this application, 2 is the Minor version number and 3 is the Build number.  A fourth field, taken from the Subversion revision number of the output directory, will be appended to this and used for assembly and installer version numbers later in the build process."));
                                 versionNumber = string.Format("{0}.{1}.{2}", versionFields[0], versionFields[1], versionFields[2]);
-                                versionNumberWithHash = string.Format("{0}.{1}.{2}.g{3}", versionFields[0], versionFields[1], versionFields[2], target.ShortHash);
                                 break;
                             default:
                                 throw new FormatException(string.Format("Version file not in expected format. There should be only one line that does not begin with a comment mark ('//') and that line should contain a version number template in the form 1.2.3 where 1 is the Major version number of this application, 2 is the Minor version number and 3 is the Build number.  A fourth field, taken from the git hash of the output directory, will be appended to this and used for assembly and installer version numbers later in the build process."));
