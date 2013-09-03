@@ -45,6 +45,9 @@
     <Reference Include="GitSharp.Core">
       <HintPath>..\..\Solutions\ESME Workbench\packages\GitSharp.0.3\lib\GitSharp.Core.dll</HintPath>
     </Reference>
+    <Reference Include="ICSharpCode.SharpZipLib">
+      <HintPath>..\..\Solutions\ESME Workbench\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
