@@ -5,7 +5,6 @@
   <?include version.wxi ?>
   <?define Manufacturer="Boston University"?>
   <?define ProductAppFolder = "InstallLocation" ?>
-  <?define ESMERoot="$(var.ESME.ProjectDir)\..\.."?>
   <?define PluginRoot="$(var.ESMERoot)\Plugins\Environmental Data Sources"?>
   <?define PluginDLLPath="$(var.PluginRoot)\InstallableNAVO\bin\Release"?>
   <?define SupportDLLPath="$(var.PluginRoot)\NAVODatabaseAdapter\bin\Release"?>
