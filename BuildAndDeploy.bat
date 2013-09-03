@@ -3,7 +3,9 @@ if "%1"=="development" goto ParameterOK
 if "%2" NEQ "" goto ParameterOK
 goto ParameterRequired
 :ParameterOK
+
 call "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\vcvarsall.bat"
+
 msbuild "ESME WorkBench\ESME Workbench.csproj" /p:SolutionDir="%~dp0\Solutions\ESME Workbench\\";Configuration=Release;Platform=AnyCPU /t:Rebuild /v:minimal
 msbuild "TransmissionLossViewer\TransmissionLossViewer.csproj" /p:SolutionDir="%~dp0\Solutions\ESME Workbench\\";Configuration=Release;Platform=AnyCPU /t:Build /v:minimal
 
