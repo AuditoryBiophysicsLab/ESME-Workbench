@@ -13,14 +13,12 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
     <SuppressSpecificWarnings />
-    <DefineConstants>ESMERoot=..\..\..\..\..</DefineConstants>
     <WixVariables />
     <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <SuppressSpecificWarnings />
-    <DefineConstants>ESMERoot=..\..\..\..\..</DefineConstants>
     <WixVariables />
     <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
@@ -40,9 +38,6 @@ exit 0</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>"$(SolutionDir)..\..\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -version "$(SolutionDir)VersionInfo.txt" -wixversion "$(ProjectDir)version.wxi" -output "$(ProjectDir) "</PreBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-    <DefineConstants>ESMERoot=..\..\..\..\..</DefineConstants>
   </PropertyGroup>
   <!--
 	To modify your build process, add your task inside one of the targets below and uncomment it.
