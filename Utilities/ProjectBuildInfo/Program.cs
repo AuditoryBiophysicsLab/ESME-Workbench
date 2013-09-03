@@ -102,7 +102,7 @@ namespace ProjectBuildInfo
                     {
                         writer.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
                         writer.WriteLine("<Include>");
-                        writer.WriteLine("  <?define ProductFullVersion = \"{0}\" ?>", versionNumberWithHash);
+                        writer.WriteLine("  <?define ProductFullVersion = \"{0}\" ?>", versionNumber);
                         writer.WriteLine("</Include>");
                     }
                 }
