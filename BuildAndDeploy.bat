@@ -21,16 +21,16 @@ set DownloadURLRoot=http://esme.bu.edu/%1
 set ESMERoot=%~dp0
 rem msbuild "Installers\MSI Packages\Plugins\Environmental Databases\InstallableNAVO\InstallableNAVOPlugin MSI.wixproj" /p:SolutionDir="%~dp0\Solutions\ESME Workbench\\";Configuration=Release;Platform="x64" /t:Rebuild /v:minimal
 
-msbuild "Installers\MSI Packages\Plugins\Environmental Databases\InstallableNAVO\InstallableNAVOPlugin MSI.wixproj" /p:SolutionDir="%~dp0\Solutions\ESME Workbench\\";Configuration=Release;Platform="x64" /t:Rebuild /p:DefineConstants="ESMERoot=%ESMERoot%"
-msbuild "Installers\MSI Packages\Plugins\Environmental Databases\InstallableNAVO\InstallableNAVOPlugin MSI.wixproj" /p:SolutionDir="%~dp0\Solutions\ESME Workbench\\";Configuration=Release;Platform="x86" /t:Rebuild /p:DefineConstants="ESMERoot=%ESMERoot%"
-msbuild "Installers\MSI Packages\ESME Application MSI\ESME Application MSI.wixproj" /p:SolutionDir="%~dp0\Solutions\ESME Workbench\\";Configuration=Release;Platform="x64" /t:Rebuild /p:DefineConstants="ESMERoot=%ESMERoot%"
-msbuild "Installers\MSI Packages\ESME Application MSI\ESME Application MSI.wixproj" /p:SolutionDir="%~dp0\Solutions\ESME Workbench\\";Configuration=Release;Platform="x86" /t:Rebuild /p:DefineConstants="ESMERoot=%ESMERoot%"
+msbuild "Installers\MSI Packages\Plugins\Environmental Databases\InstallableNAVO\InstallableNAVOPlugin MSI.wixproj" /p:SolutionDir="%~dp0\Solutions\ESME Workbench\\";Configuration=Release;Platform="x64" /t:Rebuild /p:DefineConstants="ESMERoot=%ESMERoot% "
+msbuild "Installers\MSI Packages\Plugins\Environmental Databases\InstallableNAVO\InstallableNAVOPlugin MSI.wixproj" /p:SolutionDir="%~dp0\Solutions\ESME Workbench\\";Configuration=Release;Platform="x86" /t:Rebuild /p:DefineConstants="ESMERoot=%ESMERoot% "
+msbuild "Installers\MSI Packages\ESME Application MSI\ESME Application MSI.wixproj" /p:SolutionDir="%~dp0\Solutions\ESME Workbench\\";Configuration=Release;Platform="x64" /t:Rebuild /p:DefineConstants="ESMERoot=%ESMERoot% "
+msbuild "Installers\MSI Packages\ESME Application MSI\ESME Application MSI.wixproj" /p:SolutionDir="%~dp0\Solutions\ESME Workbench\\";Configuration=Release;Platform="x86" /t:Rebuild /p:DefineConstants="ESMERoot=%ESMERoot% "
 
-msbuild "Installers\EXE Packages\ESME Application\ESME Application.wixproj" /p:SolutionDir="%~dp0\Solutions\ESME Workbench\\";Configuration=Release;Platform="x64" /t:Rebuild /p:DefineConstants="DownloadURLRoot=%DownloadURLRoot%;ESMERoot=%ESMERoot%"
-msbuild "Installers\EXE Packages\ESME Application\ESME Application.wixproj" /p:SolutionDir="%~dp0\Solutions\ESME Workbench\\";Configuration=Release;Platform="x86" /t:Rebuild /p:DefineConstants="DownloadURLRoot=%DownloadURLRoot%;ESMERoot=%ESMERoot%"
-msbuild "Installers\EXE Packages\ESME Application and Databases\ESME Application and Databases.wixproj" /p:SolutionDir="%~dp0\Solutions\ESME Workbench\\";Configuration=Release;Platform="x64" /t:Rebuild /p:DefineConstants="DownloadURLRoot=%DownloadURLRoot%;ESMERoot=%ESMERoot%"
-msbuild "Installers\EXE Packages\ESME Application and Databases\ESME Application and Databases.wixproj" /p:SolutionDir="%~dp0\Solutions\ESME Workbench\\";Configuration=Release;Platform="x86" /t:Rebuild /p:DefineConstants="DownloadURLRoot=%DownloadURLRoot%;ESMERoot=%ESMERoot%"
-msbuild "Installers\EXE Packages\ESME Databases\ESME Databases.wixproj" /p:SolutionDir="%~dp0\Solutions\ESME Workbench\\";Configuration=Release;Platform="x86" /t:Rebuild /p:DefineConstants="DownloadURLRoot=%DownloadURLRoot%;ESMERoot=%ESMERoot%"
+msbuild "Installers\EXE Packages\ESME Application\ESME Application.wixproj" /p:SolutionDir="%~dp0\Solutions\ESME Workbench\\";Configuration=Release;Platform="x64" /t:Rebuild /p:DefineConstants="DownloadURLRoot=%DownloadURLRoot%;ESMERoot=%ESMERoot% "
+msbuild "Installers\EXE Packages\ESME Application\ESME Application.wixproj" /p:SolutionDir="%~dp0\Solutions\ESME Workbench\\";Configuration=Release;Platform="x86" /t:Rebuild /p:DefineConstants="DownloadURLRoot=%DownloadURLRoot%;ESMERoot=%ESMERoot% "
+msbuild "Installers\EXE Packages\ESME Application and Databases\ESME Application and Databases.wixproj" /p:SolutionDir="%~dp0\Solutions\ESME Workbench\\";Configuration=Release;Platform="x64" /t:Rebuild /p:DefineConstants="DownloadURLRoot=%DownloadURLRoot%;ESMERoot=%ESMERoot% "
+msbuild "Installers\EXE Packages\ESME Application and Databases\ESME Application and Databases.wixproj" /p:SolutionDir="%~dp0\Solutions\ESME Workbench\\";Configuration=Release;Platform="x86" /t:Rebuild /p:DefineConstants="DownloadURLRoot=%DownloadURLRoot%;ESMERoot=%ESMERoot% "
+msbuild "Installers\EXE Packages\ESME Databases\ESME Databases.wixproj" /p:SolutionDir="%~dp0\Solutions\ESME Workbench\\";Configuration=Release;Platform="x86" /t:Rebuild /p:DefineConstants="DownloadURLRoot=%DownloadURLRoot%;ESMERoot=%ESMERoot% "
 
 goto End
 copy /y "Installers\MSI Packages\ESME Application MSI\msi\*.msi" "\\earlab.bu.edu\c$\Inetpub\wwwroot\ESME\%1"
