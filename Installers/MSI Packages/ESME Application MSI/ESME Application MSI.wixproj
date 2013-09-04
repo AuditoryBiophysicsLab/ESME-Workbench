@@ -13,7 +13,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
     <SuppressSpecificWarnings />
-    <DefineConstants>SpeciesDefinitionFilesFolder=..\..\..\Utilities\3MB\Species Files;ESMERoot=..\..\..</DefineConstants>
+    <DefineConstants>SpeciesDefinitionFilesFolder=..\..\..\Utilities\3MB\Species Files</DefineConstants>
     <WixVariables>
     </WixVariables>
     <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
@@ -21,7 +21,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <SuppressSpecificWarnings />
-    <DefineConstants>SpeciesDefinitionFilesFolder=..\..\..\Utilities\3MB\Species Files;ESMERoot=..\..\..</DefineConstants>
+    <DefineConstants>SpeciesDefinitionFilesFolder=..\..\..\Utilities\3MB\Species Files</DefineConstants>
     <WixVariables />
     <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
@@ -52,10 +52,10 @@ copy "$(TargetPath)" "\\corti.bu.edu\hrc-backup\ESME Workbench\$(TargetName)-$(P
 exit 0</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-    <DefineConstants>SpeciesDefinitionFilesFolder=..\..\..\Utilities\3MB\Species Files;ESMERoot=..\..\..</DefineConstants>
+    <DefineConstants>SpeciesDefinitionFilesFolder=..\..\..\Utilities\3MB\Species Files</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <DefineConstants>SpeciesDefinitionFilesFolder=..\..\..\Utilities\3MB\Species Files;ESMERoot=..\..\..</DefineConstants>
+    <DefineConstants>SpeciesDefinitionFilesFolder=..\..\..\Utilities\3MB\Species Files</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>"C:\Program Files (x86)\WiX Toolset v3.7\bin\heat" dir "$(ProjectDir)..\..\..\Utilities\3MB\Species Files" -srd -cg SpeciesDefinitionFiles -dr SpeciesDefinitionFilesFolder -gg -sfrag -out "$(ProjectDir)SpeciesFiles.wxs" -var var.SpeciesDefinitionFilesFolder
