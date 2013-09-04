@@ -20,7 +20,6 @@ msbuild "Installers\ManagedBootstrapper\Managed Bootstrapper.csproj" /p:Solution
 set DownloadURLRoot=http://esme.bu.edu/%1
 set ESMERoot=%~dp0
 set SpeciesDefinitionFilesFolder=%ESMERoot%Utilities\3MB\Species Files
-rem msbuild "Installers\MSI Packages\Plugins\Environmental Databases\InstallableNAVO\InstallableNAVOPlugin MSI.wixproj" /p:SolutionDir="%~dp0\Solutions\ESME Workbench\\";Configuration=Release;Platform="x64" /t:Rebuild /v:minimal
 
 msbuild "Installers\MSI Packages\Plugins\Environmental Databases\InstallableNAVO\InstallableNAVOPlugin MSI.wixproj" /p:SolutionDir="%~dp0\Solutions\ESME Workbench\\";Configuration=Release;Platform="x64" /t:Rebuild /v:minimal /p:DefineConstants="ESMERoot=%ESMERoot% "
 msbuild "Installers\MSI Packages\Plugins\Environmental Databases\InstallableNAVO\InstallableNAVOPlugin MSI.wixproj" /p:SolutionDir="%~dp0\Solutions\ESME Workbench\\";Configuration=Release;Platform="x86" /t:Rebuild /v:minimal /p:DefineConstants="ESMERoot=%ESMERoot% "
