@@ -12,7 +12,7 @@ if "%UserConfirmation%"=="yes" goto ProceedWithBuild
 goto DoNotBuild
 :ProceedWithBuild
 echo Starting build
-for /f "usebackq" %%A in (`""C:\Projects\ESME Deliverables\Utilities\VersionInfoIncrementer\bin\Release\VersionInfoIncrementer.exe" "C:\Projects\ESME Deliverables\Solutions\ESME Workbench\VersionInfo.txt""`) do set ESMEVersion=%%A
+for /f "usebackq" %%A in (`""%~dp0\Utilities\VersionInfoIncrementer\bin\Release\VersionInfoIncrementer.exe" "%~dp0\Solutions\ESME Workbench\VersionInfo.txt""`) do set ESMEVersion=%%A
 rem svn commit --message "Public release %ESMEVersion%"
 rem svn update
 rem svn copy . "https://hrcsvn.bu.edu/svn/esme/src/bu/ESME Deliverables/tags/release builds/%ESMEVersion%" --message "Tag for public release %ESMEVersion%"
