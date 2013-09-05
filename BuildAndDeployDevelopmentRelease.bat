@@ -1,4 +1,4 @@
-@echo off
+rem @echo off
 cd "%~dp0"
 for /f "usebackq" %%A in (`""%~dp0\Utilities\VersionInfoIncrementer\bin\Release\VersionInfoIncrementer.exe" "%~dp0\Solutions\ESME Workbench\VersionInfo.txt""`) do set ESMEVersion=%%A
 rem svn commit --message "Development release %ESMEVersion%"
