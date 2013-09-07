@@ -82,6 +82,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BellhopArrivalsEngine.cs" />
     <Compile Include="BellhopEngine.cs" />
     <Compile Include="Controls\BellhopConfigurationControl.xaml.cs">
       <DependentUpon>BellhopConfigurationControl.xaml</DependentUpon>
