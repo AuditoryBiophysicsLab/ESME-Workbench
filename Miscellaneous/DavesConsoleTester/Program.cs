@@ -87,15 +87,15 @@ namespace DavesConsoleTester
             var nsamples = (int)Math.Round(fs * T);
             var time = new double[nsamples];
             for (var i = 0; i < time.Length; i++) time[i] = (i / fs);
-            var w13 = Math.Pow(w, 1 / 3);
+            var w13 = Math.Pow(w, 1.0 / 3.0);
 
             var z0 = z + 10.1;
-            var z056 = Math.Pow(z0, -5 / 6);
+            var z056 = Math.Pow(z0, -5.0 / 6.0);
             // P_s = 5.04d+13*(w^(1/3)/R)^(1.13);      % Eq 1 (P_s is in muPa - Slifko)
-            var ps = 5.04e+13 * Math.Pow(w13 / r, 1.13);            // Eq 1 (P_s is in muPa - Slifko)
+            var ps = 5.04e+13 * Math.Pow(w13 / r, 1.13);
 
             // tau_s = 8.12d-05*w^(1/3)*(w^(1/3)/R)^(-0.14);   % Eq 12 
-            var tauS = 8.12e-05 * w13 * Math.Pow(w13 / r, -0.14);   // Eq 12 
+            var tauS = 8.12e-05 * w13 * Math.Pow(w13 / r, -0.14);
 
             // T1 = 2.11*w^(1/3)*z_0^(-5/6);           % first bubble pulse period - eqn 6
             var T1 = 2.11 * w13 * z056;
@@ -114,9 +114,9 @@ namespace DavesConsoleTester
             var pMin2 = 0.58 * pMin1;
 
             // tau_r = 1.36d-02*w^(1/3)*z_0^(-0.6);    % Eq 20 - first bubble pulse rise time 
-            var tauR = 1.36e-02 * w13 * Math.Pow(z0, 0.6);
+            var tauR = 1.36e-02 * w13 * Math.Pow(z0, -0.6);
             // tau_d = 0.87d-02*w^(1/3)*z_0^(-0.6);    % Eq 21 - first bubble pulse decay time
-            var tauD = 0.87e-02 * w13 * Math.Pow(z0, 0.6);
+            var tauD = 0.87e-02 * w13 * Math.Pow(z0, -0.6);
 
             // tau_r2 = 2.0*tau_r;
             var tauR2 = 2.0 * tauR;
@@ -169,7 +169,7 @@ namespace DavesConsoleTester
             // Form the R.H.S. of the linear system (pressure values at above times)
             var b = new DenseVector(new[]{ ps, 0.0, -pMin1, 0.0, p1 });
             // Solve for the coefficients
-            var x = a.Inverse().LeftMultiply(b).ToArray();
+            var x = a.Inverse().Multiply(b).ToArray();
 
             // Evaluate the expression for time < arrival of first bubble pulse
 
@@ -191,7 +191,7 @@ namespace DavesConsoleTester
             // Time values where pressure is specified by Chapman via similitude expressions
 
             // t0 = T1;				% time of first bubble pulse
-            t0 = t1;
+            t0 = T1;
             // t1 = theta_s + theta_min1 + theta_1;	% time of first zero crossing
             t1 = thetaS + thetaMin1 + theta1;
             // t2 = t1 + theta_min2*0.5;	% time of peak negative pressure (approximate)
@@ -226,7 +226,7 @@ namespace DavesConsoleTester
             b = new DenseVector(new[] { p1, 0.0, -pMin2, 0.0, p2 });
             // Solve for the coefficients
             // x = A\b;
-            x = a.Inverse().LeftMultiply(b).ToArray();
+            x = a.Inverse().Multiply(b).ToArray();
 
             // Evaluate the expression for time <= arrival of second bubble pulse
 
