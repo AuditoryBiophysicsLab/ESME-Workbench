@@ -20,7 +20,7 @@ namespace DavesConsoleTester
             var arons = Arons(10, 1, 1, 100000, 1);
             var chapman = Chapman(10, 1, 1, 100000, 1);
             var arrivalsFile = ArrivalsFile.Read(args[0]);
-            var impulseResponse = DelayAndSum(arrivalsFile, chapman, 100000, 20, 1000, 50);
+            var impulseResponse = DelayAndSum(arrivalsFile, chapman, 100000, 1, 1000, 50);
         }
 
         public static Complex[] Hilbert(IEnumerable<double> timeSeries)
@@ -43,6 +43,29 @@ namespace DavesConsoleTester
             return fft;
         }
 
+        public static Complex[] MatlabHilbert(double[] xr)
+        {
+            var fft = new MathNet.Numerics.IntegralTransforms.Algorithms.DiscreteFourierTransform();
+            var x = (from sample in xr select new Complex(sample, 0)).ToArray();
+            fft.BluesteinForward(x, FourierOptions.Default);
+            var h = new double[x.Length];
+            var fftLengthIsOdd = (x.Length | 1) == 1;
+            if (fftLengthIsOdd)
+            {
+                h[0] = 1;
+                for (var i = 1; i < xr.Length / 2; i++) h[i] = 2;
+            }
+            else
+            {
+                h[0] = 1;
+                h[(xr.Length / 2)] = 1;
+                for (var i = 1; i < xr.Length / 2; i++) h[i] = 2;
+            }
+            for (var i = 0; i < x.Length; i++) x[i] *= h[i];
+            fft.BluesteinInverse(x, FourierOptions.Default);
+            return x;
+        }
+
         public static double[] DelayAndSum(ArrivalsFile arrivalsFile, double[] inputWaveform, double sampleRate, double outputWaveformDuration, double outputRange, double outputDepth)
         {
             var nSamples = (int)Math.Round(sampleRate * outputWaveformDuration);
@@ -56,7 +79,7 @@ namespace DavesConsoleTester
             // compute a reasonable start time based on the arrival times
             var startTime = minDelay - tShift;
 
-            var hilbert = Hilbert(inputWaveform);
+            var hilbert = MatlabHilbert(inputWaveform);
             var result = new double[nSamples];
             foreach (var arrival in arrivals)
             {
