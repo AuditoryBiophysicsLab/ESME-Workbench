@@ -40,7 +40,7 @@ namespace ESME.TransmissionLoss.Bellhop
                         {
                             var arrivalCount = reader.ReadInt32();
                             reader.BaseStream.Seek(8, SeekOrigin.Current);
-                            curArrivals[rangeIndex, depthIndex] = new List<Arrival>(arrivalCount);
+                            curArrivals[depthIndex, rangeIndex] = new List<Arrival>(arrivalCount);
                             for (var arrival = 0; arrival < arrivalCount; arrival++) curArrivals[depthIndex, rangeIndex].Add(reader.ReadArrival());
                         }
                     }

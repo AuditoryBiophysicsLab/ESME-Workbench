@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using MathNet.Numerics.IntegralTransforms;
 using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace DavesConsoleTester
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args)
         {
@@ -18,7 +19,62 @@ namespace DavesConsoleTester
             }
             var arons = Arons(10, 1, 1, 100000, 1);
             var chapman = Chapman(10, 1, 1, 100000, 1);
+            var arrivalsFile = ArrivalsFile.Read(args[0]);
+            var impulseResponse = DelayAndSum(arrivalsFile, chapman, 100000, 20, 1000, 50);
         }
+
+        public static Complex[] Hilbert(IEnumerable<double> timeSeries)
+        {
+            var discreteFourierTransform = new MathNet.Numerics.IntegralTransforms.Algorithms.DiscreteFourierTransform();
+            var fft = (from sample in timeSeries
+                       select new Complex(sample, 0)).ToArray();
+            var eIPiOver2 = Complex.Exp(new Complex(0, Math.PI / 2.0));
+            var eMinusIPiOver2 = Complex.Exp(new Complex(0, -Math.PI / 2.0));
+            discreteFourierTransform.BluesteinForward(fft, FourierOptions.Default);
+            var fftLengthIsOdd = (fft.Length | 1) == 1;
+            const int negativeFrequencyStartIndex = 0;
+            var negativeFrequencyEndIndex = fftLengthIsOdd ? (fft.Length / 2) - 1 : fft.Length / 2;
+            var positiveFrequencyStartIndex = fftLengthIsOdd ? negativeFrequencyEndIndex + 2 : negativeFrequencyEndIndex + 1;
+            var positiveFrequencyEndIndex = fft.Length;
+            for (var i = negativeFrequencyStartIndex; i < negativeFrequencyEndIndex; i++) fft[i] = fft[i] * eIPiOver2;
+            for (var i = positiveFrequencyStartIndex; i < positiveFrequencyEndIndex; i++) fft[i] = fft[i] * eMinusIPiOver2;
+            if (fftLengthIsOdd) fft[fft.Length / 2] = 0;
+            discreteFourierTransform.BluesteinInverse(fft, FourierOptions.Default);
+            return fft;
+        }
+
+        public static double[] DelayAndSum(ArrivalsFile arrivalsFile, double[] inputWaveform, double sampleRate, double outputWaveformDuration, double outputRange, double outputDepth)
+        {
+            var nSamples = (int)Math.Round(sampleRate * outputWaveformDuration);
+            const double tShift = 0.002;
+            var arrivals = arrivalsFile[outputDepth, outputRange];
+            if (arrivals.Count == 0) return null;    // If there are no arrivals in the selected range and depth cell, return null
+
+            // determine the min, max of all arrival times at this receiver
+            var minDelay = arrivals.Min(a => a.Delay);
+
+            // compute a reasonable start time based on the arrival times
+            var startTime = minDelay - tShift;
+
+            var hilbert = Hilbert(inputWaveform);
+            var result = new double[nSamples];
+            foreach (var arrival in arrivals)
+            {
+                // arrival time relative to start of rcv timeseries
+                var arrivalTime = arrival.Delay - startTime;
+
+                // compute (guess-timate) of the ray path length to this receiver
+                var pathLength = 1500 * arrival.Delay;
+
+                // complex amplitude of this arrival, with spherical spreading removed
+                var amplitude = arrival.Amplitude * pathLength;
+
+                var timeIndex = (int)Math.Round(sampleRate * arrivalTime);
+                for (var i = timeIndex; i < result.Length; i++) result[i] += (amplitude * hilbert[i - timeIndex]).Real;
+            }
+            return result;
+        }
+
 
         /// <summary>
         /// Compute the time history of an explosives generated shock wave
@@ -301,7 +357,7 @@ namespace DavesConsoleTester
                         {
                             var arrivalCount = reader.ReadInt32();
                             reader.BaseStream.Seek(8, SeekOrigin.Current);
-                            curArrivals[rangeIndex, depthIndex] = new List<Arrival>(arrivalCount);
+                            curArrivals[depthIndex, rangeIndex] = new List<Arrival>(arrivalCount);
                             for (var arrival = 0; arrival < arrivalCount; arrival++) curArrivals[depthIndex, rangeIndex].Add(reader.ReadArrival());
                         }
                     }
@@ -309,7 +365,7 @@ namespace DavesConsoleTester
             }
             return result;
         }
-
+        
         /// <summary>
         /// Return a list of Arrival objects describing the rays from a particular sourceIndex that entered a given cell at depthIndex, rangeIndex
         /// </summary>
@@ -325,6 +381,39 @@ namespace DavesConsoleTester
                 if (depthIndex < 0 || depthIndex >= ReceiverDepths.Length) throw new IndexOutOfRangeException(string.Format("depthIndex is out of range 0:{0}", ReceiverDepths.Length));
                 if (rangeIndex < 0 || rangeIndex >= ReceiverRanges.Length) throw new IndexOutOfRangeException(string.Format("rangeIndex is out of range 0:{0}", ReceiverRanges.Length));
                 return Arrivals[sourceIndex][depthIndex, rangeIndex];
+            }
+        }
+
+        /// <summary>
+        /// Return a list of Arrival objects describing the rays from a particular sourceIndex that entered a given cell at depth and range
+        /// </summary>
+        /// <param name="depth"></param>
+        /// <param name="range"></param>
+        /// <returns></returns>
+        public List<Arrival> this[double depth, double range]
+        {
+            get
+            {
+                var depthIndex = Array.IndexOf(ReceiverDepths, ReceiverDepths.Last(d => d <= depth));
+                var rangeIndex = Array.IndexOf(ReceiverRanges, ReceiverRanges.Last(r => r <= range));
+                return this[0, depthIndex, rangeIndex];
+            }
+        }
+
+        /// <summary>
+        /// Return a list of Arrival objects describing the rays from a particular sourceIndex that entered a given cell at depth and range
+        /// </summary>
+        /// <param name="sourceIndex"></param>
+        /// <param name="depth"></param>
+        /// <param name="range"></param>
+        /// <returns></returns>
+        public List<Arrival> this[int sourceIndex, double depth, double range]
+        {
+            get
+            {
+                var depthIndex = Array.IndexOf(ReceiverDepths, ReceiverDepths.Last(d => d <= depth));
+                var rangeIndex = Array.IndexOf(ReceiverRanges, ReceiverRanges.Last(r => r <= range));
+                return this[sourceIndex, depthIndex, rangeIndex];
             }
         }
 
