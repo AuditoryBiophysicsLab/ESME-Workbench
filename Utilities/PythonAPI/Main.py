@@ -8,31 +8,32 @@ __author__ = 'Graham Voysey'
 
 
 class PySim(object):
-    __filename = None
+    Filename = None
 
     #  header attributes
     __trailerOffset = None
     __magic = long("a57d8ee659dc45ec", 16)
-    __timeStepSize = None
-    __startTime = None
-    __endTime = None
-    __creatingUser = None
-    __creatingComputer = None
-    __scenarioRecord = None
-    __platformRecords = None
-    __modeRecords = None
-    __speciesRecords = None
-    __timeStepRecordOffsets = None
+    TimeStepSize = None
+    StartTime = None
+    EndTime = None
+    CreatingUser = None
+    CreatingComputer = None
+    ScenarioRecord = None
+    PlatformRecords = None
+    ModeRecords = None
+    SpeciesRecords = None
+    TimeStepRecordOffsets = None
 
     # payload attributes
 
     def __init__(self, filename):
         if not os.path.exists(filename):
             raise RuntimeError('Simulation file not found')
-        self.__filename = filename
+        self.Filename = filename
+        self.__readFooter()
 
-    def ReadFooter(self):
-        with open(self.__filename, "rb") as l:
+    def __readFooter(self):
+        with open(self.Filename, "rb") as l:
             #  preliminary work; read offset and magic number or die.
             b = BinaryStream(l)
             b.base_stream.seek(-16, 2)
@@ -43,32 +44,32 @@ class PySim(object):
 
             #  read payload of the footer
             b.base_stream.seek(self.__trailerOffset, 0)
-            self.__timeStepSize = datetime.timedelta(microseconds=b.readUInt64() / 10)
-            self.__startTime = datetime.datetime(1, 1, 1) + datetime.timedelta(microseconds=long(b.readUInt64()) / 10)
-            self.__endTime = datetime.datetime(1, 1, 1) + datetime.timedelta(microseconds=long(b.readUInt64()) / 10)
-            self.__creatingUser = b.readString()
-            self.__creatingComputer = b.readString()
-            self.__scenarioRecord = b.readString(), uuid.UUID(bytes=b.readBytes(16))
+            self.TimeStepSize = datetime.timedelta(microseconds=b.readUInt64() / 10)
+            self.StartTime = datetime.datetime(1, 1, 1) + datetime.timedelta(microseconds=long(b.readUInt64()) / 10)
+            self.EndTime = datetime.datetime(1, 1, 1) + datetime.timedelta(microseconds=long(b.readUInt64()) / 10)
+            self.CreatingUser = b.readString()
+            self.CreatingComputer = b.readString()
+            self.ScenarioRecord = b.readString(), uuid.UUID(bytes=b.readBytes(16))
 
             platformCount = b.readInt32()
-            self.__platformRecords = []
+            self.PlatformRecords = []
             for i in xrange(0, platformCount):
-                self.__platformRecords.append(PlatformRecord(b.readInt32(), b.readString(), uuid.UUID(bytes=b.readBytes(16))))
+                self.PlatformRecords.append(PlatformRecord(b.readInt32(), b.readString(), uuid.UUID(bytes=b.readBytes(16))))
 
             modeCount = b.readInt32()
-            self.__modeRecords = []
+            self.ModeRecords = []
             for i in xrange(0, modeCount):
-                self.__modeRecords.append(ModeRecord(b.readInt32(), b.readString(), uuid.UUID(bytes=b.readBytes(16)), uuid.UUID(bytes=b.readBytes(16))))
+                self.ModeRecords.append(ModeRecord(b.readInt32(), b.readString(), uuid.UUID(bytes=b.readBytes(16)), uuid.UUID(bytes=b.readBytes(16))))
 
             speciesCount = b.readInt32()
-            self.__speciesRecords = []
+            self.SpeciesRecords = []
             for i in xrange(0, speciesCount):
-                self.__speciesRecords.append(SpeciesRecord(b.readInt32(), b.readInt32(), b.readString(), uuid.UUID(bytes=b.readBytes(16))))
+                self.SpeciesRecords.append(SpeciesRecord(b.readInt32(), b.readInt32(), b.readString(), uuid.UUID(bytes=b.readBytes(16))))
 
             offsetCount = b.readInt32()
-            self.__timeStepRecordOffsets = []
+            self.TimeStepRecordOffsets = []
             for i in xrange(0, offsetCount):
-                self.__timeStepRecordOffsets.append(b.readUInt64())
+                self.TimeStepRecordOffsets.append(b.readUInt64())
 
     def ReadTimeStepRecord(self, offset):
         pass
@@ -155,8 +156,21 @@ class BinaryStream:
         return self.unpack('d', 8)
 
     def readString(self):
-        length = self.readStringLength()
+        length = self.LEB128()
         return self.unpack(str(length) + 's', length)
+
+    def LEB128(self):
+        result = 0
+        shift = 0
+        size = 0
+        while True:
+            b = ord(self.base_stream.read(1))
+            size += 1
+            result |= (b & 0x7f) << shift
+            if b & 0x80 == 0:
+                break
+            shift += 7
+        return result
 
     def readStringLength(self):
         byte = 0x80
@@ -168,17 +182,6 @@ class BinaryStream:
         for i in xrange(0, len(bytes)):
             result |= (bytes[i] & 0x7F) << (len(bytes) - 1 - i)*7
         return result
-
-    def read7BitInt(self):
-        value = 0
-        shift = 0
-        while True:
-            val = ord(self.base_stream.read(1))
-            if val & 128 == 0:
-                break
-            value |= (val & 0x7F) << shift
-            shift += 7
-        return value | (val << shift)
 
     def writeBytes(self, value):
         self.base_stream.write(value)
@@ -216,10 +219,12 @@ class BinaryStream:
     def writeDouble(self, value):
         self.pack('d', value)
 
-    def writeString(self, value):
-        length = len(value)
-        self.writeUInt16(length)
-        self.pack(str(length) + 's', value)
+    #
+    # def writeString(self, value):
+    #     length = len(value)
+    #     self.writeUInt16(length)
+    #     self.pack(str(length) + 's', value)
+    #
 
     def pack(self, fmt, data):
         return self.writeBytes(pack(fmt, data))
@@ -229,4 +234,4 @@ class BinaryStream:
 
 
 sim = PySim("""C:\Users\Graham Voysey\Desktop\simulation.exposures""")
-sim.ReadFooter()
+print sim.CreatingUser
