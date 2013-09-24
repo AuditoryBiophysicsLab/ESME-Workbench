@@ -9,7 +9,6 @@ __author__ = 'Graham Voysey'
 
 class PySim(object):
     Filename = None
-
     #  header attributes
     __trailerOffset = None
     __magic = long("a57d8ee659dc45ec", 16)
@@ -72,7 +71,21 @@ class PySim(object):
                 self.TimeStepRecordOffsets.append(b.readUInt64())
 
     def ReadTimeStepRecord(self, offset):
-        pass
+        with open(self.Filename, "rb") as l:
+            b = BinaryStream(l)
+            # jump to the beginning and read the header.
+            b.base_stream.seek(offset, 0)
+            if long(b.readUInt64()) != long("d3c603dd0d7a1ee6", 16):
+                raise IOError('magic number not seen at expected location')
+            result = TimeStepRecord
+            result.StartTime = datetime.datetime(1, 1, 1) + datetime.timedelta(microseconds=long(b.readUInt64()) / 10)
+            result.ActorCount = b.readInt32()
+            for i in xrange(0, result.ActorCount):
+                result.ActorPositionRecords.append(ActorPositionRecord(b.readFloat(), b.readFloat(), b.readFloat()))
+            exposureCount = b.readInt32()
+            for i in xrange(0, exposureCount):
+                result.ActorExposureRecords.append(ActorExposureRecord(b.readInt32(), b.readInt32(), b.readFloat(), b.readFloat()))
+            return result
 
 
 class PlatformRecord(object):
@@ -180,7 +193,7 @@ class BinaryStream:
             byte = ord(self.base_stream.read(1))
             bytes.append(byte)
         for i in xrange(0, len(bytes)):
-            result |= (bytes[i] & 0x7F) << (len(bytes) - 1 - i)*7
+            result |= (bytes[i] & 0x7F) << (len(bytes) - 1 - i) * 7
         return result
 
     def writeBytes(self, value):
@@ -233,5 +246,36 @@ class BinaryStream:
         return unpack(fmt, self.readBytes(length))[0]
 
 
+class ActorPositionRecord(object):
+    Latitude = None
+    Longitude = None
+    Depth = None
+
+    def __init__(self, lat, lon, depth):
+        self.Latitude = lat
+        self.Longitude = lon
+        self.Depth = depth
+
+
+class ActorExposureRecord(object):
+    ActorID = None
+    ModeID = None
+    PeakSPL = None
+    Energy = None
+
+    def __init__(self, actorID, modeID, peak, energy):
+        self.ActorID = actorID
+        self.ModeID = modeID
+        self.PeakSPL = peak
+        self.Energy = energy
+
+
+class TimeStepRecord(object):
+    StartTime = None
+    ActorCount = None
+    ActorPositionRecords = []
+    ActorExposureRecords = []
+
+
 sim = PySim("""C:\Users\Graham Voysey\Desktop\simulation.exposures""")
-print sim.CreatingUser
+
