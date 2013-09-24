@@ -1,6 +1,8 @@
 import datetime
 from struct import *
 import uuid
+import os.path
+
 
 __author__ = 'Graham Voysey'
 
@@ -25,20 +27,22 @@ class PySim(object):
     # payload attributes
 
     def __init__(self, filename):
+        if not os.path.exists(filename):
+            raise RuntimeError('Simulation file not found')
         self.__filename = filename
 
     def ReadFooter(self):
-        with open(self.__filename, 'r') as l:
-            b = BinaryStream(l)
-
+        with open(self.__filename, "rb") as l:
             #  preliminary work; read offset and magic number or die.
-            l.seek(16, 2)
+            b = BinaryStream(l)
+            b.base_stream.seek(-16, 2)
             self.__trailerOffset = b.readUInt64()
-            if b.readUInt64() is not self.__magic:
+            magic = long(b.readUInt64())
+            if magic != self.__magic:
                 raise IOError('magic number not seen at expected location')
 
             #  read payload of the footer
-            l.seek(self.__trailerOffset, 0)
+            b.base_stream.seek(self.__trailerOffset, 0)
             self.__timeStepSize = datetime.timedelta(microseconds=b.readUInt64() / 10)
             self.__startTime = datetime.datetime(1, 1, 1) + datetime.timedelta(microseconds=long(b.readUInt64()) / 10)
             self.__endTime = datetime.datetime(1, 1, 1) + datetime.timedelta(microseconds=long(b.readUInt64()) / 10)
@@ -63,7 +67,8 @@ class PySim(object):
 
             offsetCount = b.readInt32()
             self.__timeStepRecordOffsets = []
-            for i in xrange(0, offsetCount): self.__timeStepRecordOffsets.append(b.readUInt64())
+            for i in xrange(0, offsetCount):
+                self.__timeStepRecordOffsets.append(b.readUInt64())
 
     def ReadTimeStepRecord(self, offset):
         pass
@@ -150,8 +155,30 @@ class BinaryStream:
         return self.unpack('d', 8)
 
     def readString(self):
-        length = self.readUInt16()
+        length = self.readStringLength()
         return self.unpack(str(length) + 's', length)
+
+    def readStringLength(self):
+        byte = 0x80
+        bytes = []
+        result = 0
+        while byte & 0x80:
+            byte = ord(self.base_stream.read(1))
+            bytes.append(byte)
+        for i in xrange(0, len(bytes)):
+            result |= (bytes[i] & 0x7F) << (len(bytes) - 1 - i)*7
+        return result
+
+    def read7BitInt(self):
+        value = 0
+        shift = 0
+        while True:
+            val = ord(self.base_stream.read(1))
+            if val & 128 == 0:
+                break
+            value |= (val & 0x7F) << shift
+            shift += 7
+        return value | (val << shift)
 
     def writeBytes(self, value):
         self.base_stream.write(value)
@@ -199,3 +226,7 @@ class BinaryStream:
 
     def unpack(self, fmt, length=1):
         return unpack(fmt, self.readBytes(length))[0]
+
+
+sim = PySim("""C:\Users\Graham Voysey\Desktop\simulation.exposures""")
+sim.ReadFooter()
