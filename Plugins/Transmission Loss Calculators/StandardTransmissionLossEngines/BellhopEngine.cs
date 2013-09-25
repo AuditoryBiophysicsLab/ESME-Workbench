@@ -11,7 +11,6 @@ using ESME.Environment;
 using ESME.Model;
 using ESME.Plugins;
 using ESME.Scenarios;
-using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 using HRC;
 using HRC.Aspects;
@@ -37,7 +36,6 @@ namespace StandardTransmissionLossEngines
                 .RegisterHandler(p => p.RangeCellSize, Save)
                 .RegisterHandler(p => p.DepthCellSize, Save)
                 .RegisterHandler(p => p.UseSurfaceReflection, Save)
-                .RegisterHandler(p => p.GenerateArrivalsFile, Save)
                 .RegisterHandler(p => p.RayCount, Save);
         }
 
@@ -61,17 +59,19 @@ namespace StandardTransmissionLossEngines
             RangeCellSize = settings.RangeCellSize;
             DepthCellSize = settings.DepthCellSize;
             UseSurfaceReflection = settings.UseSurfaceReflection;
-            GenerateArrivalsFile = settings.GenerateArrivalsFile;
             RayCount = settings.RayCount;
         }
 
         [Initialize(10.0)]  public double RangeCellSize { get; set; }
         [Initialize(10.0)]  public double DepthCellSize { get; set; }
         [Initialize(true)]  public bool UseSurfaceReflection { get; set; }
-        [Initialize(false)] public bool GenerateArrivalsFile { get; set; }
         [Initialize(3000)]  public int RayCount { get; set; }
-
         public override void CalculateTransmissionLoss(Platform platform, Mode mode, Radial radial, BottomProfile bottomProfile, SedimentType sedimentType, double windSpeed, IList<Tuple<double, SoundSpeedProfile>> soundSpeedProfilesAlongRadial)
+        {
+            CalculateTransmissionLossInternal(platform, mode, radial, bottomProfile, sedimentType, windSpeed, soundSpeedProfilesAlongRadial, false);
+        }
+
+        protected void CalculateTransmissionLossInternal(Platform platform, Mode mode, Radial radial, BottomProfile bottomProfile, SedimentType sedimentType, double windSpeed, IList<Tuple<double, SoundSpeedProfile>> soundSpeedProfilesAlongRadial, bool createArrivalsFile)
         {
             var depthCellCount = (int)Math.Ceiling(bottomProfile.MaxDepth / DepthCellSize);
             var rangeCellCount = (int)Math.Ceiling(mode.MaxPropagationRadius / RangeCellSize);
@@ -111,7 +111,7 @@ namespace StandardTransmissionLossEngines
                 envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0}", rangeCellCount)); // Number of receiver ranges
                 envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "0.0 {0} /", mode.MaxPropagationRadius / 1000.0));
 
-                envFile.WriteLine(GenerateArrivalsFile ? "'a'" : "'I'");
+                envFile.WriteLine(createArrivalsFile ? "'a'" : "'I'");
                 envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0}", RayCount)); // Number of beams
                 var verticalHalfAngle = mode.VerticalBeamWidth / 2;
                 var angle1 = mode.DepressionElevationAngle - verticalHalfAngle;

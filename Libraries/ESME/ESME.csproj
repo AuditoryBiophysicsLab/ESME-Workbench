@@ -287,6 +287,7 @@
     <Compile Include="SimulationAnalysis\ModeThresholdHistogram.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNLInput.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNLOutput.cs" />
+    <Compile Include="TransmissionLoss\Bellhop\ArrivalsFile.cs" />
     <Compile Include="TransmissionLoss\Bellhop\ShadeFile.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BottomProfile.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossCache.cs" />

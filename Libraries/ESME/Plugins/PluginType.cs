@@ -17,5 +17,6 @@ namespace ESME.Plugins
         Bellhop = 200,
         RAMGeo = 201,
         RAMSGeo = 202,
+        BellhopArrivals = 203,
     }
 }
