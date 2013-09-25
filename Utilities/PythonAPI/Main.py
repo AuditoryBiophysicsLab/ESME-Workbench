@@ -9,9 +9,9 @@ __author__ = 'Graham Voysey'
 
 class PySim(object):
     Filename = None
-    #  header attributes
     __trailerOffset = None
-    __magic = long("a57d8ee659dc45ec", 16)
+    __magicFooter = long("a57d8ee659dc45ec", 16)
+    __magicTimeStepRecord = long("d3c603dd0d7a1ee6", 16)
     TimeStepSize = None
     StartTime = None
     EndTime = None
@@ -22,8 +22,6 @@ class PySim(object):
     ModeRecords = None
     SpeciesRecords = None
     TimeStepRecordOffsets = None
-
-    # payload attributes
 
     def __init__(self, filename):
         if not os.path.exists(filename):
@@ -38,7 +36,7 @@ class PySim(object):
             b.base_stream.seek(-16, 2)
             self.__trailerOffset = b.readUInt64()
             magic = long(b.readUInt64())
-            if magic != self.__magic:
+            if magic != self.__magicFooter:
                 raise IOError('magic number not seen at expected location')
 
             #  read payload of the footer
@@ -75,11 +73,9 @@ class PySim(object):
             b = BinaryStream(l)
             # jump to the beginning and read the header.
             b.base_stream.seek(offset, 0)
-            if long(b.readUInt64()) != long("d3c603dd0d7a1ee6", 16):
+            if long(b.readUInt64()) != self.__magicTimeStepRecord:
                 raise IOError('magic number not seen at expected location')
-            result = TimeStepRecord
-            result.StartTime = datetime.datetime(1, 1, 1) + datetime.timedelta(microseconds=long(b.readUInt64()) / 10)
-            result.ActorCount = b.readInt32()
+            result = TimeStepRecord(datetime.datetime(1, 1, 1) + datetime.timedelta(microseconds=long(b.readUInt64()) / 10), b.readInt32())
             for i in xrange(0, result.ActorCount):
                 result.ActorPositionRecords.append(ActorPositionRecord(b.readFloat(), b.readFloat(), b.readFloat()))
             exposureCount = b.readInt32()
@@ -187,13 +183,13 @@ class BinaryStream:
 
     def readStringLength(self):
         byte = 0x80
-        bytes = []
+        byteArr = []
         result = 0
         while byte & 0x80:
             byte = ord(self.base_stream.read(1))
-            bytes.append(byte)
-        for i in xrange(0, len(bytes)):
-            result |= (bytes[i] & 0x7F) << (len(bytes) - 1 - i) * 7
+            byteArr.append(byte)
+        for i in xrange(0, len(byteArr)):
+            result |= (byteArr[i] & 0x7F) << (len(byteArr) - 1 - i) * 7
         return result
 
     def writeBytes(self, value):
@@ -276,6 +272,15 @@ class TimeStepRecord(object):
     ActorPositionRecords = []
     ActorExposureRecords = []
 
+    def __init__(self, start, count):
+        self.StartTime = start
+        self.ActorCount = count
+
 
 sim = PySim("""C:\Users\Graham Voysey\Desktop\simulation.exposures""")
-
+record = sim.ReadTimeStepRecord(sim.TimeStepRecordOffsets[0])
+record5 = sim.ReadTimeStepRecord(sim.TimeStepRecordOffsets[5])
+recordLast = sim.ReadTimeStepRecord(sim.TimeStepRecordOffsets[-1])
+print "record 1 had {0} actors and began at {1}".format(record.ActorCount, record.StartTime)
+print "record 5 had {0} actors and began at {1}".format(record5.ActorCount, record5.StartTime)
+print "the last record had {0} actors and began at {1}".format(recordLast.ActorCount, recordLast.StartTime)
