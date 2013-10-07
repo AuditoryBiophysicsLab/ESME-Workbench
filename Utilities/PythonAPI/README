@@ -12,7 +12,7 @@ populates class attributes appropriately via an internal method.
 ex:
 
     from pysim import PySim
-    sim = PySim("""/path/to/simulation.exposures""") #  replace with your path
+    sim = PySim().FromFileName("""/path/to/simulation.exposures""") #  replace with your path
 
 sim will now contain non-null header information, including sim.TimeStepRecordOffsets -- a list of indicies of each time step record.
 

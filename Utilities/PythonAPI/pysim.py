@@ -8,28 +8,36 @@ __author__ = 'Graham Voysey'
 
 
 class PySim(object):
-    Filename = None
-    __trailerOffset = None
     __magicFooter = long("a57d8ee659dc45ec", 16)
     __magicTimeStepRecord = long("d3c603dd0d7a1ee6", 16)
-    TimeStepSize = None
-    StartTime = None
-    EndTime = None
-    CreatingUser = None
-    CreatingComputer = None
-    ScenarioRecord = None
-    PlatformRecords = None
-    ModeRecords = None
-    SpeciesRecords = None
-    TimeStepRecordOffsets = None
 
-    def __init__(self, filename):
+    def __init__(self):
+        self.Filename = None
+        self.__trailerOffset = None
+        self.TimeStepSize = None
+        self.StartTime = None
+        self.EndTime = None
+        self.CreatingUser = None
+        self.CreatingComputer = None
+        self.ScenarioRecord = None
+        self.PlatformRecords = None
+        self.ModeRecords = None
+        self.SpeciesRecords = None
+        self.TimeStepRecordOffsets = None
+
+    def FromFileName(self, filename):
+        self.Filename = filename
         if not os.path.exists(filename):
             raise RuntimeError('Simulation file not found')
-        self.Filename = filename
         self.__readFooter()
+        return self
 
     def __readFooter(self):
+        """
+        @rtype : self
+        @return : a PySim object containing valid metadata.
+        @summary : reads the footer of a simulation.exposures file and populates class attributes appropriately.
+        """
         with open(self.Filename, "rb") as l:
             #  preliminary work; read offset and magic number or die.
             b = BinaryStream(l)
@@ -69,6 +77,12 @@ class PySim(object):
                 self.TimeStepRecordOffsets.append(b.readUInt64())
 
     def ReadTimeStepRecord(self, offset):
+        """
+
+        @param offset: One element of a PySim.TimeStepRecordOffset list.
+        @return: A TimeStepRecord object, containing the starting time of this collection of exposures relative to simulation start,
+                the number of actors logged in this time step, a list of actor positions (latitude, longitude, depth), and a list of actor exposure records.
+        """
         with open(self.Filename, "rb") as l:
             b = BinaryStream(l)
             # jump to the beginning and read the header.
@@ -83,12 +97,14 @@ class PySim(object):
                 result.ActorExposureRecords.append(ActorExposureRecord(b.readInt32(), b.readInt32(), b.readFloat(), b.readFloat()))
             return result
 
+    def GetTypeRecord(self, actorID):
+        pass
+
+    def GetAssociatedModes(self, platformID):
+        pass
+
 
 class PlatformRecord(object):
-    actorID = None
-    name = None
-    guid = None
-
     def __init__(self, actorID, name, guid):
         self.actorID = actorID
         self.name = name
@@ -96,11 +112,6 @@ class PlatformRecord(object):
 
 
 class ModeRecord(object):
-    actorID = None
-    name = None
-    guid = None
-    platformGuid = None
-
     def __init__(self, actorID, name, guid, platformGuid):
         self.name = name
         self.actorID = actorID
@@ -109,11 +120,6 @@ class ModeRecord(object):
 
 
 class SpeciesRecord(object):
-    animatCount = None
-    startActorID = None
-    name = None
-    guid = None
-
     def __init__(self, animatCount, startID, name, guid):
         self.animatCount = animatCount
         self.startActorID = startID
@@ -243,10 +249,6 @@ class BinaryStream:
 
 
 class ActorPositionRecord(object):
-    Latitude = None
-    Longitude = None
-    Depth = None
-
     def __init__(self, lat, lon, depth):
         self.Latitude = lat
         self.Longitude = lon
@@ -254,11 +256,6 @@ class ActorPositionRecord(object):
 
 
 class ActorExposureRecord(object):
-    ActorID = None
-    ModeID = None
-    PeakSPL = None
-    Energy = None
-
     def __init__(self, actorID, modeID, peak, energy):
         self.ActorID = actorID
         self.ModeID = modeID
@@ -267,11 +264,8 @@ class ActorExposureRecord(object):
 
 
 class TimeStepRecord(object):
-    StartTime = None
-    ActorCount = None
-    ActorPositionRecords = []
-    ActorExposureRecords = []
-
     def __init__(self, start, count):
         self.StartTime = start
         self.ActorCount = count
+        self.ActorPositionRecords = []
+        self.ActorExposureRecords = []
