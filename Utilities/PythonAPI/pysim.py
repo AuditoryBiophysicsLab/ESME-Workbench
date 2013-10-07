@@ -26,9 +26,9 @@ class PySim(object):
         self.TimeStepRecordOffsets = None
 
     def FromFileName(self, filename):
-        self.Filename = filename
         if not os.path.exists(filename):
             raise RuntimeError('Simulation file not found')
+        self.Filename = filename
         self.__readFooter()
         return self
 
