@@ -93,6 +93,12 @@
       <HintPath>..\..\ESME WorkBench\External References\MapSuiteCore.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="MathNet.Numerics">
+      <HintPath>..\..\Solutions\ESME Workbench\packages\MathNet.Numerics.2.6.1\lib\net40\MathNet.Numerics.dll</HintPath>
+    </Reference>
+    <Reference Include="MathNet.Numerics.IO">
+      <HintPath>..\..\Solutions\ESME Workbench\packages\MathNet.Numerics.2.6.1\lib\net40\MathNet.Numerics.IO.dll</HintPath>
+    </Reference>
     <Reference Include="MEFedMVVM.WPF, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b6db3dc4f5fba1e3, processorArchitecture=MSIL">
       <HintPath>..\..\ESME WorkBench\External References\MEFedMVVM.WPF.dll</HintPath>
       <Private>False</Private>
@@ -288,6 +294,7 @@
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNLInput.cs" />
     <Compile Include="TransmissionLoss\BellhopNL\BellhopNLOutput.cs" />
     <Compile Include="TransmissionLoss\Bellhop\ArrivalsFile.cs" />
+    <Compile Include="TransmissionLoss\Bellhop\ExplosiveWaveformGenerators.cs" />
     <Compile Include="TransmissionLoss\Bellhop\ShadeFile.cs" />
     <Compile Include="TransmissionLoss\Bellhop\BottomProfile.cs" />
     <Compile Include="TransmissionLoss\TransmissionLossCache.cs" />

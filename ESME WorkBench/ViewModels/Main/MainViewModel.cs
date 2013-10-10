@@ -29,6 +29,7 @@ using HRC.ViewModels;
 using HRC.WPF;
 using MEFedMVVM.Common;
 using MEFedMVVM.ViewModelLocator;
+using B4.AppLibrary;
 
 namespace ESMEWorkbench.ViewModels.Main
 {
@@ -46,6 +47,7 @@ namespace ESMEWorkbench.ViewModels.Main
         readonly IUIVisualizerService _visualizer;
         public const bool ExperimentsCurrentlySupported = false;
         Dispatcher _dispatcher;
+        readonly ApplicationTracker _appTracker;
 
         readonly List<Window> _openPopups = new List<Window>();
         #endregion
@@ -146,6 +148,9 @@ namespace ESMEWorkbench.ViewModels.Main
                 }
                 if (Database.Context.Locations.Local.Count > 0) MediatorMessage.Send(MediatorMessage.SetMapExtent, locationsExtent);
             };
+            _appTracker = new ApplicationTracker("UA-44329261-1", "TestWPFApp");
+            _appTracker.StartSession();
+            _appTracker.TrackEvent(ApplicationTrackerCategories.Command, "ApplicationStartup");
         }
 
         public ObservableCollection<Scenario> Scenarios { get; private set; }

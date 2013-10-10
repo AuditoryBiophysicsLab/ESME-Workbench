@@ -71,6 +71,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\ESME WorkBench\External References\EntityFramework.dll</HintPath>
     </Reference>
+    <Reference Include="fftwlib">
+      <HintPath>..\..\..\..\Users\Dave Anderson\Downloads\fftwlib\fftwlib.dll</HintPath>
+    </Reference>
     <Reference Include="KMLib">
       <HintPath>..\..\ESME WorkBench\External References\KMLib.dll</HintPath>
     </Reference>
@@ -79,6 +82,12 @@
     </Reference>
     <Reference Include="Log4PostSharp">
       <HintPath>..\..\ESME WorkBench\External References\Log4PostSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="MathNet.Numerics">
+      <HintPath>..\..\Solutions\ESME Workbench\packages\MathNet.Numerics.2.6.1\lib\net40\MathNet.Numerics.dll</HintPath>
+    </Reference>
+    <Reference Include="MathNet.Numerics.IO">
+      <HintPath>..\..\Solutions\ESME Workbench\packages\MathNet.Numerics.2.6.1\lib\net40\MathNet.Numerics.IO.dll</HintPath>
     </Reference>
     <Reference Include="MEFedMVVM.WPF">
       <HintPath>..\..\ESME WorkBench\External References\MEFedMVVM.WPF.dll</HintPath>
@@ -98,6 +107,9 @@
     </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.Management" />
+    <Reference Include="System.Numerics">
+      <HintPath>..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Numerics.dll</HintPath>
+    </Reference>
     <Reference Include="System.Reactive.Core">
       <HintPath>..\..\Solutions\ESME Workbench\packages\Rx-Core.2.1.30214.0\lib\Net40\System.Reactive.Core.dll</HintPath>
     </Reference>
@@ -238,6 +250,7 @@
     <Compile Include="Utility\NotifyIcon.cs" />
     <Compile Include="Utility\NotifyIcon.Interop.cs" />
     <Compile Include="Utility\NTFS.cs" />
+    <Compile Include="Utility\Numerics.cs" />
     <Compile Include="Utility\OSInfo.cs" />
     <Compile Include="Utility\PercentProgress.cs" />
     <Compile Include="Utility\ProgressInfo.cs" />

@@ -1,0 +1,14 @@
+function write_complex_vector(v, filename)
+
+fid = fopen(filename, 'wt');
+for e = v
+    fprintf(fid, '%1.16f %1.16f', 
+end
+while ~feof(fid)
+    data = fscanf(fid, '%g %g', 2);
+    if (numel(data) == 2)
+        c = complex(data(1), data(2));
+        v = [v c];
+    end
+end
+v = v';

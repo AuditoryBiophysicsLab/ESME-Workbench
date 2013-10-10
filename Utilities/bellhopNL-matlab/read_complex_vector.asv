@@ -1,0 +1,14 @@
+function v = read_complex_vector(filename)
+
+fid = fopen(filename);
+while ~feof(fid)
+    data = fscanf(fid, '%g %g', 2);
+    c = complex(data(0), data(1));
+    v = [v c];
+    currData = fread(fid, segsize);
+    if ~isempty(currData)
+        disp('Current Data:');
+        disp(currData);
+    end
+end
+ 
