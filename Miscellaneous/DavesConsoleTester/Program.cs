@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using ESME.TransmissionLoss.Bellhop;
-using HRC.Utility;
 using Nito.AsyncEx;
 
 namespace DavesConsoleTester
@@ -13,16 +12,19 @@ namespace DavesConsoleTester
     {
         static int Main(string[] args)
         {
+            int result;
             try
             {
-                //MainSync(args);
-                return AsyncContext.Run(() => MainAsync(args));
+                //result = MainSync(args);
+                AsyncContext.Run(() => MainAsync(args));
+                return 0;
             }
             catch (Exception ex)
             {
                 Console.Error.WriteLine(ex);
                 return -1;
-            }   
+            }
+            return result;
         }
 
         static int MainSync(string[] args)
@@ -83,7 +85,7 @@ namespace DavesConsoleTester
                                                                                  ExplosiveWaveformGenerators.Arons,
                                                                                  out peakPressure,
                                                                                  out totalEnergy);
-                    Numerics.WriteVector(waveforms[rangeIndex, depthIndex], String.Format("r{0:0}d{1:0}.esme", range, depth));
+                    //Numerics.WriteVector(waveforms[rangeIndex, depthIndex], String.Format("r{0:0}d{1:0}.esme", range, depth));
                     Debug.WriteLine("range {0} depth {1}: Peak pressure: {2} dB  Total energy: {3} dB", range, depth, peakPressure, totalEnergy);
                 }
             //var impulseResponse = arrivalsFile.DelayAndSum(chapman, 100000, 1, 1000, 50);
@@ -91,12 +93,12 @@ namespace DavesConsoleTester
             return 0;
         }
 
-        async static Task<int> MainAsync(string[] args)
+        async static void MainAsync(string[] args)
         {
             if (args.Length != 1)
             {
                 Console.WriteLine("Usage: ReadArrivalsFile <path-to-arrivals-file>");
-                return -1;
+                return;
             }
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -108,22 +110,23 @@ namespace DavesConsoleTester
             //var chapman = ExplosiveWaveformGenerators.Chapman(10, 1, 1, 88200, .25);
             var arrivalsFile = ArrivalsFile.Read(args[0]);
             //var waveforms = new double[arrivalsFile.ReceiverRanges.Length, arrivalsFile.ReceiverDepths.Length][];
-            await arrivalsFile.DelayAndSumAsync(chargeDepth, chargeWeight, sampleRate, waveformDuration, 1000, 100, ExplosiveWaveformGenerators.Arons).ContinueWith(t =>
-            {
-                Numerics.WriteVector(t.Result.Item1, String.Format("r{0:0}d{1:0}.esme", 1000, 100));
-                Debug.WriteLine("range {0} depth {1}: Peak pressure: {2} dB  Total energy: {3} dB", 1000, 100, t.Result.Item2, t.Result.Item3);
-
-            });
-            return 0;
+            //await arrivalsFile.DelayAndSumAsync(chargeDepth, chargeWeight, sampleRate, waveformDuration, 1000, 100, ExplosiveWaveformGenerators.Arons).ContinueWith(t =>
+            //{
+            //    Numerics.WriteVector(t.Result.Item1, String.Format("r{0:0}d{1:0}.esme", 1000, 100));
+            //    Debug.WriteLine("range {0} depth {1}: Peak pressure: {2} dB  Total energy: {3} dB", 1000, 100, t.Result.Item2, t.Result.Item3);
+            //});
+            //return 0;
             var tasks = (from depth in arrivalsFile.ReceiverDepths
                          from range in arrivalsFile.ReceiverRanges
                          let curDepth = depth
                          let curRange = range
-                         select arrivalsFile.DelayAndSumAsync(chargeDepth, chargeWeight, sampleRate, waveformDuration, curRange, curDepth, ExplosiveWaveformGenerators.Arons).ContinueWith(t => Numerics.WriteVector(t.Result.Item1, String.Format("r{0:0}d{1:0}.esme", curRange, curDepth)))).ToList();
+                         select arrivalsFile.DelayAndSumAsync(chargeDepth, chargeWeight, sampleRate, waveformDuration, curRange, curDepth, ExplosiveWaveformGenerators.Arons)
+                         //.ContinueWith(t => Numerics.WriteVector(t.Result.Item1, String.Format("r{0:0}d{1:0}.esme", curRange, curDepth)))
+                         .ContinueWith(t => Debug.WriteLine("{4:HH:mm:ss.fff} range {0} depth {1}: Peak pressure: {2} dB  Total energy: {3} dB", range, depth, t.Result.Item2, t.Result.Item3, DateTime.Now))
+                         ).ToList();
             await TaskEx.WhenAll(tasks);
             //var impulseResponse = arrivalsFile.DelayAndSum(chapman, 100000, 1, 1000, 50);
             Debug.WriteLine("Elapsed time as async: " + stopwatch.Elapsed);
-            return 0;
         }
 
 
