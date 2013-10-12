@@ -83,6 +83,9 @@
       <HintPath>..\..\ESME WorkBench\External References\FileHelpers.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="ILNumerics">
+      <HintPath>..\..\Solutions\ESME Workbench\packages\ILNumerics.3.2.2.0\lib\ILNumerics.dll</HintPath>
+    </Reference>
     <Reference Include="log4net">
       <HintPath>..\..\ESME WorkBench\External References\log4net.dll</HintPath>
     </Reference>
@@ -350,7 +353,20 @@
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="bin32\libiomp5md.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="bin32\mkl_custom.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="bin64\libiomp5md.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="bin64\mkl_custom.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>"$(SolutionDir)..\..\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -namespace ESME -class BuildInformation -version "$(SolutionDir)VersionInfo.txt" -assemblyversion "$(ProjectDir)\Properties\AssemblyVersionInfo.cs" -output "$(ProjectDir)BuildInformation.cs"</PreBuildEvent>
