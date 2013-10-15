@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using MathNet.Numerics.LinearAlgebra.Double;
+using HRC.Utility;
 
 namespace ESME.TransmissionLoss.Bellhop
 {
@@ -142,7 +142,7 @@ namespace ESME.TransmissionLoss.Bellhop
             // p(t) = x0*exp(-t/tau_s) + x1*exp((t-t4)/tau_r) + x2*t^2 + x3*t + x4
             // We now form the coefficient matrix;
 
-            var coefficientMatrix = new[,]
+            var a = new[,]
             {
                 {                 1.0, Math.Exp((t0 - t4) / tauR),    0.0, 0.0, 1.0},
                 {Math.Exp(-t1 / tauS), Math.Exp((t1 - t4) / tauR), t1 * t1, t1, 1.0},
@@ -150,12 +150,9 @@ namespace ESME.TransmissionLoss.Bellhop
                 {Math.Exp(-t3 / tauS), Math.Exp((t3 - t4) / tauR), t3 * t3, t3, 1.0},
                 {Math.Exp(-t4 / tauS),                        1.0, t4 * t4, t4, 1.0}
             };
-            var a = DenseMatrix.OfArray(coefficientMatrix);
             // Form the R.H.S. of the linear system (pressure values at above times)
-            var b = new DenseVector(new[] { ps, 0.0, -pMin1, 0.0, p1 });
-            // Solve for the coefficients
-            var x = a.Inverse().Multiply(b).ToArray();
-
+            var b = new[] { ps, 0.0, -pMin1, 0.0, p1 };
+            var x = Numerics.LeftDivide(a, b);
             // Evaluate the expression for time < arrival of first bubble pulse
 
             // t = time(time < t4);
@@ -196,7 +193,7 @@ namespace ESME.TransmissionLoss.Bellhop
             // A(3,:) = [ exp(-(t2-t0)/tau_d), exp((t2-t4)/tau_r2), t2^2, t2, 1.0 ];
             // A(4,:) = [ exp(-(t3-t0)/tau_d), exp((t3-t4)/tau_r2), t3^2, t3, 1.0 ];
             // A(5,:) = [ exp(-(t4-t0)/tau_d),                 1.0, t4^2, t4, 1.0 ];
-            coefficientMatrix = new[,]
+            a = new[,]
             {
                 {                        1.0, Math.Exp((t0 - t4) / tauR2), t0 * t0, t0, 1.0},
                 {Math.Exp(-(t1 - t0) / tauD), Math.Exp((t1 - t4) / tauR2), t1 * t1, t1, 1.0},
@@ -204,14 +201,13 @@ namespace ESME.TransmissionLoss.Bellhop
                 {Math.Exp(-(t3 - t0) / tauD), Math.Exp((t3 - t4) / tauR2), t3 * t3, t3, 1.0},
                 {Math.Exp(-(t4 - t0) / tauD),                         1.0, t4 * t4, t4, 1.0}
             };
-            a = DenseMatrix.OfArray(coefficientMatrix);
 
             // Form the R.H.S. of the linear system (pressure values at above times)
             // b = [ P_1; 0.0; -P_min2; 0.0; P_2 ];
-            b = new DenseVector(new[] { p1, 0.0, -pMin2, 0.0, p2 });
+            b = new[] { p1, 0.0, -pMin2, 0.0, p2 };
             // Solve for the coefficients
             // x = A\b;
-            x = a.Inverse().Multiply(b).ToArray();
+            x = Numerics.LeftDivide(a, b);
 
             // Evaluate the expression for time <= arrival of second bubble pulse
 

@@ -67,6 +67,7 @@ timeMsec = [ 1 : nsamples ] .*1000 ./fs;
 % figure(1); plot(timeMsec, 'w')
 % hold on
 
+tic
 % loop over receiver depths
 for ird = 1 : nrd
 
@@ -134,5 +135,5 @@ for ird = 1 : nrd
   end	% loop over receiver ranges
 
 end	% loop over receiver depths
-
+disp(toc);
 return

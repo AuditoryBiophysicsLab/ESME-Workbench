@@ -69,6 +69,8 @@
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=YXZ/@EntryIndexedValue">YXZ</s:String>
 	<s:Boolean x:Key="/Default/Environment/InjectedLayers/FileInjectedLayer/=E95ABC682C75374F98F7112EA7A527B6/@KeyIndexDefined">True</s:Boolean>
 	<s:String x:Key="/Default/Environment/InjectedLayers/FileInjectedLayer/=E95ABC682C75374F98F7112EA7A527B6/AbsolutePath/@EntryValue">C:\Projects\ESME Deliverables\Solutions\ESME Workbench\ESME Workbench.sln.DotSettings</s:String>
+	<s:Boolean x:Key="/Default/Environment/InjectedLayers/InjectedLayerCustomization/=FileE95ABC682C75374F98F7112EA7A527B6/@KeyIndexDefined">True</s:Boolean>
+	<s:Double x:Key="/Default/Environment/InjectedLayers/InjectedLayerCustomization/=FileE95ABC682C75374F98F7112EA7A527B6/RelativePriority/@EntryValue">2</s:Double>
 	<s:Boolean x:Key="/Default/Environment/InjectedLayers/InjectedLayerCustomization/=File_003A_003AC_003A_005CProjects_005CESME_0020Deliverables_005CSolutions_005CESME_0020Workbench_005CESME_0020Workbench_002Esln_002EDotSettings/@KeyIndexDefined">True</s:Boolean>
 	<s:Double x:Key="/Default/Environment/InjectedLayers/InjectedLayerCustomization/=File_003A_003AC_003A_005CProjects_005CESME_0020Deliverables_005CSolutions_005CESME_0020Workbench_005CESME_0020Workbench_002Esln_002EDotSettings/RelativePriority/@EntryValue">1</s:Double>
 	<s:Boolean x:Key="/Default/Environment/Internet/WebProxy/IsCustomProxy/@EntryValue">True</s:Boolean>
