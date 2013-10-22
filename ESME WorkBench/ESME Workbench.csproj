@@ -86,10 +86,6 @@
     </Reference>
     <Reference Include="Kent.Boogaart.Converters, Version=1.1.0.0, Culture=neutral, PublicKeyToken=cc96fa93a217f7a1, processorArchitecture=MSIL" />
     <Reference Include="Kent.Boogaart.HelperTrinity, Version=1.2.0.0, Culture=neutral, PublicKeyToken=cc96fa93a217f7a1, processorArchitecture=MSIL" />
-    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL" />
-    <Reference Include="Log4PostSharp, Version=2.0.0.0, Culture=neutral, PublicKeyToken=759ea4e6677b553f, processorArchitecture=MSIL">
-      <HintPath>External References\Log4PostSharp.dll</HintPath>
-    </Reference>
     <Reference Include="MapSuiteCore, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="MathNet.Numerics">
       <HintPath>..\Solutions\ESME Workbench\packages\MathNet.Numerics.2.3.0\lib\net40\MathNet.Numerics.dll</HintPath>

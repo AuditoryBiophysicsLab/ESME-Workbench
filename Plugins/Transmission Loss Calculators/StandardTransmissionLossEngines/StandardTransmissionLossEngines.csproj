@@ -33,12 +33,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="log4net">
-      <HintPath>..\..\..\ESME WorkBench\External References\log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="Log4PostSharp">
-      <HintPath>..\..\..\ESME WorkBench\External References\Log4PostSharp.dll</HintPath>
-    </Reference>
     <Reference Include="MathNet.Numerics">
       <HintPath>..\..\..\ESME WorkBench\External References\MathNet.Numerics.dll</HintPath>
     </Reference>

@@ -64,12 +64,6 @@
     <Reference Include="FileHelpers">
       <HintPath>..\ESME WorkBench\External References\FileHelpers.dll</HintPath>
     </Reference>
-    <Reference Include="log4net">
-      <HintPath>..\ESME WorkBench\External References\log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="Log4PostSharp">
-      <HintPath>..\ESME WorkBench\External References\Log4PostSharp.dll</HintPath>
-    </Reference>
     <Reference Include="MEFedMVVM.WPF">
       <HintPath>..\ESME WorkBench\External References\MEFedMVVM.WPF.dll</HintPath>
     </Reference>

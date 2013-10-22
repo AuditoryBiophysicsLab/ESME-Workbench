@@ -81,12 +81,6 @@
     <Reference Include="KMLib">
       <HintPath>..\..\ESME WorkBench\External References\KMLib.dll</HintPath>
     </Reference>
-    <Reference Include="log4net">
-      <HintPath>..\..\ESME WorkBench\External References\log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="Log4PostSharp">
-      <HintPath>..\..\ESME WorkBench\External References\Log4PostSharp.dll</HintPath>
-    </Reference>
     <Reference Include="MathNet.Numerics">
       <HintPath>..\..\Solutions\ESME Workbench\packages\MathNet.Numerics.2.6.1\lib\net40\MathNet.Numerics.dll</HintPath>
     </Reference>

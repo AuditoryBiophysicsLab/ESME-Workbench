@@ -223,9 +223,10 @@ namespace ESME.Scenarios
         }
         string _storageDirectoryPath;
 
+#if false
         public void Log()
         {
-            var log = log4net.LogManager.GetLogger(GetType());
+            //var log = log4net.LogManager.GetLogger(GetType());
             var sb = new StringBuilder();
             sb.AppendLine(string.Format("Scenario :{0}",Name ));
             sb.AppendLine(string.Format("Location :{0}", Location.Name));
@@ -241,8 +242,9 @@ namespace ESME.Scenarios
             sb.AppendLine(string.Format("Transmission Loss Count :{0}", (from a in AnalysisPoints from t in a.TransmissionLosses select t).Count() ));
             sb.AppendLine(string.Format("Radial Count :{0}",(from a in AnalysisPoints from t in a.TransmissionLosses from r in t.Radials select r).Count() ));
             sb.AppendLine(string.Format("Storage Directory :{0}",StorageDirectoryPath ));
-            log.Info(sb.ToString());
+            //log.Info(sb.ToString());
         }
+#endif
 
         [NotMapped]
         public static IMasterDatabaseService Database { get; set; }

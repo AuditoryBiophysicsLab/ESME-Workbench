@@ -87,12 +87,6 @@
     <Reference Include="ILNumerics">
       <HintPath>..\..\Solutions\ESME Workbench\packages\ILNumerics.3.2.2.0\lib\ILNumerics.dll</HintPath>
     </Reference>
-    <Reference Include="log4net">
-      <HintPath>..\..\ESME WorkBench\External References\log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="Log4PostSharp">
-      <HintPath>..\..\ESME WorkBench\External References\Log4PostSharp.dll</HintPath>
-    </Reference>
     <Reference Include="MapSuiteCore">
       <HintPath>..\..\ESME WorkBench\External References\MapSuiteCore.dll</HintPath>
       <Private>False</Private>

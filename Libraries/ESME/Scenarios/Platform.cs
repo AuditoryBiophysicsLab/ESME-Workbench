@@ -17,7 +17,6 @@ using HRC.Services;
 using HRC.Utility;
 using HRC.ViewModels;
 using HRC.WPF;
-using log4net;
 
 namespace ESME.Scenarios
 {
@@ -248,13 +247,15 @@ namespace ESME.Scenarios
             {
                 mapLayer.AddLines(locations);
             }
-            catch (Exception e)
+            catch (Exception)
             {
+#if false
                 var log = LogManager.GetLogger(GetType());
                 log.Error(string.Format("AddLines failed:{0}", e.Message));
                 log.ErrorFormat("Malformed wellformedtext:{0}", OverlayShapeMapLayer.WellKnownText("LINESTRING(", locations, ")"));
                 log.Error(string.Format("locations.count:{0}", locations.Count));
                 Scenario.Log();
+#endif
             }
             mapLayer.Done();
             LayerSettings.MapLayerViewModel = mapLayer;
