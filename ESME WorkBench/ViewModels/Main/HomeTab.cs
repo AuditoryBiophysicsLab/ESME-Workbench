@@ -172,13 +172,35 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.CreateScenario)]
         void CreateScenarioHandler(Location location = null)
         {
-            if (_lastCreateScenarioLocation == null) _lastCreateScenarioLocation = Database.Context.Locations.Local.First();
-            var vm = new CreateScenarioViewModel { Locations = Database.Context.Locations.Local, PluginManager = _plugins, Location = location ?? _lastCreateScenarioLocation, TimePeriod = (TimePeriod)DateTime.Today.Month, IsLocationSelectable = location == null };
-            var result = _visualizer.ShowDialog("CreateScenarioView", vm);
-            if ((!result.HasValue) || (!result.Value)) return;
-            if (location == null) _lastCreateScenarioLocation = vm.Location;
-            var scenario = CreateScenario(vm.Location, vm.ScenarioName, vm.Comments, vm.TimePeriod, vm.Duration, vm.SelectedPlugins[PluginSubtype.Wind].SelectedDataSet, vm.SelectedPlugins[PluginSubtype.SoundSpeed].SelectedDataSet, vm.SelectedPlugins[PluginSubtype.Bathymetry].SelectedDataSet, vm.SelectedPlugins[PluginSubtype.Sediment].SelectedDataSet);
-            Scenario = scenario;
+            try
+            {
+                if (_lastCreateScenarioLocation == null) _lastCreateScenarioLocation = Database.Context.Locations.Local.First();
+                var vm = new CreateScenarioViewModel
+                {
+                    Locations = Database.Context.Locations.Local,
+                    PluginManager = _plugins,
+                    Location = location ?? _lastCreateScenarioLocation,
+                    TimePeriod = (TimePeriod)DateTime.Today.Month,
+                    IsLocationSelectable = location == null
+                };
+                var result = _visualizer.ShowDialog("CreateScenarioView", vm);
+                if ((!result.HasValue) || (!result.Value)) return;
+                if (location == null) _lastCreateScenarioLocation = vm.Location;
+                var scenario = CreateScenario(vm.Location,
+                                              vm.ScenarioName,
+                                              vm.Comments,
+                                              vm.TimePeriod,
+                                              vm.Duration,
+                                              vm.SelectedPlugins[PluginSubtype.Wind].SelectedDataSet,
+                                              vm.SelectedPlugins[PluginSubtype.SoundSpeed].SelectedDataSet,
+                                              vm.SelectedPlugins[PluginSubtype.Bathymetry].SelectedDataSet,
+                                              vm.SelectedPlugins[PluginSubtype.Sediment].SelectedDataSet);
+                Scenario = scenario;
+            }
+            catch (DuplicateNameException exception)
+            {
+                _messageBox.ShowError("Error creating this Scenario: " + exception.Message);
+            }
         }
 
         Scenario CreateScenario(Location location, string scenarioName, string comments, TimePeriod timePeriod, TimeSpan duration, EnvironmentalDataSet wind, EnvironmentalDataSet soundSpeed, EnvironmentalDataSet bathymetry, EnvironmentalDataSet sediment)
@@ -202,7 +224,7 @@ namespace ESMEWorkbench.ViewModels.Main
             var existing = (from s in location.Scenarios
                             where s.Name == scenario.Name && s.Location == scenario.Location
                             select s).FirstOrDefault();
-            if (existing != null) throw new DuplicateNameException(String.Format("A scenario named {0} already exists in location {1}, choose another name", scenario.Name, scenario.Location.Name));
+            if (existing != null) throw new DuplicateNameException(String.Format("a Scenario named \"{0}\" already exists in the Location \"{1}\"; please select another name.", scenario.Name, scenario.Location.Name));
             location.Scenarios.Add(scenario);
             Database.Context.Scenarios.Add(scenario);
             return scenario;
