@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using ESME.Environment;
 using ESME.Environment.NAVO;
-using ESME.Model;
 using HRC.Navigation;
 using HRC.NetCDF;
 
@@ -58,7 +57,7 @@ namespace NAVODatabaseAdapter
                 }
                 return true;
             }
-            catch (System.IO.FileFormatException)
+            catch (FileFormatException)
             {
                 return false;
             }

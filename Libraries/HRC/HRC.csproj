@@ -274,6 +274,7 @@
     <Compile Include="WPF\BindingExtensions.cs" />
     <Compile Include="WPF\ColorExtensions.cs" />
     <Compile Include="WPF\ComparisonBinding.cs" />
+    <Compile Include="WPF\DataPipe.cs" />
     <Compile Include="WPF\DispatcherExtensions.cs" />
     <Compile Include="WPF\Dynamic.cs" />
     <Compile Include="WPF\EventToCommandArgs.cs" />

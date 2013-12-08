@@ -371,6 +371,7 @@ namespace ESME.Scenarios
             _bottomProfile = null;
             _minimumTransmissionLossValues = null;
             _maximumTransmissionLossValues = null;
+            _shadeFile = null;
         }
 
         void ReadAxisFile()

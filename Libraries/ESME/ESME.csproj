@@ -189,6 +189,7 @@
     <Compile Include="Database\Importers\PSMFileRecord.cs" />
     <Compile Include="Environment\AnimatDDBFile.cs" />
     <Compile Include="Environment\Animat3MBFile.cs" />
+    <Compile Include="Environment\EnvironmentFileExtensions.cs" />
     <Compile Include="Environment\SoundSpeedProfileExtensions.cs" />
     <Compile Include="Locations\EnvironmentalDataSet.cs" />
     <Compile Include="Locations\Location.cs" />

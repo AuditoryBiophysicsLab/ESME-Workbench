@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -10,7 +11,10 @@ namespace ESME.Mapping
     [Serializable]
     public class MyGdiPlusRasterLayer : GdiPlusRasterLayer
     {
-        public MyGdiPlusRasterLayer(string fileName) : base(fileName) { }
+        public MyGdiPlusRasterLayer(string fileName) : base(fileName)
+        {
+            InterpolationMode = InterpolationMode.NearestNeighbor;
+        }
         public new RasterSource ImageSource
         {
             get { return base.ImageSource; }
@@ -54,7 +58,8 @@ namespace ESME.Mapping
                 {
                     UpperThreshold = double.MaxValue,
                     LowerThreshold = 0,
-                    IsGrayscale = false
+                    IsGrayscale = false,
+                    InterpolationMode = InterpolationMode.NearestNeighbor,
                 };
                 LayerOverlay.Layers.Add(_layer);
             }
