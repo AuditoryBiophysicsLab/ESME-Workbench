@@ -326,7 +326,7 @@ namespace ESME.Views.TransmissionLossViewer
                 var py = AxisSeriesViewModel.MouseLocation.Y / AxisSeriesViewModel.ActualHeight;
                 var rangeIndex = Math.Max(0, Math.Min((int)(_shadeFile.ReceiverRanges.Length * px), _shadeFile.ReceiverRanges.Length - 1));
                 var depthIndex = Math.Max(0, Math.Min((int)(_shadeFile.ReceiverDepths.Length * py), _shadeFile.ReceiverDepths.Length - 1)); MouseTransmissionLossInfo = string.Format("Transmission Loss: {0:0.0}dB", _shadeFile.TransmissionLoss[depthIndex, rangeIndex]);
-                if (float.IsInfinity(_shadeFile.TransmissionLoss[depthIndex, rangeIndex]) || float.IsNaN(_shadeFile.TransmissionLoss[depthIndex, rangeIndex]) || double.IsNaN(AxisSeriesViewModel.YAxis.MouseDataLocation) || (AxisSeriesViewModel.YAxis.MouseDataLocation > Radial.BottomDepths[rangeIndex]))
+                if (float.IsInfinity(_shadeFile.TransmissionLoss[depthIndex, rangeIndex]) || float.IsNaN(_shadeFile.TransmissionLoss[depthIndex, rangeIndex]) || double.IsNaN(AxisSeriesViewModel.YAxis.MouseDataLocation) || (Radial.BottomDepths!= null && (AxisSeriesViewModel.YAxis.MouseDataLocation > Radial.BottomDepths[rangeIndex])))
                 {
                     MouseTransmissionLossInfo = "Transmission Loss: N/A";
                     MouseSPLInfo = "Sound Pressure: N/A";
