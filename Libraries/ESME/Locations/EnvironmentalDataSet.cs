@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Data;
 using ESME.Database;
 using ESME.Environment;
@@ -76,6 +77,7 @@ namespace ESME.Locations
         protected static readonly Random Random = new Random();
         public void UpdateMapLayers()
         {
+            if (Location.Cache[this] != null && !Location.Cache[this].IsCompleted || Location.Cache[this].Status != TaskStatus.Running) Location.Cache[this].Start();
             var dataType = ((PluginIdentifier)SourcePlugin).PluginSubtype;
             switch (dataType)
             {

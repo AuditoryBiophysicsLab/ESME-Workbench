@@ -29,30 +29,16 @@ namespace ESME.TransmissionLoss
             WorkQueue = new ObservableConcurrentDictionary<Guid, Radial>();
             _calculator = new ActionBlock<Radial>(radial =>
             {
-                if (!radial.IsDeleted)
-                {
-#if false
-                    var longestRadiusMode = (from mode in radial.TransmissionLoss.Modes
-                                             orderby mode.MaxPropagationRadius descending
-                                             select mode).FirstOrDefault();
-                    if (longestRadiusMode != null)
-                    {
-                        var modeName = string.Format("{0}|{1}|{2}", longestRadiusMode.Source.Platform.PlatformName, longestRadiusMode.Source.SourceName, longestRadiusMode.ModeName);
-                        var geo = (Geo)radial.TransmissionLoss.AnalysisPoint.Geo;
-                        Debug.WriteLine(string.Format("About to calculate radial {0}[{1:0.###},{2:0.###}]/{3:0.#} deg", modeName, geo.Latitude, geo.Longitude, radial.Bearing));
-                    }
-                    else 
-                        Debug.WriteLine("TransmissionLossCalculatorService: longestRadiusMode is null!");
-#endif
-                    Calculate(radial);
-                }
+                if (!radial.IsDeleted) Calculate(radial);
                 WorkQueue.Remove(radial.Guid);
                 _shadeFileProcessorQueue.Post(radial);
             }, new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = System.Environment.ProcessorCount });
             _calculatorQueue = new BufferBlock<Radial>(new DataflowBlockOptions { BoundedCapacity = -1 });
             _calculatorQueue.LinkTo(_calculator);
-            _shadeFileProcessor = new ActionBlock<Radial>(r => { if (!r.IsDeleted && r.ExtractAxisData()) r.ReleaseAxisData(); },
-                                                          new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = System.Environment.ProcessorCount });
+            _shadeFileProcessor = new ActionBlock<Radial>(r =>
+            {
+                if (!r.IsDeleted && r.ExtractAxisData()) r.ReleaseAxisData();
+            }, new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = System.Environment.ProcessorCount });
             _shadeFileProcessorQueue = new BufferBlock<Radial>(new DataflowBlockOptions { BoundedCapacity = -1 });
             _shadeFileProcessorQueue.LinkTo(_shadeFileProcessor);
         }
@@ -91,9 +77,7 @@ namespace ESME.TransmissionLoss
             }
             var radials = (from radial in _databaseService.Context.Radials
                                .Include(r => r.TransmissionLoss)
-                               .Include(r => r.TransmissionLoss.Modes)
-                               //.Include(r => r.TransmissionLoss.Mode.Source)
-                               //.Include(r => r.TransmissionLoss.Mode.Source.Platform)
+                               .Include(r => r.TransmissionLoss.Modes.Select(m => m.Source).Select(s => s.Platform))
                                .Include(r => r.TransmissionLoss.AnalysisPoint)
                                .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario)
                                .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario.Location)
@@ -106,9 +90,9 @@ namespace ESME.TransmissionLoss
                     continue;
                 }
                 if (radial.TransmissionLoss.AnalysisPoint.Scenario.Wind == null ||
-                    radial.TransmissionLoss.AnalysisPoint.Scenario.SoundSpeed == null ||
-                    radial.TransmissionLoss.AnalysisPoint.Scenario.Bathymetry == null ||
-                    radial.TransmissionLoss.AnalysisPoint.Scenario.Sediment == null)
+                        radial.TransmissionLoss.AnalysisPoint.Scenario.SoundSpeed == null ||
+                        radial.TransmissionLoss.AnalysisPoint.Scenario.Bathymetry == null ||
+                        radial.TransmissionLoss.AnalysisPoint.Scenario.Sediment == null)
                 {
                     var scenario = (from s in _databaseService.Context.Scenarios
                                         .Include(s => s.Wind)
@@ -118,12 +102,8 @@ namespace ESME.TransmissionLoss
                                     where s.Guid == radial.TransmissionLoss.AnalysisPoint.Scenario.Guid
                                     select s).Single();
                 }
-                if (!File.Exists(radial.BasePath + ".shd"))
-                {
-                    _databaseService.Context.Radials.
-                    Add(radial);
-                }
-                else _shadeFileProcessorQueue.Post(radial);
+                if (!File.Exists(radial.BasePath + ".shd")) Add(radial);
+                else if (!File.Exists(radial.BasePath + ".axs")) _shadeFileProcessorQueue.Post(radial);
             }
         }
 
