@@ -81,6 +81,11 @@ namespace ESME.TransmissionLoss
                                .Include(r => r.TransmissionLoss.AnalysisPoint)
                                .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario)
                                .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario.Location)
+                               .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario.Location.LayerSettings)
+                               .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario.Wind)
+                               .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario.SoundSpeed)
+                               .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario.Bathymetry)
+                               .Include(r => r.TransmissionLoss.AnalysisPoint.Scenario.Sediment)
                            select radial);
             foreach (var radial in radials)
             {
@@ -88,19 +93,6 @@ namespace ESME.TransmissionLoss
                 {
                     _databaseService.Context.Radials.Remove(radial);
                     continue;
-                }
-                if (radial.TransmissionLoss.AnalysisPoint.Scenario.Wind == null ||
-                        radial.TransmissionLoss.AnalysisPoint.Scenario.SoundSpeed == null ||
-                        radial.TransmissionLoss.AnalysisPoint.Scenario.Bathymetry == null ||
-                        radial.TransmissionLoss.AnalysisPoint.Scenario.Sediment == null)
-                {
-                    var scenario = (from s in _databaseService.Context.Scenarios
-                                        .Include(s => s.Wind)
-                                        .Include(s => s.SoundSpeed)
-                                        .Include(s => s.Bathymetry)
-                                        .Include(s => s.Sediment)
-                                    where s.Guid == radial.TransmissionLoss.AnalysisPoint.Scenario.Guid
-                                    select s).Single();
                 }
                 if (!File.Exists(radial.BasePath + ".shd")) Add(radial);
                 else if (!File.Exists(radial.BasePath + ".axs")) _shadeFileProcessorQueue.Post(radial);

@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -75,10 +76,10 @@ namespace ESME.Locations
         [NotMapped] public bool IsDeleted { get; set; }
 
         protected static readonly Random Random = new Random();
-        public void UpdateMapLayers()
+        public async void UpdateMapLayers()
         {
-            if (Location.Cache[this] != null && !Location.Cache[this].IsCompleted || Location.Cache[this].Status != TaskStatus.Running) Location.Cache[this].Start();
             var dataType = ((PluginIdentifier)SourcePlugin).PluginSubtype;
+            await Location.Cache[this];
             switch (dataType)
             {
                 case PluginSubtype.SoundSpeed:
