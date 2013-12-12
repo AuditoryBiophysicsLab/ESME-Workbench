@@ -58,7 +58,7 @@ exit 0</PostBuildEvent>
     <DefineConstants>SpeciesDefinitionFilesFolder=..\..\..\Utilities\3MB\Species Files</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>"C:\Program Files (x86)\WiX Toolset v3.7\bin\heat" dir "$(ProjectDir)..\..\..\Utilities\3MB\Species Files" -srd -cg SpeciesDefinitionFiles -dr SpeciesDefinitionFilesFolder -gg -sfrag -out "$(ProjectDir)SpeciesFiles.wxs" -var var.SpeciesDefinitionFilesFolder
+    <PreBuildEvent>"C:\Program Files (x86)\WiX Toolset v3.8\bin\heat" dir "$(ProjectDir)..\..\..\Utilities\3MB\Species Files" -srd -cg SpeciesDefinitionFiles -dr SpeciesDefinitionFilesFolder -gg -sfrag -out "$(ProjectDir)SpeciesFiles.wxs" -var var.SpeciesDefinitionFilesFolder
 if errorlevel 1 goto BuildEventFailed
 "$(SolutionDir)..\..\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -version "$(SolutionDir)VersionInfo.txt" -wixversion "$(ProjectDir)version.wxi" -output "$(ProjectDir) "
 if errorlevel 1 goto BuildEventFailed
