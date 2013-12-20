@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ESME</RootNamespace>
     <AssemblyName>ESME</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -35,6 +35,8 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\Solutions\ESME Workbench\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <DontImportPostSharp>True</DontImportPostSharp>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -48,6 +50,7 @@
     <PostSharpSearchPath>C:\Projects\ESME Deliverables\ESME WorkBench\External References\x86;C:\Projects\ESME Deliverables\ESME WorkBench\External References\x64;C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETPortable\v4.0\Profile\Profile1</PostSharpSearchPath>
     <PostSharpHost>Managed</PostSharpHost>
     <PostSharpTargetProcessor>x64</PostSharpTargetProcessor>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -60,110 +63,115 @@
     <PostSharpSearchPath>C:\Projects\ESME Deliverables\ESME WorkBench\External References\x86;C:\Projects\ESME Deliverables\ESME WorkBench\External References\x64;C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETPortable\v4.0\Profile\Profile1</PostSharpSearchPath>
     <PostSharpHost>Managed</PostSharpHost>
     <PostSharpTargetProcessor>x64</PostSharpTargetProcessor>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="3MBSLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\..\ESME WorkBench\External References\x64\3MBSLib.dll</HintPath>
-    </Reference>
     <Reference Include="3MBWrapperClass, Version=1.0.4574.28957, Culture=neutral, processorArchitecture=AMD64">
       <HintPath>..\..\ESME WorkBench\External References\x64\3MBWrapperClass.dll</HintPath>
     </Reference>
-    <Reference Include="AsyncCtpLibrary">
-      <HintPath>..\..\ESME WorkBench\External References\AsyncCtpLibrary.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="C5, Version=2.2.4881.16939, Culture=neutral, PublicKeyToken=282361b99ded7e8e, processorArchitecture=MSIL">
+    <Reference Include="C5, Version=2.2.5073.27396, Culture=neutral, PublicKeyToken=282361b99ded7e8e, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Solutions\ESME Workbench\packages\C5.2.2.4881.16939\lib\portable-win+net40+sl40+wp+Xbox40\C5.dll</HintPath>
+      <HintPath>..\..\Solutions\ESME Workbench\packages\C5.2.2.5073.27396\lib\portable-net40+sl50+wp80+win\C5.dll</HintPath>
     </Reference>
-    <Reference Include="EntityFramework, Version=4.3.1.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\ESME WorkBench\External References\EntityFramework.dll</HintPath>
+      <HintPath>..\..\Solutions\ESME Workbench\packages\EntityFramework.6.0.2\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer">
+      <HintPath>..\..\Solutions\ESME Workbench\packages\EntityFramework.6.0.2\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServerCompact">
+      <HintPath>..\..\Solutions\ESME Workbench\packages\EntityFramework.SqlServerCompact.6.0.2\lib\net45\EntityFramework.SqlServerCompact.dll</HintPath>
     </Reference>
     <Reference Include="FileHelpers">
       <HintPath>..\..\ESME WorkBench\External References\FileHelpers.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="ILNumerics">
-      <HintPath>..\..\Solutions\ESME Workbench\packages\ILNumerics.3.2.2.0\lib\ILNumerics.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="MapSuiteCore">
       <HintPath>..\..\ESME WorkBench\External References\MapSuiteCore.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="MathNet.Numerics">
-      <HintPath>..\..\Solutions\ESME Workbench\packages\MathNet.Numerics.2.6.1\lib\net40\MathNet.Numerics.dll</HintPath>
-    </Reference>
-    <Reference Include="MathNet.Numerics.IO">
-      <HintPath>..\..\Solutions\ESME Workbench\packages\MathNet.Numerics.2.6.1\lib\net40\MathNet.Numerics.IO.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="MEFedMVVM.WPF, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b6db3dc4f5fba1e3, processorArchitecture=MSIL">
       <HintPath>..\..\ESME WorkBench\External References\MEFedMVVM.WPF.dll</HintPath>
-      <Private>False</Private>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="PostSharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL" />
+    <Reference Include="PostSharp, Version=3.1.27.9, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\..\Solutions\ESME Workbench\packages\PostSharp.3.1.27\lib\net20\PostSharp.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
+      <Private>True</Private>
     </Reference>
     <Reference Include="PresentationFramework">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.ComponentModel.Composition" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System.Configuration" />
+    <Reference Include="System">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.ComponentModel.Composition">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.ComponentModel.DataAnnotations">
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data.Entity" />
-    <Reference Include="System.Data.Linq" />
-    <Reference Include="System.Data.SqlServerCe, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <Private>True</Private>
-      <HintPath>..\..\Solutions\ESME Workbench\packages\Microsoft.SqlServer.Compact.4.0.8876.1\lib\net40\System.Data.SqlServerCe.dll</HintPath>
     </Reference>
-    <Reference Include="System.Data.SqlServerCe.Entity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+    <Reference Include="System.Drawing">
       <Private>True</Private>
-      <HintPath>..\..\Solutions\ESME Workbench\packages\EntityFramework.SqlServerCompact.4.3.6\lib\net40\System.Data.SqlServerCe.Entity.dll</HintPath>
     </Reference>
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Reactive.Core">
-      <HintPath>..\..\Solutions\ESME Workbench\packages\Rx-Core.2.1.30214.0\lib\Net40\System.Reactive.Core.dll</HintPath>
+    <Reference Include="System.Numerics">
+      <Private>True</Private>
     </Reference>
-    <Reference Include="System.Reactive.Interfaces">
-      <HintPath>..\..\Solutions\ESME Workbench\packages\Rx-Interfaces.2.1.30214.0\lib\Net40\System.Reactive.Interfaces.dll</HintPath>
+    <Reference Include="System.Reactive.Core, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Solutions\ESME Workbench\packages\Rx-Core.2.2.2\lib\net45\System.Reactive.Core.dll</HintPath>
     </Reference>
-    <Reference Include="System.Reactive.Linq">
-      <HintPath>..\..\Solutions\ESME Workbench\packages\Rx-Linq.2.1.30214.0\lib\Net40\System.Reactive.Linq.dll</HintPath>
+    <Reference Include="System.Reactive.Interfaces, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Solutions\ESME Workbench\packages\Rx-Interfaces.2.2.2\lib\net45\System.Reactive.Interfaces.dll</HintPath>
     </Reference>
-    <Reference Include="System.Reactive.PlatformServices">
-      <HintPath>..\..\Solutions\ESME Workbench\packages\Rx-PlatformServices.2.1.30214.0\lib\Net40\System.Reactive.PlatformServices.dll</HintPath>
+    <Reference Include="System.Reactive.Linq, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Solutions\ESME Workbench\packages\Rx-Linq.2.2.2\lib\net45\System.Reactive.Linq.dll</HintPath>
     </Reference>
-    <Reference Include="System.Reactive.Windows.Threading">
-      <HintPath>..\..\Solutions\ESME Workbench\packages\Rx-XAML.2.1.30214.0\lib\Net40\System.Reactive.Windows.Threading.dll</HintPath>
+    <Reference Include="System.Reactive.Windows.Threading, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Solutions\ESME Workbench\packages\Rx-XAML.2.2.2\lib\net45\System.Reactive.Windows.Threading.dll</HintPath>
     </Reference>
-    <Reference Include="System.Runtime.Caching" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Threading.Tasks.Dataflow, Version=0.0.4098.29463, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\ESME WorkBench\External References\System.Threading.Tasks.Dataflow.dll</HintPath>
+    <Reference Include="System.Runtime.Caching">
+      <Private>True</Private>
     </Reference>
-    <Reference Include="System.Transactions" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="System.Xml.Linq">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    <Reference Include="System.Runtime.Serialization">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.5.14.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Solutions\ESME Workbench\packages\Microsoft.Tpl.Dataflow.4.5.14\lib\portable-net45+win8\System.Threading.Tasks.Dataflow.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xaml">
+      <Private>True</Private>
     </Reference>
     <Reference Include="System.Data.DataSetExtensions">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <Reference Include="System.Data">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Private>True</Private>
+    </Reference>
     <Reference Include="WindowsBase">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
+      <Private>True</Private>
     </Reference>
     <Reference Include="WpfDesktopEdition">
       <HintPath>..\..\ESME WorkBench\External References\WpfDesktopEdition.dll</HintPath>
-      <Private>False</Private>
+      <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -198,6 +206,10 @@
     <Compile Include="Locations\LogEntry.cs" />
     <Compile Include="Mapping\CustomEditOverlay.cs" />
     <Compile Include="Mapping\EditableRectangleInteractiveOverlay.cs" />
+    <Compile Include="Migrations\201312200124097_Initial.cs" />
+    <Compile Include="Migrations\201312200124097_Initial.Designer.cs">
+      <DependentUpon>201312200124097_Initial.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyVersionInfo.cs" />
     <Compile Include="PSM\PSMContext.cs" />
@@ -300,7 +312,9 @@
     <Compile Include="TransmissionLoss\TransmissionLossCalculatorService.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -346,7 +360,7 @@
     <ProjectReference Include="..\HRC\HRC.csproj">
       <Project>{38BB9B49-3218-4F10-8D45-79FF3746C7CD}</Project>
       <Name>HRC</Name>
-      <Private>False</Private>
+      <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -363,6 +377,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201312200124097_Initial.resx">
+      <DependentUpon>201312200124097_Initial.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>"$(SolutionDir)..\..\Utilities\ProjectBuildInfo\bin\Release\ProjectBuildInfo.exe" -namespace ESME -class BuildInformation -version "$(SolutionDir)VersionInfo.txt" -assemblyversion "$(ProjectDir)\Properties\AssemblyVersionInfo.cs" -output "$(ProjectDir)BuildInformation.cs"</PreBuildEvent>
@@ -375,6 +395,11 @@
     xcopy /s /y "$(SolutionDir)packages\Microsoft.SqlServer.Compact.4.0.8876.1\NativeBinaries\amd64\*.*" "$(TargetDir)amd64"</PostBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Import Project="..\..\Solutions\ESME Workbench\packages\PostSharp.3.1.27\tools\PostSharp.targets" Condition="Exists('..\..\Solutions\ESME Workbench\packages\PostSharp.3.1.27\tools\PostSharp.targets')" />
+  <Target Name="EnsurePostSharpImported" BeforeTargets="BeforeBuild" Condition="'$(PostSharp30Imported)' == ''">
+    <Error Condition="!Exists('..\..\Solutions\ESME Workbench\packages\PostSharp.3.1.27\tools\PostSharp.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://www.postsharp.net/links/nuget-restore." />
+    <Error Condition="Exists('..\..\Solutions\ESME Workbench\packages\PostSharp.3.1.27\tools\PostSharp.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://www.postsharp.net/links/nuget-restore." />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

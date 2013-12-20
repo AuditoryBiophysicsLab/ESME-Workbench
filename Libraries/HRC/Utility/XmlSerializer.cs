@@ -123,6 +123,18 @@ namespace HRC.Utility
         }
 
         /// <summary>
+        /// Load the data from a file, validating against a list of schema resources
+        /// </summary>
+        /// <param name="xml"> </param>
+        /// <param name="referencedTypes"></param>
+        /// <returns></returns>
+        public static T LoadFromXml(string xml, List<Type> referencedTypes = null)
+        {
+            if (referencedTypes == null) referencedTypes = new List<Type>();
+            return Deserialize(xml, null, referencedTypes);
+        }
+
+        /// <summary>
         /// Load the data from a file without validating against an XML schema
         /// </summary>
         /// <param name="data"> </param>
@@ -147,12 +159,6 @@ namespace HRC.Utility
                 }
             }
             if (ex != null) throw ex;
-        }
-
-
-        public string Xml
-        {
-            get { return Serialize(ReferencedTypes); }
         }
 
         /// <summary>
@@ -187,6 +193,16 @@ namespace HRC.Utility
                 }
             }
             if (ex != null) throw ex;
+        }
+
+        public string SaveToXml(List<Type> referencedTypes)
+        {
+            return Serialize(referencedTypes);
+        }
+
+        public string SaveToXml()
+        {
+            return Serialize(ReferencedTypes);
         }
 
         #endregion

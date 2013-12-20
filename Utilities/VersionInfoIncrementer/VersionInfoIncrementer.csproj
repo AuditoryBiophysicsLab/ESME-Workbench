@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
@@ -10,11 +10,13 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>VersionInfoIncrementer</RootNamespace>
     <AssemblyName>VersionInfoIncrementer</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\Solutions\ESME Workbench\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <DontImportPostSharp>True</DontImportPostSharp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -25,6 +27,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -34,6 +37,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -44,6 +48,7 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <OutputPath>bin\Release\</OutputPath>
@@ -54,8 +59,13 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PostSharp, Version=3.1.27.9, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\..\Solutions\ESME Workbench\packages\PostSharp.3.1.27\lib\net20\PostSharp.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -68,8 +78,16 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Import Project="..\..\Solutions\ESME Workbench\packages\PostSharp.3.1.27\tools\PostSharp.targets" Condition="Exists('..\..\Solutions\ESME Workbench\packages\PostSharp.3.1.27\tools\PostSharp.targets')" />
+  <Target Name="EnsurePostSharpImported" BeforeTargets="BeforeBuild" Condition="'$(PostSharp30Imported)' == ''">
+    <Error Condition="!Exists('..\..\Solutions\ESME Workbench\packages\PostSharp.3.1.27\tools\PostSharp.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://www.postsharp.net/links/nuget-restore." />
+    <Error Condition="Exists('..\..\Solutions\ESME Workbench\packages\PostSharp.3.1.27\tools\PostSharp.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://www.postsharp.net/links/nuget-restore." />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

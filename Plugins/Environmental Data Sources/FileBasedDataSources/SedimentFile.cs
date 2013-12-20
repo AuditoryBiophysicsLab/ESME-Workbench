@@ -30,6 +30,7 @@ namespace FileBasedDataSources
             IsTimeVariantData = false;
             IsSelectable = true;
         }
+        public override string Xml { get; set; }
 
         protected override void Save()
         {
@@ -88,6 +89,7 @@ namespace FileBasedDataSources
 
         public Dictionary<int, string> ValidSedimentTypes { get { return BottomSedimentTypeTable.SedimentNames; } }
         public int SelectedSedimentType { get; set; }
+        public override string Xml { get; set; }
 
         protected override void Save()
         {

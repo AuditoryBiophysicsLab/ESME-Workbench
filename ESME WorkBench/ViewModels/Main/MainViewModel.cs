@@ -85,7 +85,15 @@ namespace ESMEWorkbench.ViewModels.Main
             _cache = cache;
             MapViewModel = new MapViewModel(_viewAwareStatus, _messageBox, this, _visualizer, _saveFile);
             Cursor = Cursors.Arrow;
-            
+
+            ESME.Globals.PluginManagerService = plugins;
+            ESME.Globals.TransmissionLossCalculatorService = transmissionLoss;
+            ESME.Globals.MasterDatabaseService = database;
+            ESME.Globals.VisualizerService = visualizer;
+            ESME.Globals.SaveFileService = saveFile;
+            ESME.Globals.OpenFileService = openFile;
+            ESME.Globals.EnvironmentalCacheService = cache;
+
             _transmissionLoss.WorkQueue.PropertyChanged +=
                 (s, e) =>
                 {
@@ -167,25 +175,6 @@ namespace ESMEWorkbench.ViewModels.Main
         void SetMouseEarthCoordinate(Geo mouseGeo)
         {
             MouseGeo = mouseGeo;
-#if false
-            if (IsInAnalysisPointMode)
-            {
-                if (_fakeAnalysisPoint == null)
-                {
-                    _fakeAnalysisPoint = new AnalysisPoint { Geo = MouseGeo, Scenario = Scenario };
-                    Database.AddFakeMapLayer(_fakeAnalysisPoint);
-                    _fakeAnalysisPoint.CreateMapLayers();
-                    _fakeAnalysisPoint.LayerSettings.IsChecked = true;
-                }
-                else
-                {
-                    _fakeAnalysisPoint.Geo = MouseGeo;
-                    MediatorMessage.Send(MediatorMessage.RemoveMapLayer, _fakeAnalysisPoint.LayerSettings.MapLayerViewModel);
-                    ((OverlayShapeMapLayer)_fakeAnalysisPoint.LayerSettings.MapLayerViewModel).DrawAction();
-                    MediatorMessage.Send(MediatorMessage.AddMapLayer, _fakeAnalysisPoint.LayerSettings.MapLayerViewModel);
-                }
-            }
-#endif
             if (MouseGeo != null)
             {
                 var lat = mouseGeo.Latitude;
@@ -451,7 +440,7 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 if (Scenario != null && geo != null && Scenario.GeoRect.Contains(geo))
                 {
-                    TaskEx.Run(() =>
+                    Task.Run(() =>
                     {
                         var analysisPoint = new AnalysisPoint { Geo = new Geo(geo), Scenario = Scenario };
                         Scenario.AnalysisPoints.Add(analysisPoint);

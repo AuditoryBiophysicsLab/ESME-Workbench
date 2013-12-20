@@ -108,6 +108,8 @@ namespace ESME.Plugins
         [XmlIgnore] public object SelectionControlViewModel { get; protected set; }
         [XmlIgnore] public abstract EnvironmentalDataSet SelectedDataSet { get; }
 
+        public abstract string Xml { get; set; }
+
         protected void CheckResolutionAndTimePeriod(float resolution, TimePeriod timePeriod)
         {
             if (!AvailableTimePeriods.Contains(timePeriod)) throw new ParameterOutOfRangeException(string.Format("Specified timePeriod is not available in the {0} data set", PluginName));
@@ -149,5 +151,4 @@ namespace ESME.Plugins
     {
         public abstract T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, PercentProgress progress = null);
     }
-    
 }

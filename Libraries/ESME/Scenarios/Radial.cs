@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -155,7 +156,7 @@ namespace ESME.Scenarios
                     deleteFailed = true;
                 }
                 if (!deleteFailed) break;
-                await TaskEx.Delay(FileDeleteDelayTime);
+                await Task.Delay(FileDeleteDelayTime);
                 retryCount--;
             }
         }
@@ -251,7 +252,7 @@ namespace ESME.Scenarios
                 if (_bottomDepths != null) _shadeFile.BottomDepths = _bottomDepths;
             });
             result.Start();
-            await TaskEx.WhenAll(result);
+            await Task.WhenAll(result);
             return this;
         }
 

@@ -91,7 +91,7 @@ namespace ESME.Simulator
 
             try
             {
-                var result = TaskEx.Run(() => Run(TimeStepSize, _cancellationTokenSource.Token));
+                var result = Task.Run(() => Run(TimeStepSize, _cancellationTokenSource.Token));
                 await result;
             }
             catch (Exception e)
@@ -249,7 +249,7 @@ namespace ESME.Simulator
                     bufferBlock.Complete();
                 }
                 //Debug.WriteLine("Actor IDs sent.  Waiting for completion.");
-                TaskEx.WhenAll(actionBlockCompletions).Wait();
+                Task.WhenAll(actionBlockCompletions).Wait();
                 PercentProgress.Report(timeStepIndex);
                 var timeStepRecord = new SimulationTimeStepRecord();
                 timeStepRecord.ActorPositionRecords.AddRange(actorPositionRecords);
@@ -460,7 +460,7 @@ namespace ESME.Simulator
                     mbs.AbortRun();
                     throw new AnimatInterfaceMMBSException("C3mbs::RunScenarioNumIterations FATAL error: " + mbs.ResultToTc(result));
                 }
-                while (mbsRUNSTATE.RUNNING == mbs.GetRunState()) TaskEx.Yield();
+                while (mbsRUNSTATE.RUNNING == mbs.GetRunState()) Task.Yield();
             }, new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = -1 });
             foreach (var mbs in _mbs) actionBlock.Post(mbs);
             actionBlock.Complete();

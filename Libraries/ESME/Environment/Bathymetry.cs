@@ -20,7 +20,7 @@ namespace ESME.Environment
 
         public static Task<Bathymetry> LoadAsync(string filename)
         {
-            return TaskEx.Run(() => Load(filename));
+            return Task.Run(() => Load(filename));
         }
 
         public override void Save(string filename)

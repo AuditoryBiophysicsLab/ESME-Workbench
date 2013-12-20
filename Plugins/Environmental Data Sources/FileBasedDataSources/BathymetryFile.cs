@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.Composition;
 using System.IO;
+using System.Xml.Serialization;
 using ESME.Environment;
 using ESME.Plugins;
 using FileBasedDataSources.Controls;
@@ -29,7 +30,17 @@ namespace FileBasedDataSources
             IsSelectable = true;
         }
 
-        protected override void Save()
+        [XmlIgnore] public override string Xml
+        {
+            get { return new XmlSerializer<BathymetryFile> { Data = this }.SaveToXml(); }
+            set
+            {
+                var settings = XmlSerializer<BathymetryFile>.LoadFromXml(value);
+                DataLocation = settings.DataLocation;
+            }
+        }
+
+protected override void Save()
         {
             var serializer = new XmlSerializer<BathymetryFile> { Data = this };
             serializer.Save(ConfigurationFile, null);

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Data;
 using System.Data.Entity;
@@ -11,7 +10,6 @@ using System.Linq;
 using System.Threading;
 using ESME.Database;
 using ESME.Environment;
-using ESME.Migrations;
 using ESME.Plugins;
 using ESME.Scenarios;
 using HRC;
@@ -153,9 +151,8 @@ namespace ESME.Locations
                 Directory.CreateDirectory(Path.Combine(MasterDatabaseDirectory, "locations"));
                 Directory.CreateDirectory(Path.Combine(MasterDatabaseDirectory, "scenarios"));
             }
-            System.Data.Entity.Database.DefaultConnectionFactory = new SqlCeConnectionFactory("System.Data.SqlServerCe.4.0");
-            System.Data.Entity.Database.SetInitializer(new Initializer());
-            var connection = System.Data.Entity.Database.DefaultConnectionFactory.CreateConnection(Path.Combine(MasterDatabaseDirectory, "esme.db"));
+            //System.Data.Entity.Database.SetInitializer(new Initializer());
+            var connection = new SqlCeConnectionFactory("System.Data.SqlServerCe.4.0").CreateConnection(Path.Combine(MasterDatabaseDirectory, "esme.db"));
             Context = new LocationContext(connection, true);
             Refresh();
             OnPropertyChanged("Locations");
@@ -231,8 +228,8 @@ namespace ESME.Locations
             }
             catch (Exception e)
             {
-                Debug.WriteLine(string.Format("{0}: Caught (and discarded) exception from LogBase: {1}", DateTime.Now, e.Message));
-                Debug.WriteLine(string.Format("{0}:   Log message causing exception: {1}", DateTime.Now, logEntry.Message));
+                Debug.WriteLine("{0}: Caught (and discarded) exception from LogBase: {1}", DateTime.Now, e.Message);
+                Debug.WriteLine("{0}:   Log message causing exception: {1}", DateTime.Now, logEntry.Message);
             }
         }
 

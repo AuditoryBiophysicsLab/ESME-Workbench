@@ -28,6 +28,7 @@ namespace FileBasedDataSources
             IsTimeVariantData = true;
             IsSelectable = true;
         }
+        public override string Xml { get; set; }
 
         protected override void Save()
         {

@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -49,6 +50,22 @@ namespace ESME.Locations
         public string FileName { get; set; }
         public DbPluginIdentifier SourcePlugin { get; set; }
 
+        // Added by Dave on 12-Dec-2013 to support the new data source plugins
+        public string PluginXml
+        {
+            get
+            {
+                var sourcePlugin = (EnvironmentalDataSourcePluginBase)Globals.PluginManagerService[PluginType.EnvironmentalDataSource, SourcePlugin.PluginSubtype];
+                return sourcePlugin == null ? null : sourcePlugin.Xml;
+            }
+            set
+            {
+                var sourcePlugin = (EnvironmentalDataSourcePluginBase)Globals.PluginManagerService[PluginType.EnvironmentalDataSource, SourcePlugin.PluginSubtype];
+                if (sourcePlugin == null) return;
+                sourcePlugin.Xml = value;
+            }
+        }
+
         public virtual Location Location { get; set; }
         [Initialize] public virtual LayerSettings LayerSettings { get; set; }
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
@@ -74,6 +91,7 @@ namespace ESME.Locations
             }
         }
         [NotMapped] public bool IsDeleted { get; set; }
+
 
         protected static readonly Random Random = new Random();
         public async void UpdateMapLayers()

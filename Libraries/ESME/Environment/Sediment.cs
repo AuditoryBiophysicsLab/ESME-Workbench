@@ -19,7 +19,7 @@ namespace ESME.Environment
 
         public static Task<Sediment> LoadAsync(string filename)
         {
-            return TaskEx.Run(() => Load(filename));
+            return Task.Run(() => Load(filename));
         }
 
         public static Sediment Load(string filename)

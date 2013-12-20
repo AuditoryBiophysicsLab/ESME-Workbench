@@ -30,7 +30,7 @@ namespace ESMEWorkbench.ViewModels.Main
             var progress = new FirstRunProgressViewModel { ItemCount = _sampleScenarios.Count * 4, CurrentItem = 0 };
             var window = _visualizer.ShowWindow("FirstRunProgressView", progress, true);
             _openPopups.Add(window);
-            await TaskEx.Delay(10);
+            await Task.Delay(10);
             var windData = new EnvironmentalDataSet { SourcePlugin = new DbPluginIdentifier(wind.PluginIdentifier), Resolution = wind.AvailableResolutions.Max() };
             var soundSpeedData = new EnvironmentalDataSet { SourcePlugin = new DbPluginIdentifier(soundSpeed.PluginIdentifier), Resolution = soundSpeed.AvailableResolutions.Max() };
             var bathymetryData = new EnvironmentalDataSet { SourcePlugin = new DbPluginIdentifier(bathymetry.PluginIdentifier), Resolution = bathymetry.AvailableResolutions.Max() };
@@ -120,12 +120,12 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             progress.ProgressMessage = string.Format("Creating sample location \"{0}\"", scenarioDescriptor.LocationName);
             progress.CurrentItem++;
-            await TaskEx.Delay(10);
+            await Task.Delay(10);
             var location = CreateLocation(scenarioDescriptor.LocationName, "Created as a sample location", scenarioDescriptor.GeoRect);
             location.UpdateMapLayers();
             progress.ProgressMessage = string.Format("Creating sample scenario \"{0}\"", scenarioDescriptor.ScenarioName);
             progress.CurrentItem++;
-            await TaskEx.Delay(10);
+            await Task.Delay(10);
             var scenario = CreateScenario(location, scenarioDescriptor.ScenarioName, "Created as a sample scenario", scenarioDescriptor.TimePeriod, new TimeSpan(0, 1, 0, 0), windData, soundSpeedData, bathymetryData, sedimentData);
             var perimeterGeoArray = new GeoArray(scenarioDescriptor.PerimeterGeos);
             Perimeter perimeter = (GeoArray)perimeterGeoArray.Closed;
@@ -174,7 +174,7 @@ namespace ESMEWorkbench.ViewModels.Main
             animats.Save(species.PopulationFilePath);
             //Database.SaveChanges();
             progress.ProgressMessage = string.Format("Extracting environmental data for scenario \"{0}\"", scenarioDescriptor.ScenarioName);
-            await TaskEx.WhenAll(_cache[scenario.Wind], _cache[scenario.SoundSpeed], _cache[scenario.Bathymetry], _cache[scenario.Sediment]);
+            await Task.WhenAll(_cache[scenario.Wind], _cache[scenario.SoundSpeed], _cache[scenario.Bathymetry], _cache[scenario.Sediment]);
             progress.CurrentItem++;
             _dispatcher.InvokeIfRequired(() =>
             {
@@ -193,12 +193,12 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             progress.ProgressMessage = string.Format("Creating sample location \"{0}\"", scenarioDescriptor.LocationName);
             progress.CurrentItem++;
-            await TaskEx.Delay(10);
+            await Task.Delay(10);
             var location = CreateLocation(scenarioDescriptor.LocationName, "Created as a sample location", scenarioDescriptor.GeoRect);
             location.UpdateMapLayers();
             progress.ProgressMessage = string.Format("Creating sample scenario \"{0}\"", scenarioDescriptor.ScenarioName);
             progress.CurrentItem++;
-            await TaskEx.Delay(10);
+            await Task.Delay(10);
             var scenario = CreateScenario(location, scenarioDescriptor.ScenarioName, "Created as a sample scenario", scenarioDescriptor.TimePeriod, new TimeSpan(0, 1, 0, 0), windData, soundSpeedData, bathymetryData, sedimentData);
             var perimeterGeoArray = new GeoArray(scenarioDescriptor.PerimeterGeos);
             Perimeter perimeter = (GeoArray)perimeterGeoArray.Closed;
@@ -244,7 +244,7 @@ namespace ESMEWorkbench.ViewModels.Main
             animats.Save(species.PopulationFilePath);
             //Database.SaveChanges();
             progress.ProgressMessage = string.Format("Extracting environmental data for scenario \"{0}\"", scenarioDescriptor.ScenarioName);
-            await TaskEx.WhenAll(_cache[scenario.Wind], _cache[scenario.SoundSpeed], _cache[scenario.Bathymetry], _cache[scenario.Sediment]);
+            await Task.WhenAll(_cache[scenario.Wind], _cache[scenario.SoundSpeed], _cache[scenario.Bathymetry], _cache[scenario.Sediment]);
             progress.CurrentItem++;
             _dispatcher.InvokeIfRequired(() =>
             {

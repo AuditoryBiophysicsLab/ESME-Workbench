@@ -125,7 +125,7 @@ namespace DavesConsoleTester
                          .ContinueWith(t => Numerics.WriteVector(t.Result.Item1, String.Format("r{0:0}d{1:0}.esme", curRange, curDepth)))
                          //.ContinueWith(t => Console.WriteLine("{4:HH:mm:ss.fff} range {0} depth {1}: Peak pressure: {2} dB  Total energy: {3} dB", range, depth, t.Result.Item2, t.Result.Item3, DateTime.Now))
                          ).ToList();
-            await TaskEx.WhenAll(tasks);
+            await Task.WhenAll(tasks);
             //var impulseResponse = arrivalsFile.DelayAndSum(chapman, 100000, 1, 1000, 50);
             Debug.WriteLine("Elapsed time as async: " + stopwatch.Elapsed);
         }

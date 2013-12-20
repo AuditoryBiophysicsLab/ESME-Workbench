@@ -4,7 +4,6 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -302,7 +301,7 @@ namespace ESMEWorkbench.ViewModels.Main
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete this analysis point \"{0}\"?", analysisPoint.Geo), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             //analysisPoint.LayerSettings.IsChecked = false;
             //analysisPoint.RemoveMapLayers();
-            //await TaskEx.Delay(50);
+            //await Task.Delay(50);
             analysisPoint.Delete();
             OnPropertyChanged("IsRunSimulationCommandEnabled");
             OnPropertyChanged("IsSaveScenarioCommandEnabled");
@@ -314,7 +313,7 @@ namespace ESMEWorkbench.ViewModels.Main
             if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete all analysis points from the scenario {0} ?", Scenario.Name), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             //foreach (var analysisPoint in Scenario.AnalysisPoints) analysisPoint.LayerSettings.IsChecked = false;
             //foreach (var analysisPoint in Scenario.AnalysisPoints) analysisPoint.RemoveMapLayers();
-            //await TaskEx.Delay(50);
+            //await Task.Delay(50);
             foreach (var analysisPoint in Scenario.AnalysisPoints.ToList()) analysisPoint.Delete();
             OnPropertyChanged("IsRunSimulationCommandEnabled");
         }
@@ -345,7 +344,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 MessageBoxResult.Yes) return;
             //transmissionLoss.LayerSettings.IsChecked = false;
             //transmissionLoss.RemoveMapLayers();
-            //await TaskEx.Delay(50);
+            //await Task.Delay(50);
             transmissionLoss.Delete();
         }
 
@@ -404,7 +403,7 @@ namespace ESMEWorkbench.ViewModels.Main
             if (!platform.IsNew) return;
             platform.IsNew = false;
             ((LayerControl)platform.LayerControl).Select();
-            await TaskEx.Delay(50);
+            await Task.Delay(50);
             ((LayerControl)platform.LayerControl).Edit();
         }
 
@@ -457,7 +456,7 @@ namespace ESMEWorkbench.ViewModels.Main
             if (!source.IsNew) return;
             source.IsNew = false;
             ((LayerControl)source.LayerControl).Select();
-            await TaskEx.Delay(50);
+            await Task.Delay(50);
             ((LayerControl)source.LayerControl).Edit();
         }
 
@@ -525,7 +524,7 @@ namespace ESMEWorkbench.ViewModels.Main
             if (!mode.IsNew) return;
             mode.IsNew = false;
             ((LayerControl)mode.LayerControl).Select();
-            await TaskEx.Delay(50);
+            await Task.Delay(50);
             ((LayerControl)mode.LayerControl).Edit();
         }
 

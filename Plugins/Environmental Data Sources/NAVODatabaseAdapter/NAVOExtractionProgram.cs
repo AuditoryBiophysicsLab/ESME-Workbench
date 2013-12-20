@@ -32,7 +32,7 @@ namespace NAVODatabaseAdapter
 // ReSharper disable EmptyGeneralCatchClause
             try { process.PriorityClass = ProcessPriorityClass.Idle; } catch {}
 // ReSharper restore EmptyGeneralCatchClause
-            while (!process.HasExited) await TaskEx.Delay(50);
+            while (!process.HasExited) await Task.Delay(50);
             //Debug.WriteLine("{0}: {1} has completed", DateTime.Now, Path.GetFileNameWithoutExtension(extractionProgramPath));
             return process.StandardOutput.ReadToEnd();
         }
