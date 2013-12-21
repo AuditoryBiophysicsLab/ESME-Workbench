@@ -27,11 +27,11 @@ git push
 IF %ERRORLEVEL% NEQ 0 goto Failure
 call "BuildAndDeploy.bat" download  %ESMEVersion%
 IF %ERRORLEVEL% NEQ 0 goto Failure
-goto End
+goto Success
 :DoNotBuild
 echo Build canceled
 goto Done
-:End
+:Success
 echo Successfully built public release %ESMEVersion%
 goto Done
 :Failure

@@ -20,4 +20,5 @@ echo Successfully built development release %ESMEVersion%
 goto End
 :Failure
 echo Build of development release %ESMEVersion% FAILED
+:End
 pause
