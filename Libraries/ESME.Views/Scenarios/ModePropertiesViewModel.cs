@@ -17,7 +17,6 @@ namespace ESME.Views.Scenarios
         readonly Mode _editedMode;
         readonly Mode _originalMode;
         const string TimeSpanFormatString = @"hh\:mm\:ss\.fff";
-        public static IPluginManagerService PluginManagerService { get; set; }
         [UsedImplicitly] PropertyObserver<ModePropertiesViewModel> _propertyObserver;
 
         public ModePropertiesViewModel(Mode mode)
@@ -41,10 +40,10 @@ namespace ESME.Views.Scenarios
             RadialCountString = _editedMode.RadialCount == 0 ? ValidRadialCounts[0] : _editedMode.RadialCount.ToString(CultureInfo.InvariantCulture);
             SideLobeAttenuation = _editedMode.SideLobeAttenuation;
 
-            AvailableTransmissionLossEngines.AddRange(from key in PluginManagerService[PluginType.TransmissionLossCalculator].Keys
-                                                      select (TransmissionLossCalculatorPluginBase)PluginManagerService[PluginType.TransmissionLossCalculator][key].DefaultPlugin);
+            AvailableTransmissionLossEngines.AddRange(from key in Globals.PluginManagerService[PluginType.TransmissionLossCalculator].Keys
+                                                      select (TransmissionLossCalculatorPluginBase)Globals.PluginManagerService[PluginType.TransmissionLossCalculator][key].DefaultPlugin);
 
-            SelectedTransmissionLossEngine = _editedMode.GetTransmissionLossPlugin(PluginManagerService);
+            SelectedTransmissionLossEngine = _editedMode.GetTransmissionLossPlugin(Globals.PluginManagerService);
 
             _propertyObserver = new PropertyObserver<ModePropertiesViewModel>(this)
                 .RegisterHandler(p => p.SelectedTransmissionLossEngine, () => { });

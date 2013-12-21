@@ -1,4 +1,5 @@
-﻿using ESME.Data;
+﻿using System.Windows.Threading;
+using ESME.Data;
 using ESME.Locations;
 using ESME.Plugins;
 using ESME.TransmissionLoss;
@@ -27,5 +28,8 @@ namespace ESME
         public static IHRCSaveFileService SaveFileService { get; set; }
         public static IHRCOpenFileService OpenFileService { get; set; }
         public static EnvironmentalCacheService EnvironmentalCacheService { get; set; }
+        public static IViewAwareStatus ViewAwareStatusService { get; set; }
+        public static IMessageBoxService MessageBoxService { get; set; }
+        public static Dispatcher Dispatcher { get; set; }
     }
 }

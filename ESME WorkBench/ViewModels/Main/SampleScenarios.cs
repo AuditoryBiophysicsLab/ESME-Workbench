@@ -19,16 +19,16 @@ namespace ESMEWorkbench.ViewModels.Main
         public bool IsSaveSampleDataRequested { get; set; }
         public async void CreateSampleScenariosIfRequested()
         {
-            var wind = (EnvironmentalDataSourcePluginBase)_plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Wind];
-            var soundSpeed = (EnvironmentalDataSourcePluginBase)_plugins[PluginType.EnvironmentalDataSource, PluginSubtype.SoundSpeed];
-            var bathymetry = (EnvironmentalDataSourcePluginBase)_plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry];
-            var sediment = (EnvironmentalDataSourcePluginBase)_plugins[PluginType.EnvironmentalDataSource, PluginSubtype.Sediment];
-            foreach (var locations in Database.Context.Locations.Local) locations.UpdateMapLayers();
+            var wind = (EnvironmentalDataSourcePluginBase)ESME.Globals.PluginManagerService[PluginType.EnvironmentalDataSource, PluginSubtype.Wind];
+            var soundSpeed = (EnvironmentalDataSourcePluginBase)ESME.Globals.PluginManagerService[PluginType.EnvironmentalDataSource, PluginSubtype.SoundSpeed];
+            var bathymetry = (EnvironmentalDataSourcePluginBase)ESME.Globals.PluginManagerService[PluginType.EnvironmentalDataSource, PluginSubtype.Bathymetry];
+            var sediment = (EnvironmentalDataSourcePluginBase)ESME.Globals.PluginManagerService[PluginType.EnvironmentalDataSource, PluginSubtype.Sediment];
+            foreach (var locations in ESME.Globals.MasterDatabaseService.Context.Locations.Local) locations.UpdateMapLayers();
             if (wind == null || soundSpeed == null || bathymetry == null || sediment == null) return;
-            var result = _visualizer.ShowDialog("FirstRunQuestionView", new FirstRunQuestionViewModel { MessageBoxService = _messageBox });
+            var result = ESME.Globals.VisualizerService.ShowDialog("FirstRunQuestionView", new FirstRunQuestionViewModel { MessageBoxService = ESME.Globals.MessageBoxService });
             if (!result.HasValue || !result.Value) return;
             var progress = new FirstRunProgressViewModel { ItemCount = _sampleScenarios.Count * 4, CurrentItem = 0 };
-            var window = _visualizer.ShowWindow("FirstRunProgressView", progress, true);
+            var window = ESME.Globals.VisualizerService.ShowWindow("FirstRunProgressView", progress, true);
             _openPopups.Add(window);
             await Task.Delay(10);
             var windData = new EnvironmentalDataSet { SourcePlugin = new DbPluginIdentifier(wind.PluginIdentifier), Resolution = wind.AvailableResolutions.Max() };
@@ -153,9 +153,9 @@ namespace ESMEWorkbench.ViewModels.Main
             AddMode(AddSource(platform, "300 Hz 37500", false), "300 Hz mode", false, 300, 10, 37500);
             AddMode(AddSource(platform, "300 Hz 25000", false), "300 Hz mode", false, 300, 10, 25000);
 
-            platform.Sources[0].Modes[0].TransmissionLossPluginType = _plugins[PluginType.TransmissionLossCalculator][PluginSubtype.RAMGeo].DefaultPlugin.PluginIdentifier.Type;
-            platform.Sources[1].Modes[0].TransmissionLossPluginType = _plugins[PluginType.TransmissionLossCalculator][PluginSubtype.RAMGeo].DefaultPlugin.PluginIdentifier.Type;
-            platform.Sources[2].Modes[0].TransmissionLossPluginType = _plugins[PluginType.TransmissionLossCalculator][PluginSubtype.Bellhop].DefaultPlugin.PluginIdentifier.Type;
+            platform.Sources[0].Modes[0].TransmissionLossPluginType = ESME.Globals.PluginManagerService[PluginType.TransmissionLossCalculator][PluginSubtype.RAMGeo].DefaultPlugin.PluginIdentifier.Type;
+            platform.Sources[1].Modes[0].TransmissionLossPluginType = ESME.Globals.PluginManagerService[PluginType.TransmissionLossCalculator][PluginSubtype.RAMGeo].DefaultPlugin.PluginIdentifier.Type;
+            platform.Sources[2].Modes[0].TransmissionLossPluginType = ESME.Globals.PluginManagerService[PluginType.TransmissionLossCalculator][PluginSubtype.Bellhop].DefaultPlugin.PluginIdentifier.Type;
             AddPlatform(scenario, platform);
             progress.ProgressMessage = string.Format("Generating animat population for scenario \"{0}\"", scenarioDescriptor.ScenarioName);
             var species = new ScenarioSpecies
@@ -170,13 +170,13 @@ namespace ESMEWorkbench.ViewModels.Main
             };
             scenario.ScenarioSpecies.Add(species);
             scenario.RemoveMapLayers();
-            var animats = await Animat.SeedAsync(species, scenarioDescriptor.GeoRect, (Bathymetry)_cache[scenario.Bathymetry].Result);
+            var animats = await Animat.SeedAsync(species, scenarioDescriptor.GeoRect, (Bathymetry)ESME.Globals.EnvironmentalCacheService[scenario.Bathymetry].Result);
             animats.Save(species.PopulationFilePath);
             //Database.SaveChanges();
             progress.ProgressMessage = string.Format("Extracting environmental data for scenario \"{0}\"", scenarioDescriptor.ScenarioName);
-            await Task.WhenAll(_cache[scenario.Wind], _cache[scenario.SoundSpeed], _cache[scenario.Bathymetry], _cache[scenario.Sediment]);
+            await Task.WhenAll(ESME.Globals.EnvironmentalCacheService[scenario.Wind], ESME.Globals.EnvironmentalCacheService[scenario.SoundSpeed], ESME.Globals.EnvironmentalCacheService[scenario.Bathymetry], ESME.Globals.EnvironmentalCacheService[scenario.Sediment]);
             progress.CurrentItem++;
-            _dispatcher.InvokeIfRequired(() =>
+            ESME.Globals.Dispatcher.InvokeIfRequired(() =>
             {
                 progress.ProgressMessage = string.Format("Adding analysis point(s) to scenario \"{0}\"", scenarioDescriptor.ScenarioName);
                 scenario.ShowAllAnalysisPoints = true;
@@ -224,8 +224,8 @@ namespace ESMEWorkbench.ViewModels.Main
             AddMode(AddSource(platform, "High Frequency Source", false), "3 kHz mode", false, 3000, 5);
             AddMode(AddSource(platform, "Low Frequency Source", false), "100 Hz mode", false, 100, 10, 50000);
 
-            platform.Sources[0].Modes[0].TransmissionLossPluginType = _plugins[PluginType.TransmissionLossCalculator][PluginSubtype.Bellhop].DefaultPlugin.PluginIdentifier.Type;
-            platform.Sources[1].Modes[0].TransmissionLossPluginType = _plugins[PluginType.TransmissionLossCalculator][PluginSubtype.RAMGeo].DefaultPlugin.PluginIdentifier.Type;
+            platform.Sources[0].Modes[0].TransmissionLossPluginType = ESME.Globals.PluginManagerService[PluginType.TransmissionLossCalculator][PluginSubtype.Bellhop].DefaultPlugin.PluginIdentifier.Type;
+            platform.Sources[1].Modes[0].TransmissionLossPluginType = ESME.Globals.PluginManagerService[PluginType.TransmissionLossCalculator][PluginSubtype.RAMGeo].DefaultPlugin.PluginIdentifier.Type;
             AddPlatform(scenario, platform);
             progress.ProgressMessage = string.Format("Generating animat population for scenario \"{0}\"", scenarioDescriptor.ScenarioName);
             var species = new ScenarioSpecies
@@ -240,13 +240,13 @@ namespace ESMEWorkbench.ViewModels.Main
             };
             scenario.ScenarioSpecies.Add(species);
             scenario.RemoveMapLayers();
-            var animats = await Animat.SeedAsync(species, scenarioDescriptor.GeoRect, (Bathymetry)_cache[scenario.Bathymetry].Result);
+            var animats = await Animat.SeedAsync(species, scenarioDescriptor.GeoRect, (Bathymetry)ESME.Globals.EnvironmentalCacheService[scenario.Bathymetry].Result);
             animats.Save(species.PopulationFilePath);
             //Database.SaveChanges();
             progress.ProgressMessage = string.Format("Extracting environmental data for scenario \"{0}\"", scenarioDescriptor.ScenarioName);
-            await Task.WhenAll(_cache[scenario.Wind], _cache[scenario.SoundSpeed], _cache[scenario.Bathymetry], _cache[scenario.Sediment]);
+            await Task.WhenAll(ESME.Globals.EnvironmentalCacheService[scenario.Wind], ESME.Globals.EnvironmentalCacheService[scenario.SoundSpeed], ESME.Globals.EnvironmentalCacheService[scenario.Bathymetry], ESME.Globals.EnvironmentalCacheService[scenario.Sediment]);
             progress.CurrentItem++;
-            _dispatcher.InvokeIfRequired(() =>
+            ESME.Globals.Dispatcher.InvokeIfRequired(() =>
             {
                 progress.ProgressMessage = string.Format("Adding analysis point(s) to scenario \"{0}\"", scenarioDescriptor.ScenarioName);
                 scenario.ShowAllAnalysisPoints = true;

@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Windows;
 using ESME.Behaviors;
-using ESME.Locations;
 using ESME.Scenarios;
 using HRC;
 using HRC.Navigation;
-using HRC.Services;
 using HRC.ViewModels;
 using HRC.WPF;
 
@@ -62,14 +60,11 @@ namespace ESME.Views.Scenarios
     {
         [UsedImplicitly] PropertyObserver<Platform> _platformObserver;
         [UsedImplicitly] PropertyObserver<PlatformPropertiesViewModel> _viewModelObserver;
-        public PlatformPropertiesViewModel(Platform platform, IHRCOpenFileService openFileService, IMessageBoxService messageBoxService, IMasterDatabaseService databaseService)
+        public PlatformPropertiesViewModel(Platform platform)
         {
             Platform = platform;
             Latitude = platform.Geo.Latitude;
             Longitude = platform.Geo.Longitude;
-            _openFileService = openFileService;
-            _messageBoxService = messageBoxService;
-            _databaseService = databaseService;
             _platformObserver = new PropertyObserver<Platform>(Platform)
                 .RegisterHandler(p => p.SelectedTrackType, SelectedTrackTypeChanged)
                 .RegisterHandler(p => p.PlatformName, WindowTitleChanged)
@@ -91,9 +86,6 @@ namespace ESME.Views.Scenarios
         public string WindowTitle { get; set; }
         public Visibility ImportWaypointFileVisibility { get; set; }
         public Visibility RandomizeSectionVisibility { get; set; }
-        readonly IHRCOpenFileService _openFileService;
-        readonly IMessageBoxService _messageBoxService;
-        readonly IMasterDatabaseService _databaseService;
         public double Latitude { get; set; }
         public double Longitude { get; set; }
         bool _isGeoChanged;
@@ -135,7 +127,7 @@ namespace ESME.Views.Scenarios
         void SelectedTrackTypeChanged()
         {
             CheckIsSpeedEnabled();
-            ImportWaypointFileVisibility = _openFileService != null && Platform.SelectedTrackType == TrackType.WaypointFile ? Visibility.Visible : Visibility.Collapsed;
+            ImportWaypointFileVisibility = Globals.OpenFileService != null && Platform.SelectedTrackType == TrackType.WaypointFile ? Visibility.Visible : Visibility.Collapsed;
             RandomizeSectionVisibilityChanged();
         }
         void RandomizeSectionVisibilityChanged() { RandomizeSectionVisibility = IsPSMView || (Platform.SelectedTrackType == TrackType.WaypointFile) ? Visibility.Collapsed : Visibility.Visible; }
@@ -162,21 +154,21 @@ namespace ESME.Views.Scenarios
         void ImportWaypointFileHandler(EventToCommandArgs args)
         {
             //var parameter = args.CommandParameter;
-            _openFileService.Title = "Import waypoint file";
-            _openFileService.Filter = "Waypoint files (*.wpt)|*.wpt|Text files (*.txt)|*.txt|All files (*.*)|*.*";
-            var result = _openFileService.ShowDialog(null);
+            Globals.OpenFileService.Title = "Import waypoint file";
+            Globals.OpenFileService.Filter = "Waypoint files (*.wpt)|*.wpt|Text files (*.txt)|*.txt|All files (*.*)|*.*";
+            var result = Globals.OpenFileService.ShowDialog(null);
             if (!result.HasValue || !result.Value) return;
             try
             {
-                if (Platform.ShipTrack != null) _databaseService.Context.ShipTracks.Remove(Platform.ShipTrack);
-                var shipTrack = ShipTrack.ReadWaypointFile(_openFileService.FileName);
-                _databaseService.Context.ShipTracks.Add(shipTrack);
+                if (Platform.ShipTrack != null) Globals.MasterDatabaseService.Context.ShipTracks.Remove(Platform.ShipTrack);
+                var shipTrack = ShipTrack.ReadWaypointFile(Globals.OpenFileService.FileName);
+                Globals.MasterDatabaseService.Context.ShipTracks.Add(shipTrack);
                 shipTrack.Platform = Platform;
                 Platform.ShipTrack = shipTrack;
             }
             catch (Exception ex)
             {
-                _messageBoxService.ShowError(ex.Message);
+                Globals.MessageBoxService.ShowError(ex.Message);
             }
         }
         #endregion

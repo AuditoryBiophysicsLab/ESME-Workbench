@@ -7,7 +7,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks.Dataflow;
-using System.Windows.Threading;
 using ESME.Environment;
 using ESME.Locations;
 using ESME.Plugins;
@@ -27,20 +26,20 @@ namespace ESME.TransmissionLoss
         public TransmissionLossCalculatorService()
         {
             WorkQueue = new ObservableConcurrentDictionary<Guid, Radial>();
-            _calculator = new ActionBlock<Radial>(radial =>
+            var calculator = new ActionBlock<Radial>(radial =>
             {
                 if (!radial.IsDeleted) Calculate(radial);
                 WorkQueue.Remove(radial.Guid);
                 _shadeFileProcessorQueue.Post(radial);
             }, new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = System.Environment.ProcessorCount });
             _calculatorQueue = new BufferBlock<Radial>(new DataflowBlockOptions { BoundedCapacity = -1 });
-            _calculatorQueue.LinkTo(_calculator);
-            _shadeFileProcessor = new ActionBlock<Radial>(r =>
+            _calculatorQueue.LinkTo(calculator);
+            var shadeFileProcessor = new ActionBlock<Radial>(r =>
             {
                 if (!r.IsDeleted && r.ExtractAxisData()) r.ReleaseAxisData();
             }, new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = System.Environment.ProcessorCount });
             _shadeFileProcessorQueue = new BufferBlock<Radial>(new DataflowBlockOptions { BoundedCapacity = -1 });
-            _shadeFileProcessorQueue.LinkTo(_shadeFileProcessor);
+            _shadeFileProcessorQueue.LinkTo(shadeFileProcessor);
         }
 
         public TransmissionLossCalculatorService(IMasterDatabaseService databaseService, IPluginManagerService pluginService, EnvironmentalCacheService cacheService) : this()
@@ -51,16 +50,13 @@ namespace ESME.TransmissionLoss
 
         [Import] IMasterDatabaseService _databaseService;
         [Import] EnvironmentalCacheService _cacheService;
-        public Dispatcher Dispatcher { get; set; }
         public ObservableConcurrentDictionary<Guid, Radial> WorkQueue { get; private set; }
-        readonly ActionBlock<Radial> _calculator;
         readonly BufferBlock<Radial> _calculatorQueue;
-        readonly ActionBlock<Radial> _shadeFileProcessor;
         readonly BufferBlock<Radial> _shadeFileProcessorQueue;
 
         public void OnImportsSatisfied()
         {
-            if (Dispatcher == null || _databaseService.MasterDatabaseDirectory == null) return;
+            if (Globals.Dispatcher == null || _databaseService.MasterDatabaseDirectory == null) return;
             Start();
         }
 
@@ -68,7 +64,7 @@ namespace ESME.TransmissionLoss
         bool _isStarted;
         public void Start()
         {
-            if (Dispatcher == null) return;
+            if (Globals.Dispatcher == null) return;
 
             lock (LockObject)
             {
@@ -139,7 +135,6 @@ namespace ESME.TransmissionLoss
             Calculate(radial);
         }
 
-        public IPluginManagerService PluginManagerService { get; set; }
         void Calculate(Radial radial)
         {
             try
@@ -187,14 +182,14 @@ namespace ESME.TransmissionLoss
                 var directoryPath = Path.GetDirectoryName(radial.BasePath);
                 if (directoryPath == null) return;
                 if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
-                if (PluginManagerService != null && PluginManagerService[PluginType.TransmissionLossCalculator] != null)
+                if (Globals.PluginManagerService != null && Globals.PluginManagerService[PluginType.TransmissionLossCalculator] != null)
                 {
                     var profilesAlongRadial = ProfilesAlongRadial(radial.Segment, 0.0, null, null, bottomProfile, soundSpeed[timePeriod].EnvironmentData, deepestProfile).ToList();
                     if (radial.IsDeleted) return;
                     radial.CalculationStarted = DateTime.Now;
                     try
                     {
-                        mode.GetTransmissionLossPlugin(PluginManagerService).CalculateTransmissionLoss(platform, mode, radial, bottomProfile, sedimentSample, windSample.Data, profilesAlongRadial);
+                        mode.GetTransmissionLossPlugin(Globals.PluginManagerService).CalculateTransmissionLoss(platform, mode, radial, bottomProfile, sedimentSample, windSample.Data, profilesAlongRadial);
                     }
                     catch (RadialDeletedByUserException)
                     {

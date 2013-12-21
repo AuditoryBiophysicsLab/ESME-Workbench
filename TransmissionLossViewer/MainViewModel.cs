@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel.Composition;
-using System.IO;
 using System.Linq;
 using System.Windows;
 using ESME.Scenarios;
@@ -19,10 +18,8 @@ namespace TransmissionLossViewer
     [ExportViewModel("TransmissionLossViewerMainViewModel")]
     class MainViewModel : ViewModelBase
     {
-        readonly string _databaseDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"ESME Workbench\Database");
         public string TitleString { get; set; }
         public int RadialCount { get; set; }
-        public IMasterDatabaseService Database { get; private set; }
         [Initialize] public ObservableList<AnalysisPoint> AnalysisPoints { get; set; }
         [Initialize] public ObservableList<Tuple<string, TransmissionLoss>> AnalysisPointModes { get; set; }
         [Initialize] public ObservableList<Radial> Radials { get; set; }
@@ -57,8 +54,9 @@ namespace TransmissionLossViewer
         [ImportingConstructor]
         public MainViewModel(IHRCSaveFileService saveFileService, IViewAwareStatus viewAwareStatus, IMasterDatabaseService database)
         {
-            Database = database;
-            Database.MasterDatabaseDirectory = _databaseDirectory;
+            ESME.Globals.SaveFileService = saveFileService;
+            ESME.Globals.ViewAwareStatusService = viewAwareStatus;
+            ESME.Globals.MasterDatabaseService = database;
             if (!Designer.IsInDesignMode)
             {
                 viewAwareStatus.ViewLoaded += () =>
@@ -67,7 +65,7 @@ namespace TransmissionLossViewer
                                                       TransmissionLossViewModel.SaveFileService = saveFileService;
                                                       TransmissionLossViewModel.RadialViewModel.WaitToRenderText = "No Scenario Selected";
                                                   };
-                viewAwareStatus.ViewActivated += () => Database.Refresh();
+                viewAwareStatus.ViewActivated += () => ESME.Globals.MasterDatabaseService.Refresh();
             }
         }
 
@@ -80,7 +78,7 @@ namespace TransmissionLossViewer
                 return _viewClosing ?? (_viewClosing = new SimpleCommand<object, EventToCommandArgs>(vcArgs =>
                 {
                     Properties.Settings.Default.Save();
-                    Database.Dispose();
+                    ESME.Globals.MasterDatabaseService.Dispose();
                 }));
             }
         }

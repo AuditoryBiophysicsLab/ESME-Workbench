@@ -84,6 +84,9 @@
       <Private>True</Private>
       <HintPath>..\Solutions\ESME Workbench\packages\PostSharp.3.1.27\lib\net20\PostSharp.dll</HintPath>
     </Reference>
+    <Reference Include="PostSharp.Patterns.Model">
+      <HintPath>..\Solutions\ESME Workbench\packages\PostSharp.Patterns.Model.3.1.27\lib\net40\PostSharp.Patterns.Model.dll</HintPath>
+    </Reference>
     <Reference Include="RibbonControlsLibrary, Version=4.0.0.11019, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -176,7 +179,7 @@
     <Compile Include="Controls\MapView.xaml.cs">
       <DependentUpon>MapView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Globals.cs" />
+    <Compile Include="StaticHelpers.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>

@@ -128,10 +128,6 @@
     <Reference Include="System.Runtime.Serialization">
       <Private>True</Private>
     </Reference>
-    <Reference Include="System.Threading.Tasks.Dataflow, Version=0.0.4098.29463, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\ESME WorkBench\External References\System.Threading.Tasks.Dataflow.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System.Transactions">
       <Private>True</Private>
     </Reference>

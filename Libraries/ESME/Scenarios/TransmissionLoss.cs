@@ -135,7 +135,7 @@ namespace ESME.Scenarios
         {
             if (Modes == null || Modes.Count == 0)
             {
-                Debug.WriteLine(string.Format("Deleting map layers for TL {0} at {1} because Modes is null or empty", Guid, (Geo)AnalysisPoint.Geo));
+                Debug.WriteLine("Deleting map layers for TL {0} at {1} because Modes is null or empty", Guid, (Geo)AnalysisPoint.Geo);
                 Delete();
                 return;
             }
@@ -156,7 +156,7 @@ namespace ESME.Scenarios
                     });
                 }
                 mapLayer.LineColor = Color.FromArgb(64, mapLayer.LineColor.R, mapLayer.LineColor.G, mapLayer.LineColor.B);
-                mapLayer.AreaColor = Color.FromArgb(32, mapLayer.LineColor.R, mapLayer.LineColor.G, mapLayer.LineColor.B); ;
+                mapLayer.AreaColor = Color.FromArgb(32, mapLayer.LineColor.R, mapLayer.LineColor.G, mapLayer.LineColor.B);
                 mapLayer.Clear();
                 var maxPropagationRadius = Modes.Max(m => m.MaxPropagationRadius);
                 //Debug.WriteLine(string.Format("Creating map layers for TL {0} of radius {1} for mode [{2}] at {3}", Guid, maxPropagationRadius, Modes.First().ModeName, (Geo)AnalysisPoint.Geo));
@@ -214,7 +214,7 @@ namespace ESME.Scenarios
             if (Modes != null && Modes.Count > 0)
             {
                 var maxPropagationRadius = Modes.Max(m => m.MaxPropagationRadius);
-                Debug.WriteLine(string.Format("Removing map layers for TL {0} of radius {1} for mode [{2}] at {3}", Guid, maxPropagationRadius, Modes.First().ModeName, (Geo)AnalysisPoint.Geo));
+                Debug.WriteLine("Removing map layers for TL {0} of radius {1} for mode [{2}] at {3}", Guid, maxPropagationRadius, Modes.First().ModeName, (Geo)AnalysisPoint.Geo);
             }
             LayerSettings.MapLayerViewModel = null;
         }
@@ -231,8 +231,8 @@ namespace ESME.Scenarios
             foreach (var radial in Radials.ToList()) radial.Delete();
             AnalysisPoint.TransmissionLosses.Remove(this);
             foreach (var mode in Modes) mode.TransmissionLosses.Remove(this); // Remove this TL from all matching modes' list of TLs
-            Scenario.Database.Context.LayerSettings.Remove(LayerSettings);
-            Scenario.Database.Context.TransmissionLosses.Remove(this);
+            Globals.MasterDatabaseService.Context.LayerSettings.Remove(LayerSettings);
+            Globals.MasterDatabaseService.Context.TransmissionLosses.Remove(this);
         }
         #region Layer Move commands
         #region MoveLayerToFrontCommand
@@ -258,14 +258,14 @@ namespace ESME.Scenarios
 
         public void Recalculate()
         {
-            Debug.WriteLine(string.Format("Recalculating transmission loss at ({0:0.###}, {1:0.###}) for mode {2}", AnalysisPoint.Geo.Latitude, AnalysisPoint.Geo.Longitude, Modes[0]));
+            Debug.WriteLine("Recalculating transmission loss at ({0:0.###}, {1:0.###}) for mode {2}", AnalysisPoint.Geo.Latitude, AnalysisPoint.Geo.Longitude, Modes[0]);
             var maxPropagationRadius = Modes.Max(m => m.MaxPropagationRadius);
             RemoveMapLayers();
             foreach (var radial in Radials)
             {
                 radial.Length = maxPropagationRadius;
                 radial.Recalculate();
-                Debug.WriteLine(string.Format("Recalculating radial at bearing {0} with radius of {1}", radial.Bearing, radial.Length));
+                Debug.WriteLine("Recalculating radial at bearing {0} with radius of {1}", radial.Bearing, radial.Length);
             }
             UpdateMapLayers();
         }

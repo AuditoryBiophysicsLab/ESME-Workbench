@@ -37,7 +37,7 @@ namespace ESME.Locations
     [ExportService(ServiceType.Both, typeof(EnvironmentalCacheService))]
     public class EnvironmentalCacheService : ViewModelBase, IEnvironmentalCacheService
     {
-        public EnvironmentalCacheService() { Location.Cache = this; Scenario.Cache = this; }
+        public EnvironmentalCacheService() { }
         public EnvironmentalCacheService(IPluginManagerService plugins, IMasterDatabaseService database) : this()
         {
             _plugins = plugins;

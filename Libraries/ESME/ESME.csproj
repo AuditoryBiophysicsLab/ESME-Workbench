@@ -99,6 +99,9 @@
       <Private>True</Private>
       <HintPath>..\..\Solutions\ESME Workbench\packages\PostSharp.3.1.27\lib\net20\PostSharp.dll</HintPath>
     </Reference>
+    <Reference Include="PostSharp.Patterns.Model">
+      <HintPath>..\..\Solutions\ESME Workbench\packages\PostSharp.Patterns.Model.3.1.27\lib\net40\PostSharp.Patterns.Model.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
       <Private>True</Private>
@@ -285,7 +288,6 @@
     <Compile Include="Scenarios\ScenarioSpecies.cs" />
     <Compile Include="Scenarios\ShipTrack.cs" />
     <Compile Include="Scenarios\Source.cs" />
-    <Compile Include="Scenarios\TrackDefinition.cs" />
     <Compile Include="Scenarios\TransmissionLoss.cs" />
     <Compile Include="Settings\Exceptions.cs" />
     <Compile Include="Settings\SettingsBase.cs" />

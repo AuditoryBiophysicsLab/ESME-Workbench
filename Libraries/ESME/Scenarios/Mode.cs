@@ -288,7 +288,7 @@ namespace ESME.Scenarios
         {
             Source.Modes.Remove(this);
             foreach (var tl in TransmissionLosses.ToList()) tl.Delete();
-            Scenario.Database.Context.Modes.Remove(this);
+            Globals.MasterDatabaseService.Context.Modes.Remove(this);
         }
 
         /// <summary>

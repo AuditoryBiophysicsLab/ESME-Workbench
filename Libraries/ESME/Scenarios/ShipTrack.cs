@@ -96,7 +96,7 @@ namespace ESME.Scenarios
                 foreach (var waypoint in Waypoints)
                 {
                     var geo = (Geo)waypoint.Geo;
-                    writer.WriteLine(string.Format("{0} {1}{2}", geo.Latitude, geo.Longitude, includeTimestamps ? " " +((TimeSpan)waypoint.TimeAtWaypoint) : ""));
+                    writer.WriteLine("{0} {1}{2}", geo.Latitude, geo.Longitude, includeTimestamps ? " " +((TimeSpan)waypoint.TimeAtWaypoint) : "");
                 }
             }
         }

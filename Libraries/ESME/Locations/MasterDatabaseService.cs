@@ -21,7 +21,7 @@ namespace ESME.Locations
 {
     public interface IMasterDatabaseService : IDisposable
     {
-        string MasterDatabaseDirectory { get; set; }
+        string MasterDatabaseDirectory { get; }
         LocationContext Context { get; }
         void Refresh();
         void Add(Perimeter perimeter);
@@ -40,13 +40,13 @@ namespace ESME.Locations
         string _masterDatabaseDirectory;
         public string MasterDatabaseDirectory
         {
-            get { return _masterDatabaseDirectory; }
-            set
+            get
             {
-                _masterDatabaseDirectory = value;
+                if (!string.IsNullOrEmpty(_masterDatabaseDirectory)) return _masterDatabaseDirectory;
+                if (!Directory.Exists(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"))) Directory.CreateDirectory(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"));
+                _masterDatabaseDirectory = Globals.AppSettings.DatabaseDirectory ?? Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database");
                 Initialize();
-                Location.Database = this;
-                Scenario.Database = this;
+                return _masterDatabaseDirectory;
             }
         }
 

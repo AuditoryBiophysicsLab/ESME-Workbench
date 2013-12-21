@@ -13,7 +13,6 @@ using ESMEWorkbench.ViewModels.Main;
 using ESMEWorkbench.Views;
 using HRC;
 using HRC.Navigation;
-using HRC.Services;
 using HRC.ViewModels;
 using HRC.WPF;
 using MEFedMVVM.Common;
@@ -29,38 +28,32 @@ namespace ESMEWorkbench.ViewModels.Map
     {
         #region Private fields
 
-        readonly IViewAwareStatus _viewAwareStatus;
         readonly MainViewModel _mainViewModel;
         WpfMap _wpfMap;
-        readonly IUIVisualizerService _visualizer;
-        private readonly IHRCSaveFileService _saveFile;
 
         #endregion
 
         public string MapDLLVersion { get; private set; }
-        public MapViewModel(IViewAwareStatus viewAwareStatus, IMessageBoxService messageBox, MainViewModel mainViewModel, IUIVisualizerService visualizer, IHRCSaveFileService saveFile)
+        public MapViewModel(MainViewModel mainViewModel)
         {
             _mainViewModel = mainViewModel;
-            _visualizer = visualizer;
-            _saveFile = saveFile;
-            viewAwareStatus.ViewLoaded += ViewLoaded;
+            Globals.ViewAwareStatusService.ViewLoaded += ViewLoaded;
             try
             {
                 Mediator.Instance.Register(this);
             }
             catch (Exception ex)
             {
-                Globals.DisplayException(messageBox, ex, "***********\nMapViewModel: Mediator registration failed\n***********");
+                StaticHelpers.DisplayException(ex, "***********\nMapViewModel: Mediator registration failed\n***********");
                 throw;
             }
-            _viewAwareStatus = viewAwareStatus;
         }
 
         void ViewLoaded()
         {
             if (Designer.IsInDesignMode) return;
 
-            _wpfMap = ((MainView)_viewAwareStatus.View).MapView.WpfMap;
+            _wpfMap = ((MainView)Globals.ViewAwareStatusService.View).MapView.WpfMap;
 
             CreateMouseEventStreams();
             SubscribeToMouseEventStreams();
@@ -254,10 +247,10 @@ namespace ESMEWorkbench.ViewModels.Map
             {
                 if (MouseSoundSpeedProfile != null)
                 {
-                    if (SoundSpeedProfileViewModel == null) SoundSpeedProfileViewModel = new SoundSpeedProfileViewModel(_saveFile);
+                    if (SoundSpeedProfileViewModel == null) SoundSpeedProfileViewModel = new SoundSpeedProfileViewModel(Globals.SaveFileService);
                     if (_soundSpeedProfileWindowView == null)
                     {
-                        _soundSpeedProfileWindowView = (SoundSpeedProfileWindowView)_visualizer.ShowWindow("SoundSpeedProfileWindowView", SoundSpeedProfileViewModel, false, (sender, args) => { _soundSpeedProfileWindowView = null; });
+                        _soundSpeedProfileWindowView = (SoundSpeedProfileWindowView)Globals.VisualizerService.ShowWindow("SoundSpeedProfileWindowView", SoundSpeedProfileViewModel, false, (sender, args) => { _soundSpeedProfileWindowView = null; });
                         _soundSpeedProfileWindowView.Closed += (s, e1) => { SoundSpeedProfileViewModel = null; };
                         SoundSpeedProfileViewModel.View = _soundSpeedProfileWindowView.FindChildren<SoundSpeedProfileView>().First();
                         SoundSpeedProfileViewModel.WindowView = _soundSpeedProfileWindowView;
@@ -271,26 +264,18 @@ namespace ESMEWorkbench.ViewModels.Map
         //IDisposable _mouseHover, _timeObserver;
         void CreateMouseEventStreams()
         {
-            LeftButtonDown = Observable.FromEventPattern<MouseButtonEventArgs>(_wpfMap, "MouseDown")
-                .Where(e => e.EventArgs.ChangedButton == MouseButton.Left)
+            LeftButtonDown = Observable.FromEventPattern<MouseButtonEventArgs>(_wpfMap, "MouseDown").Where(e => e.EventArgs.ChangedButton == MouseButton.Left)
                 .Select(e => GetMouseEventArgsGeo(e.EventArgs));
-            RightButtonDown = Observable.FromEventPattern<MouseButtonEventArgs>(_wpfMap, "MouseDown")
-                .Where(e => e.EventArgs.ChangedButton == MouseButton.Right)
+            RightButtonDown = Observable.FromEventPattern<MouseButtonEventArgs>(_wpfMap, "MouseDown").Where(e => e.EventArgs.ChangedButton == MouseButton.Right)
                 .Select(e => GetMouseEventArgsGeo(e.EventArgs));
-            LeftButtonUp = Observable.FromEventPattern<MouseButtonEventArgs>(_wpfMap, "MouseUp")
-                .Where(e => e.EventArgs.ChangedButton == MouseButton.Left)
+            LeftButtonUp = Observable.FromEventPattern<MouseButtonEventArgs>(_wpfMap, "MouseUp").Where(e => e.EventArgs.ChangedButton == MouseButton.Left)
                 .Select(e => GetMouseEventArgsGeo(e.EventArgs));
-            RightButtonUp = Observable.FromEventPattern<MouseButtonEventArgs>(_wpfMap, "MouseUp")
-                .Where(e => e.EventArgs.ChangedButton == MouseButton.Right)
+            RightButtonUp = Observable.FromEventPattern<MouseButtonEventArgs>(_wpfMap, "MouseUp").Where(e => e.EventArgs.ChangedButton == MouseButton.Right)
                 .Select(e => GetMouseEventArgsGeo(e.EventArgs));
-            MouseGeo = Observable.FromEventPattern<MouseEventArgs>(_wpfMap, "MouseMove")
-                .Select(e => GetMouseEventArgsGeo(e.EventArgs))
-                .Merge(Observable.FromEventPattern<MouseEventArgs>(_wpfMap, "MouseLeave")
-                           .Select(e => (Geo)null));
-            Click = Observable.FromEventPattern<MapClickWpfMapEventArgs>(_wpfMap, "MapClick")
-                .Select(e => new Geo(e.EventArgs.WorldY, e.EventArgs.WorldX));
-            DoubleClick = Observable.FromEventPattern<MapClickWpfMapEventArgs>(_wpfMap, "MapDoubleClick")
-                .Select(e => new Geo(e.EventArgs.WorldY, e.EventArgs.WorldX));
+            MouseGeo = Observable.FromEventPattern<MouseEventArgs>(_wpfMap, "MouseMove").Select(e => GetMouseEventArgsGeo(e.EventArgs))
+                .Merge(Observable.FromEventPattern<MouseEventArgs>(_wpfMap, "MouseLeave").Select(e => (Geo)null));
+            Click = Observable.FromEventPattern<MapClickWpfMapEventArgs>(_wpfMap, "MapClick").Select(e => new Geo(e.EventArgs.WorldY, e.EventArgs.WorldX));
+            DoubleClick = Observable.FromEventPattern<MapClickWpfMapEventArgs>(_wpfMap, "MapDoubleClick").Select(e => new Geo(e.EventArgs.WorldY, e.EventArgs.WorldX));
             MouseHover();
         }
 
@@ -301,8 +286,7 @@ namespace ESMEWorkbench.ViewModels.Map
             // Here create an event stream called MouseHoverGeo, which consists of mouseGeosWithMouseWheelNulls events 
             // filtered to only give us an event after 300 ms of inactivity with duplicate events and null events removed
             MouseHoverGeo = MouseGeo.Throttle(TimeSpan.FromMilliseconds(300))
-                .Merge(Observable.FromEventPattern<MouseWheelEventArgs>(_wpfMap, "MouseWheel")
-                                                                .Select(e => (Geo)null))
+                .Merge(Observable.FromEventPattern<MouseWheelEventArgs>(_wpfMap, "MouseWheel").Select(e => (Geo)null))
                 .Merge(MouseGeo.Select(e => (Geo)null))
                 .DistinctUntilChanged();
             //MouseHoverGeo.ObserveOn(TaskPoolScheduler.Default).Subscribe(g => Debug.WriteLine(string.Format("{0:HH:mm:ss:fff} MouseHoverGeo is now {1}", DateTime.Now, g)));

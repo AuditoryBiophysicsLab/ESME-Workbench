@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,7 +12,6 @@ using System.Windows.Threading;
 using ESME.Database;
 using ESME.Environment;
 using ESME.Locations;
-using ESME.TransmissionLoss;
 using HRC.Aspects;
 using HRC.Navigation;
 using HRC.Utility;
@@ -206,18 +204,18 @@ namespace ESME.Scenarios
             }
         }
         [NotMapped] public bool IsLoaded { get; set; }
-        [NotMapped] public Wind WindData { get { return ((Wind)Cache[Wind].Result); } }
-        [NotMapped] public SoundSpeed SoundSpeedData { get { return ((SoundSpeed)Cache[SoundSpeed].Result); } }
-        [NotMapped] public Bathymetry BathymetryData { get { return ((Bathymetry)Cache[Bathymetry].Result); } }
-        [NotMapped] public Sediment SedimentData { get { return ((Sediment)Cache[Sediment].Result); } }
+        [NotMapped] public Wind WindData { get { return ((Wind)Globals.EnvironmentalCacheService[Wind].Result); } }
+        [NotMapped] public SoundSpeed SoundSpeedData { get { return ((SoundSpeed)Globals.EnvironmentalCacheService[SoundSpeed].Result); } }
+        [NotMapped] public Bathymetry BathymetryData { get { return ((Bathymetry)Globals.EnvironmentalCacheService[Bathymetry].Result); } }
+        [NotMapped] public Sediment SedimentData { get { return ((Sediment)Globals.EnvironmentalCacheService[Sediment].Result); } }
         [NotMapped]
         public string StorageDirectoryPath
         {
             get
             {
                 if (_storageDirectoryPath != null) return _storageDirectoryPath;
-                if (Database == null || Database.MasterDatabaseDirectory == null) throw new ApplicationException("Database or Database.MasterDatabaseDirectory is null");
-                _storageDirectoryPath = Path.Combine(Database.MasterDatabaseDirectory, StorageDirectory);
+                if (Globals.MasterDatabaseService == null || Globals.MasterDatabaseService.MasterDatabaseDirectory == null) throw new ApplicationException("Database or Database.MasterDatabaseDirectory is null");
+                _storageDirectoryPath = Path.Combine(Globals.MasterDatabaseService.MasterDatabaseDirectory, StorageDirectory);
                 if (!Directory.Exists(_storageDirectoryPath)) Directory.CreateDirectory(_storageDirectoryPath);
                 return _storageDirectoryPath;
             }
@@ -247,10 +245,6 @@ namespace ESME.Scenarios
         }
 #endif
 
-        [NotMapped]
-        public static IMasterDatabaseService Database { get; set; }
-        [NotMapped]
-        public static IEnvironmentalCacheService Cache { get; set; }
         [NotMapped]
         public bool IsNew { get; set; }
         [NotMapped]
@@ -324,7 +318,7 @@ namespace ESME.Scenarios
             foreach (var analysisPoint in AnalysisPoints.ToList()) analysisPoint.Delete();
             foreach (var species in ScenarioSpecies.ToList()) species.Delete();
             foreach (var perimeter in Perimeters.ToList()) perimeter.Delete();
-            Database.Context.Scenarios.Remove(this);
+            Globals.MasterDatabaseService.Context.Scenarios.Remove(this);
             Directory.Delete(StorageDirectoryPath, true);
         }
         #region LoadScenarioCommand
@@ -348,9 +342,6 @@ namespace ESME.Scenarios
 
     public static class ScenarioExensions
     {
-        public static TransmissionLossCalculatorService TransmissionLossCalculator;
-        public static Dispatcher Dispatcher;
-
         /// <summary>
         /// Update all the AnalysisPoints contained in a specified Scenario, ensuring that all modes are properly represented across
         /// all AnalysisPoints
@@ -378,7 +369,7 @@ namespace ESME.Scenarios
                     // If the current TransmissionLoss has no modes
                     if (transmissionLoss.Modes == null || transmissionLoss.Modes.Count == 0)
                     {
-                        Debug.WriteLine(string.Format("Deleting empty TL at {0}", (Geo)transmissionLoss.AnalysisPoint.Geo));
+                        Debug.WriteLine("Deleting empty TL at {0}", (Geo)transmissionLoss.AnalysisPoint.Geo);
                         // Delete the current TransmissionLoss
                         transmissionLoss.Delete();
                         // And look at the next one
@@ -394,7 +385,7 @@ namespace ESME.Scenarios
                     // If no current mode group matches the representative Mode
                     if (matchingModeGroup == null)
                     {
-                        Debug.WriteLine(string.Format("Deleting TL [{0}:{1}] at {2}", transmissionLoss.Modes.First().ModeName, transmissionLoss.Modes.First().MaxPropagationRadius, (Geo)transmissionLoss.AnalysisPoint.Geo));
+                        Debug.WriteLine("Deleting TL [{0}:{1}] at {2}", transmissionLoss.Modes.First().ModeName, transmissionLoss.Modes.First().MaxPropagationRadius, (Geo)transmissionLoss.AnalysisPoint.Geo);
                         // Delete the current TransmissionLoss
                         transmissionLoss.Delete();
                         // And look at the next one
@@ -406,7 +397,7 @@ namespace ESME.Scenarios
                     // Remove the unmatched original modes in the current TransmissionLoss
                     unmatchedOriginalModes.ForEach(m =>
                     {
-                        Debug.WriteLine(string.Format("Removing mode [{0}:{1}] from [{2}:{3}] at {4}", m.ModeName, m.MaxPropagationRadius, transmissionLoss.Modes.First().ModeName, transmissionLoss.Modes.First().MaxPropagationRadius, (Geo)transmissionLoss.AnalysisPoint.Geo));
+                        Debug.WriteLine("Removing mode [{0}:{1}] from [{2}:{3}] at {4}", m.ModeName, m.MaxPropagationRadius, transmissionLoss.Modes.First().ModeName, transmissionLoss.Modes.First().MaxPropagationRadius, (Geo)transmissionLoss.AnalysisPoint.Geo);
                         transmissionLoss.Modes.Remove(m);
                         m.TransmissionLosses.Remove(transmissionLoss);
                     });
@@ -416,7 +407,7 @@ namespace ESME.Scenarios
                     // Add those new modes to the current TransmissionLoss
                     unmatchedNewModes.ForEach(m =>
                     {
-                        Debug.WriteLine(string.Format("Adding mode [{0}:{1}] to [{2}:{3}] at {4}", m.ModeName, m.MaxPropagationRadius, transmissionLoss.Modes.First().ModeName, transmissionLoss.Modes.First().MaxPropagationRadius, (Geo)transmissionLoss.AnalysisPoint.Geo));
+                        Debug.WriteLine("Adding mode [{0}:{1}] to [{2}:{3}] at {4}", m.ModeName, m.MaxPropagationRadius, transmissionLoss.Modes.First().ModeName, transmissionLoss.Modes.First().MaxPropagationRadius, (Geo)transmissionLoss.AnalysisPoint.Geo);
                         m.TransmissionLosses.Add(transmissionLoss);
                         transmissionLoss.Modes.Add(m);
                     });
@@ -446,16 +437,16 @@ namespace ESME.Scenarios
                     // then don't add a TransmissionLoss for this list of modes to the current AnalysisPoint
                     if (sourceDepth >= depthAtAnalysisPoint)
                     {
-                        Debug.WriteLine(string.Format("Skipping TL mode [{0}:{1}] at {2} because depth is too shallow ", firstMode.ModeName, firstMode.MaxPropagationRadius, (Geo)analysisPoint.Geo));
+                        Debug.WriteLine("Skipping TL mode [{0}:{1}] at {2} because depth is too shallow ", firstMode.ModeName, firstMode.MaxPropagationRadius, (Geo)analysisPoint.Geo);
                         continue;
                     }
                     // The depth check is OK, so create a new TransmissionLoss
-                    Debug.WriteLine(string.Format("Creating new TL for mode [{0}:{1}] at {2}", firstMode.ModeName, firstMode.MaxPropagationRadius, (Geo)analysisPoint.Geo));
+                    Debug.WriteLine("Creating new TL for mode [{0}:{1}] at {2}", firstMode.ModeName, firstMode.MaxPropagationRadius, (Geo)analysisPoint.Geo);
                     var transmissionLoss = new TransmissionLoss { AnalysisPoint = analysisPoint };
                     // Add the list of modes to the TransmissionLoss
                     newModeGroup.ForEach(m =>
                     {
-                        Debug.WriteLine(string.Format("Adding mode [{0}:{1}] to new TL at {2}", m.ModeName, m.MaxPropagationRadius, (Geo)transmissionLoss.AnalysisPoint.Geo));
+                        Debug.WriteLine("Adding mode [{0}:{1}] to new TL at {2}", m.ModeName, m.MaxPropagationRadius, (Geo)transmissionLoss.AnalysisPoint.Geo);
                         transmissionLoss.Modes.Add(m);
                         m.TransmissionLosses.Add(transmissionLoss);
                     });
@@ -468,7 +459,7 @@ namespace ESME.Scenarios
                 unmatchedModeGroups.AddRange(matchedModeGroups);
                 // Clear the matched mode group list for the next iteration
                 matchedModeGroups.Clear();
-                Dispatcher.InvokeIfRequired(analysisPoint.UpdateMapLayers);
+                Globals.Dispatcher.InvokeIfRequired(analysisPoint.UpdateMapLayers);
             }
         }
 
@@ -502,7 +493,7 @@ namespace ESME.Scenarios
             if (transmissionLoss.Radials != null && transmissionLoss.Radials.Count == modeRadialCount && transmissionLoss.Radials.All(radial => radial.Length >= modeMaxRadius))
             {
                 // Redraw the map layers to display the new TransmissionLoss as it should be
-                Dispatcher.InvokeIfRequired(transmissionLoss.UpdateMapLayers);
+                Globals.Dispatcher.InvokeIfRequired(transmissionLoss.UpdateMapLayers);
                 return;
             }
 
@@ -546,13 +537,13 @@ namespace ESME.Scenarios
                 // Add the new Radial to the TransmissionLoss
                 transmissionLoss.Radials.Add(radial);
                 // Queue the new Radial for calculation
-                TransmissionLossCalculator.Add(radial);
+                Globals.TransmissionLossCalculatorService.Add(radial);
             }
             // Delete any radials in the current TransmissionLoss that are no longer required
             //  Debug.WriteLine(string.Format("Deleting now-unused radial [{0}] from mode [{1}] at {2}", r.ToString(), transmissionLoss.Modes.First(), (Geo)transmissionLoss.AnalysisPoint.Geo));
             transmissionLoss.Radials.FindAll(r => !requiredBearings.Contains(r.Bearing)).ForEach(r => r.Delete());
             // Redraw the map layers to display the new TransmissionLoss as it should be
-            Dispatcher.InvokeIfRequired(transmissionLoss.UpdateMapLayers);
+            Globals.Dispatcher.InvokeIfRequired(transmissionLoss.UpdateMapLayers);
         }
 
         private static ListCollectionView GroupEquivalentModes(this Scenario scenario)

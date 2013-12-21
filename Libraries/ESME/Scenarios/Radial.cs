@@ -6,9 +6,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using ESME.Database;
 using ESME.Locations;
-using ESME.TransmissionLoss;
 using ESME.TransmissionLoss.Bellhop;
 using HRC.Aspects;
 using HRC.Navigation;
@@ -18,14 +18,15 @@ namespace ESME.Scenarios
     [NotifyPropertyChanged]
     public class Radial : IHaveGuid
     {
-        public static TransmissionLossCalculatorService TransmissionLossCalculator;
         public Radial()
         {
             // For reasons I don't fully understand, using the WeakEventListener pattern here (via PropertyObserver<Radial>)
             // causes some kind of aberrant behavior whereby adding a new AnalysisPoint won't cause the TL's to calculate
             // properly.  Doing it old-school like this DOES seem to work.
             Filename = Path.GetFileNameWithoutExtension(Path.GetRandomFileName());
-            ((INotifyPropertyChanged)this).PropertyChanged += PropertyChangedHandler;
+            //((INotifyPropertyChanged)this).PropertyChanged += PropertyChangedHandler;
+            PropertyChangedEventManager.AddHandler((INotifyPropertyChanged)this, PropertyChangedHandler, "Bearing");
+            WeakEventManager<Radial, PropertyChangedEventArgs>.AddHandler(this, "PropertyChanged", PropertyChangedHandler);
         }
 
         void PropertyChangedHandler(object sender, PropertyChangedEventArgs args)
@@ -126,9 +127,9 @@ namespace ESME.Scenarios
             IsDeleted = true;
             ((INotifyPropertyChanged)this).PropertyChanged -= PropertyChangedHandler;
             CleanupFiles();
-            TransmissionLossCalculator.Remove(this);
+            Globals.TransmissionLossCalculatorService.Remove(this);
             TransmissionLoss.Radials.Remove(this);
-            Scenario.Database.Context.Radials.Remove(this);
+            Globals.MasterDatabaseService.Context.Radials.Remove(this);
         }
 
         public void CleanupFiles()
@@ -282,7 +283,7 @@ namespace ESME.Scenarios
                 catch (EndOfStreamException)
                 {
                     FileDeleteWithRetry(BasePath + ".shd");
-                    TransmissionLossCalculator.Add(this);
+                    Globals.TransmissionLossCalculatorService.Add(this);
                     return false;
                 }
                 _ranges = _shadeFile.ReceiverRanges.ToArray();
@@ -328,12 +329,7 @@ namespace ESME.Scenarios
                         var maxTransmissionLoss = tlValuesAboveBottom.Max();
                         var maxTransmissionLossDepthIndex = _shadeFile[rangeIndex].IndexOf(maxTransmissionLoss);
                         var maxTransmissionLossDepth = _depths[maxTransmissionLossDepthIndex];
-                        Debug.WriteLine(string.Format("Maximum TL value for this field found at radial bearing {0}, range {1}, depth {2}, TL {3}, bottom depth at this range {4}",
-                                                      Bearing,
-                                                      curRange,
-                                                      maxTransmissionLossDepth,
-                                                      maxTransmissionLoss,
-                                                      depthAtThisRange));
+                        Debug.WriteLine("Maximum TL value for this field found at radial bearing {0}, range {1}, depth {2}, TL {3}, bottom depth at this range {4}", Bearing, curRange, maxTransmissionLossDepth, maxTransmissionLoss, depthAtThisRange);
                     }
                     MinimumTransmissionLossValues[rangeIndex] = tlValuesAboveBottom.Min();
                     MaximumTransmissionLossValues[rangeIndex] = tlValuesAboveBottom.Max();
@@ -415,7 +411,7 @@ namespace ESME.Scenarios
             _minimumTransmissionLossValues = _maximumTransmissionLossValues = _meanTransmissionLossValues = null;
             var files = Directory.GetFiles(Path.GetDirectoryName(BasePath), Path.GetFileNameWithoutExtension(BasePath) + ".*");
             foreach (var file in files) FileDeleteWithRetry(file);
-            TransmissionLossCalculator.Add(this);
+            Globals.TransmissionLossCalculatorService.Add(this);
         }
 
         public override string ToString() { return string.Format("Bearing: {0:0.#}deg | Length: {1:0.#}m", Bearing, Length); }

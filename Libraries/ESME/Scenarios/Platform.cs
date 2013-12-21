@@ -214,9 +214,9 @@ namespace ESME.Scenarios
             RemoveMapLayers();
             Scenario.Platforms.Remove(this);
             foreach (var source in Sources.ToList()) source.Delete();
-            if (LayerSettings != null) Scenario.Database.Context.LayerSettings.Remove(LayerSettings);
+            if (LayerSettings != null) Globals.MasterDatabaseService.Context.LayerSettings.Remove(LayerSettings);
             LayerSettings = null;
-            Scenario.Database.Context.Platforms.Remove(this);
+            Globals.MasterDatabaseService.Context.Platforms.Remove(this);
         }
 
         public void Refresh()
