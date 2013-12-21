@@ -87,7 +87,6 @@
     <Reference Include="PostSharp.Patterns.Model">
       <HintPath>..\Solutions\ESME Workbench\packages\PostSharp.Patterns.Model.3.1.27\lib\net40\PostSharp.Patterns.Model.dll</HintPath>
     </Reference>
-    <Reference Include="RibbonControlsLibrary, Version=4.0.0.11019, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Data" />
@@ -108,6 +107,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Solutions\ESME Workbench\packages\Rx-XAML.2.2.2\lib\net45\System.Reactive.Windows.Threading.dll</HintPath>
     </Reference>
+    <Reference Include="System.Windows.Controls.Ribbon" />
     <Reference Include="System.Windows.Interactivity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
@@ -135,8 +135,6 @@
     <Compile Include="Controls\ProgressMarker.xaml.cs">
       <DependentUpon>ProgressMarker.xaml</DependentUpon>
     </Compile>
-    <Compile Include="EventToCommandTrigger.cs" />
-    <Compile Include="Exceptions.cs" />
     <Compile Include="ViewModels\Layers\CustomUnitScaleBarAdornmentLayer.cs" />
     <Compile Include="ViewModels\Main\FirstRunViewModel.cs" />
     <Compile Include="ViewModels\Main\SampleScenarios.cs" />
@@ -212,11 +210,6 @@
     <Compile Include="ViewModels\Layers\RotatingAdornmentLayer.cs" />
     <Compile Include="ViewModels\Map\MapViewModel.cs" />
     <Compile Include="ViewModels\Main\ApplicationOptionsViewModel.cs" />
-    <Compile Include="ViewModels\RecentFiles\ApplicationAttributes.cs" />
-    <Compile Include="ViewModels\RecentFiles\IPersist.cs" />
-    <Compile Include="ViewModels\RecentFiles\RecentFileList.cs" />
-    <Compile Include="ViewModels\RecentFiles\RegistryPersister.cs" />
-    <Compile Include="ViewModels\RecentFiles\XmlPersister.cs" />
     <Page Include="Controls\EditableTextBlock.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -454,7 +447,6 @@
     <None Include="External References\Microsoft.Expression.Interactions.dll" />
     <None Include="External References\Microsoft.Windows.Shell.dll" />
     <None Include="External References\NetTopologySuite.dll" />
-    <None Include="External References\RibbonControlsLibrary.dll" />
     <None Include="External References\System.Windows.Interactivity.dll" />
     <None Include="External References\WpfDesktopEdition.dll" />
   </ItemGroup>
@@ -464,13 +456,8 @@
     <Resource Include="App_Readme\MathNet.Numerics.readme.txt" />
     <Resource Include="App_Readme\MathNet.Numerics.copyright.txt" />
     <Resource Include="App_Readme\MathNet.Numerics.authors.txt" />
-    <Content Include="External References\AsyncCtpLibrary.dll" />
     <Content Include="External References\Kent.Boogaart.Converters.dll" />
     <Content Include="External References\Kent.Boogaart.HelperTrinity.dll" />
-    <Content Include="External References\log4net.dll" />
-    <Content Include="External References\System.Data.SQLite.dll" />
-    <Content Include="External References\System.Data.SQLite.Linq.dll" />
-    <Content Include="External References\System.Threading.Tasks.Dataflow.dll" />
     <Resource Include="Images\SmallIcons\table_save.png" />
     <Resource Include="table_save.png" />
     <Resource Include="Images\SmallIcons\save_as.png" />
@@ -648,7 +635,6 @@
     <Resource Include="Images\AboutLogo.png">
       <SubType>Image</SubType>
     </Resource>
-    <Content Include="External References\Devart.Data.Linq.dll" />
     <SplashScreen Include="Images\ESME Splash Screen.png" />
   </ItemGroup>
   <ItemGroup>

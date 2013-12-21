@@ -151,7 +151,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
         public bool IsInAnalysisPointMode { get; set; }
 
-        public string MainWindowTitle { get { return string.Format("ESME 2012: {0}", _scenario == null ? "<No scenario loaded>" : _scenario.Name); } }
+        public string MainWindowTitle { get { return string.Format("ESME 2014: {0}", _scenario == null ? "<No scenario loaded>" : _scenario.Name); } }
 
         #region CreateScenarioCommand
         public SimpleCommand<object, EventToCommandArgs> CreateScenarioCommand { get { return _createScenario ?? (_createScenario = new SimpleCommand<object, EventToCommandArgs>(o => IsCreateScenarioCommandEnabled, o => CreateScenarioHandler())); } }

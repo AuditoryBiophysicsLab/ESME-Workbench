@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Boston University")]
 [assembly: AssemblyProduct("ESME Workbench")]
-[assembly: AssemblyCopyright("© Boston University 2009-2012")]
+[assembly: AssemblyCopyright("© Boston University 2009-2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
