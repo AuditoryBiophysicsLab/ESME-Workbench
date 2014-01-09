@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
+using System.Xml.Serialization;
 using ESME.Environment;
 using ESME.Environment.NAVO;
 using ESME.Plugins;
@@ -30,7 +31,17 @@ namespace FileBasedDataSources
             IsTimeVariantData = false;
             IsSelectable = true;
         }
-        public override string Xml { get; set; }
+
+        [XmlIgnore]
+        public override string Xml
+        {
+            get { return new XmlSerializer<SedimentFile> { Data = this }.SaveToXml(); }
+            set
+            {
+                var settings = XmlSerializer<SedimentFile>.LoadFromXml(value);
+                DataLocation = settings.DataLocation;
+            }
+        }
 
         protected override void Save()
         {

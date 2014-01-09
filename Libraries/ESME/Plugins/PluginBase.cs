@@ -107,8 +107,7 @@ namespace ESME.Plugins
         [XmlIgnore] public EnvironmentDataType EnvironmentDataType { get; protected set; }
         [XmlIgnore] public object SelectionControlViewModel { get; protected set; }
         [XmlIgnore] public abstract EnvironmentalDataSet SelectedDataSet { get; }
-
-        public abstract string Xml { get; set; }
+        [XmlIgnore] public abstract string Xml { get; set; }
 
         protected void CheckResolutionAndTimePeriod(float resolution, TimePeriod timePeriod)
         {

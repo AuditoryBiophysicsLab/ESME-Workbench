@@ -144,6 +144,7 @@ namespace ESME.Locations
                         dataSet.SampleCount = (from period in wind.TimePeriods select period.EnvironmentData.Count).Sum();
                         if (dataSet.SampleCount == 0) return null;
                         wind.Serialize(fileName);
+                        dataSet.PluginXml = sourcePlugin.Xml;
                         var windColormap = new Colormap(Colormap.CoolComponents, 512);
                         ToBitmap(wind[dataSet.TimePeriod].EnvironmentData, fileName, v => v == null ? 0 : v.Data, windColormap.ToPixelValues);
                         Debug.WriteLine("Importer: Imported {0}min Wind [{1}] from plugin {2}", dataSet.Resolution, (TimePeriod)dataSet.TimePeriod, sourcePlugin.PluginName);

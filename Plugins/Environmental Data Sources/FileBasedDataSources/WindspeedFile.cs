@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.Composition;
 using System.IO;
+using System.Xml.Serialization;
 using ESME.Environment;
 using ESME.Plugins;
 using FileBasedDataSources.Controls;
@@ -28,7 +29,17 @@ namespace FileBasedDataSources
             IsTimeVariantData = true;
             IsSelectable = true;
         }
-        public override string Xml { get; set; }
+
+        [XmlIgnore]
+        public override string Xml
+        {
+            get { return new XmlSerializer<WindspeedFile> { Data = this }.SaveToXml(); }
+            set
+            {
+                var settings = XmlSerializer<WindspeedFile>.LoadFromXml(value);
+                DataLocation = settings.DataLocation;
+            }
+        }
 
         protected override void Save()
         {

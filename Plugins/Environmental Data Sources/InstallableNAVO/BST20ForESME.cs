@@ -1,6 +1,7 @@
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Management;
+using System.Xml.Serialization;
 using ESME.Environment;
 using ESME.Locations;
 using ESME.Plugins;
@@ -41,7 +42,6 @@ namespace InstallableNAVOPlugin
             };
             SelectionControl = new MultipleSelectionsView { DataContext = SelectionControlViewModel };
         }
-        public override string Xml { get; set; }
 
         readonly string _dataDirectory;
 

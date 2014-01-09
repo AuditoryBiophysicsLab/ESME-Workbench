@@ -30,7 +30,8 @@ namespace FileBasedDataSources
             IsSelectable = true;
         }
 
-        [XmlIgnore] public override string Xml
+        [XmlIgnore] 
+        public override string Xml
         {
             get { return new XmlSerializer<BathymetryFile> { Data = this }.SaveToXml(); }
             set
