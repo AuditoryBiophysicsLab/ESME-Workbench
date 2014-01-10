@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Linq;
 using System.Windows.Data;
@@ -70,16 +71,14 @@ namespace ESME.Locations
             }
         }
         CollectionViewSource _collectionView;
-        [NotMapped] public static IMasterDatabaseService Database { get; set; }
-        [NotMapped] public static IEnvironmentalCacheService Cache { get; set; }
         [NotMapped] public bool IsDeleted { get; set; }
         [NotMapped] public string StorageDirectoryPath
         {
             get
             {
                 if (_storageDirectoryPath != null) return _storageDirectoryPath;
-                if (Database == null || Database.MasterDatabaseDirectory == null) throw new ApplicationException("Database or Database.MasterDatabaseDirectory is null");
-                _storageDirectoryPath = Path.Combine(Database.MasterDatabaseDirectory, StorageDirectory);
+                if (Globals.MasterDatabaseService == null || Globals.MasterDatabaseService.MasterDatabaseDirectory == null) throw new ApplicationException("Database or Database.MasterDatabaseDirectory is null");
+                _storageDirectoryPath = Path.Combine(Globals.MasterDatabaseService.MasterDatabaseDirectory, StorageDirectory);
                 if (!Directory.Exists(_storageDirectoryPath)) Directory.CreateDirectory(_storageDirectoryPath);
                 return _storageDirectoryPath;
             }
@@ -125,7 +124,7 @@ namespace ESME.Locations
             RemoveMapLayers();
             foreach (var scenario in Scenarios.ToList()) scenario.Delete();
             foreach (var dataSet in EnvironmentalDataSets.ToList()) dataSet.Delete();
-            Database.Context.Locations.Remove(this);
+            Globals.MasterDatabaseService.Context.Locations.Remove(this);
             Directory.Delete(StorageDirectoryPath, true);
         }
 

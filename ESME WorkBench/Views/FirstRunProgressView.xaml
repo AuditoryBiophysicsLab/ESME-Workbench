@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:Main="clr-namespace:ESMEWorkbench.ViewModels.Main"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        Title="ESME 2012"
+        Title="ESME 2014"
         Width="350"
         d:DataContext="{d:DesignInstance Main:FirstRunProgressViewModel}"
         ResizeMode="NoResize"

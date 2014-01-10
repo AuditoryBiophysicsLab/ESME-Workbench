@@ -20,7 +20,7 @@ namespace ESME.Environment
 
         public static Task<Wind> LoadAsync(string filename)
         {
-            return TaskEx.Run(() => Load(filename));
+            return Task.Run(() => Load(filename));
         }
 
         public static Wind Load(string filename)

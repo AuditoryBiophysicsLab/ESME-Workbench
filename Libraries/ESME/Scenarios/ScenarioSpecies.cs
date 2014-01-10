@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Linq;
 using ESME.Environment;
@@ -155,8 +156,8 @@ namespace ESME.Scenarios
         {
             IsDeleted = true;
             RemoveMapLayers();
-            Scenario.Database.Context.LayerSettings.Remove(LayerSettings);
-            Scenario.Database.Context.ScenarioSpecies.Remove(this);
+            Globals.MasterDatabaseService.Context.LayerSettings.Remove(LayerSettings);
+            Globals.MasterDatabaseService.Context.ScenarioSpecies.Remove(this);
         }
 
         public bool Equals(ScenarioSpecies other) { return Guid == other.Guid; }

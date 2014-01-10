@@ -18,7 +18,7 @@ namespace ESME.Environment
 
         public static Task<BottomLoss> LoadAsync(string filename)
         {
-            return TaskEx.Run(() => Load(filename));
+            return Task.Run(() => Load(filename));
         }
 
         public static BottomLoss Load(string filename)

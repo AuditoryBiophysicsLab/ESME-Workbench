@@ -19,12 +19,12 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             if (IsSimulationRunning || IsTransmissionLossBusy)
             {
-                _messageBox.ShowInformation("A location cannot be deleted while a simulation is running or transmission losses are being calculated.  Please wait until these tasks finish.");
+                Globals.MessageBoxService.ShowInformation("A location cannot be deleted while a simulation is running or transmission losses are being calculated.  Please wait until these tasks finish.");
             }
             else
             {
                 if (
-                    _messageBox.ShowYesNo(
+                    Globals.MessageBoxService.ShowYesNo(
                                           string.Format("Deleting a location also deletes all scenarios defined in that location.\n\nAre you sure you want to delete the location \"{0}\"?",
                                                         location.Name),
                                           MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
@@ -52,7 +52,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 MapViewModel.EditableRectangleOverlayViewModel.West = (currentExtent.West + currentExtent.Center.Longitude) / 2;
                 MapViewModel.EditableRectangleOverlayViewModel.IsVisible = true;
 
-                _visualizer.ShowWindow("CreateLocationView",
+                Globals.VisualizerService.ShowWindow("CreateLocationView",
                                        new CreateLocationViewModel { EditableRectangleOverlayViewModel = MapViewModel.EditableRectangleOverlayViewModel },
                                        true,
                                        (sender, args) =>
@@ -63,12 +63,12 @@ namespace ESMEWorkbench.ViewModels.Main
                                            CreateLocation(vm.LocationName, vm.Comments, MapViewModel.EditableRectangleOverlayViewModel.GeoRect);
                                        }); 
             }
-            catch (Exception e) { _messageBox.ShowError(e.Message); }
+            catch (Exception e) { Globals.MessageBoxService.ShowError(e.Message); }
         }
 
         Location CreateLocation(string locationName, string comments, GeoRect geoRect)
         {
-            var existing = (from l in Database.Context.Locations
+            var existing = (from l in Globals.MasterDatabaseService.Context.Locations
                             where l.Name == locationName
                             select l).FirstOrDefault();
             if (existing != null) throw new DuplicateNameException(String.Format("A location named {0} already exists, choose another name", locationName));
@@ -79,7 +79,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 GeoRect = geoRect,
                 LayerSettings = { IsChecked = true, LineOrSymbolSize = 5 }
             };
-            Database.Context.Locations.Local.Add(location);
+            Globals.MasterDatabaseService.Context.Locations.Local.Add(location);
             location.UpdateMapLayers();
             return location;
         }
@@ -109,7 +109,7 @@ namespace ESMEWorkbench.ViewModels.Main
         void ViewActivatedHandler()
         {
             if (_viewIsActivated) return;
-            Console.WriteLine("The window has been activated!");
+            //Console.WriteLine(@"The window has been activated!");
             _viewIsActivated = true;
         }
         bool _viewIsActivated;
@@ -195,11 +195,11 @@ namespace ESMEWorkbench.ViewModels.Main
             try
             {
                 var vm = new NewOverlayViewModel(ESME.Globals.AppSettings, RangeComplexes.SelectedRangeComplex.Name);
-                var result = _visualizer.ShowDialog("NewOverlayView", vm);
+                var result = ESME.Globals.VisualizerService.ShowDialog("NewOverlayView", vm);
                 if ((!result.HasValue) || (!result.Value)) return;
                 RangeComplexes.SelectedArea = RangeComplexes.SelectedRangeComplex.CreateArea(vm.OverlayName, vm.OverlayGeos);
             }
-            catch (Exception e) { _messageBox.ShowError(e.Message); }
+            catch (Exception e) { ESME.Globals.MessageBoxService.ShowError(e.Message); }
         }
 
         #endregion
@@ -226,7 +226,7 @@ namespace ESMEWorkbench.ViewModels.Main
             try
             {
                 var vm = new OverlayExpandViewModel(RangeComplexes.SelectedRangeComplex, RangeComplexes.SelectedArea);
-                var result = _visualizer.ShowDialog("OverlayExpandView", vm);
+                var result = ESME.Globals.VisualizerService.ShowDialog("OverlayExpandView", vm);
                 if ((!result.HasValue) || (!result.Value)) return;
 
                 var curOverlay = RangeComplexes.SelectedArea.OverlayShape;
@@ -239,7 +239,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
                 RangeComplexes.SelectedArea = RangeComplexes.SelectedRangeComplex.CreateArea(vm.OverlayName, coordinateList);
             }
-            catch (Exception e) { _messageBox.ShowError(e.Message); }
+            catch (Exception e) { ESME.Globals.MessageBoxService.ShowError(e.Message); }
         }
 
         #endregion
@@ -258,10 +258,10 @@ namespace ESMEWorkbench.ViewModels.Main
             var canDelete = RangeComplexes.SelectedRangeComplex.TryRemoveArea(RangeComplexes.SelectedArea.Name, out error);
             if (!canDelete)
             {
-                _messageBox.ShowError(error);
+                ESME.Globals.MessageBoxService.ShowError(error);
                 return;
             }
-            var result = _messageBox.ShowYesNo(string.Format("Are you sure you want to delete the overlay \"{0}\"?\r\nThis operation cannot be undone.", RangeComplexes.SelectedArea.Name), MessageBoxImage.Exclamation);
+            var result = ESME.Globals.MessageBoxService.ShowYesNo(string.Format("Are you sure you want to delete the overlay \"{0}\"?\r\nThis operation cannot be undone.", RangeComplexes.SelectedArea.Name), MessageBoxImage.Exclamation);
             if (result == MessageBoxResult.No) return;
             RangeComplexes.SelectedRangeComplex.RemoveArea(RangeComplexes.SelectedArea.Name);
             RangeComplexes.SelectedArea = null;

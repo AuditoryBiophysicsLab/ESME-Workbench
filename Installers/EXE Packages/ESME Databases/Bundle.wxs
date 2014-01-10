@@ -7,7 +7,7 @@
   <?define InstallersRoot="$(var.ESMERoot)\Installers"?>
   <?define MSIRoot="$(var.InstallersRoot)\MSI Packages"?>
   <?define DatabasesRoot="$(var.MSIRoot)\ESME Databases"?>
-  <?define ProductName = "ESME 2012 Databases" ?>
+  <?define ProductName = "ESME 2014 Databases" ?>
   <Bundle Name="$(var.ProductName)" 
           Version="$(var.ProductFullVersion)" 
           Manufacturer="$(var.Manufacturer)"
@@ -18,7 +18,7 @@
           UpdateUrl="http://esme.bu.edu"
           Compressed="no">
     <Variable Name="BundleLongName" Value="Effects of Sound on the Marine Environment" />
-    <Variable Name="BundleShortName" Value="ESME 2012" />
+    <Variable Name="BundleShortName" Value="ESME 2014" />
     <Variable Name="ProductLongName" Value="$(var.ProductName)" />
     <Variable Name="ProductShortName" Value="Databases" />
     <Variable Name="ProductFullVersion" Value="$(var.ProductFullVersion)" />

@@ -1,9 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Windows;
 using ESME.Locations;
 using HRC.Aspects;
 using HRC.Utility;
@@ -163,7 +161,7 @@ namespace ESME.Scenarios
         {
             Platform.Sources.Remove(this);
             foreach (var mode in Modes.ToList()) mode.Delete();
-            Scenario.Database.Context.Sources.Remove(this);
+            Globals.MasterDatabaseService.Context.Sources.Remove(this);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Data;
@@ -287,7 +288,7 @@ namespace ESME.Scenarios
         {
             Source.Modes.Remove(this);
             foreach (var tl in TransmissionLosses.ToList()) tl.Delete();
-            Scenario.Database.Context.Modes.Remove(this);
+            Globals.MasterDatabaseService.Context.Modes.Remove(this);
         }
 
         /// <summary>

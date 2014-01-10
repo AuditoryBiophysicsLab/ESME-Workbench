@@ -33,10 +33,10 @@ namespace ESME.Simulator
         //public Scenario Scenario { get { return _database.Scenarios.First(); } }
         readonly TransmissionLossCache _transmissionLossCache;
 
-        public static Simulation Create(Scenario scenario, string simulationDirectory, Dispatcher dispatcher)
+        public static Simulation Create(Scenario scenario, string simulationDirectory)
         {
             Directory.CreateDirectory(simulationDirectory);
-            var result = new Simulation(scenario, simulationDirectory, dispatcher)
+            var result = new Simulation(scenario, simulationDirectory)
             {
                 MovingAnimats = false,
                 AnimateSimulation = true,
@@ -48,10 +48,9 @@ namespace ESME.Simulator
             return result;
         }
 
-        Simulation(Scenario scenario, string simulationDirectory, Dispatcher dispatcher)
+        Simulation(Scenario scenario, string simulationDirectory)
         {
             _simulationDirectory = simulationDirectory;
-            Dispatcher = dispatcher;
             //_database = SimulationContext.OpenOrCreate(Path.Combine(_simulationDirectory, "simulation.db"));
             //_scenario = _database.ImportScenario(scenario);
             Scenario = scenario;
@@ -65,7 +64,6 @@ namespace ESME.Simulator
         }
 
         public Scenario Scenario { get; private set; }
-        public Dispatcher Dispatcher { get; private set; }
         readonly string _simulationDirectory;
         //readonly SimulationContext _database;
         readonly List<PlatformState[]> _platformStates = new List<PlatformState[]>();
@@ -91,7 +89,7 @@ namespace ESME.Simulator
 
             try
             {
-                var result = TaskEx.Run(() => Run(TimeStepSize, _cancellationTokenSource.Token));
+                var result = Task.Run(() => Run(TimeStepSize, _cancellationTokenSource.Token));
                 await result;
             }
             catch (Exception e)
@@ -120,7 +118,7 @@ namespace ESME.Simulator
 
                 _platformStates.Add(behaviors);
                 var curPlatform = platform;
-                Dispatcher.InvokeIfRequired(() =>
+                Globals.Dispatcher.InvokeIfRequired(() =>
                                             {
                                                 curPlatform.RemoveMapLayers();
                                                 curPlatform.UpdateMapLayers();
@@ -176,7 +174,7 @@ namespace ESME.Simulator
                         {
                             UpdateFootprintMapLayer(activeMode, platformState, curModeLayer);
                             var isActive = platformState.ModeActiveTimes[activeMode].Ticks > 0;
-                            Dispatcher.InvokeIfRequired(() =>
+                            Globals.Dispatcher.InvokeIfRequired(() =>
                                                         {
                                                             MediatorMessage.Send(AnimateSimulation && isActive ? MediatorMessage.ShowMapLayer : MediatorMessage.HideMapLayer, curModeLayer);
                                                             MediatorMessage.Send(MediatorMessage.RefreshMapLayer, curModeLayer);
@@ -249,16 +247,16 @@ namespace ESME.Simulator
                     bufferBlock.Complete();
                 }
                 //Debug.WriteLine("Actor IDs sent.  Waiting for completion.");
-                TaskEx.WhenAll(actionBlockCompletions).Wait();
+                Task.WhenAll(actionBlockCompletions).Wait();
                 PercentProgress.Report(timeStepIndex);
                 var timeStepRecord = new SimulationTimeStepRecord();
                 timeStepRecord.ActorPositionRecords.AddRange(actorPositionRecords);
                 if (processTask != null) processTask.Wait();
-                processTask = ModeThresholdHistogram.Process(timeStepRecord, Dispatcher);
+                processTask = ModeThresholdHistogram.Process(timeStepRecord, Globals.Dispatcher);
                 if (timeStepIndex % 10 == 0)
                 {
                     processTask.Wait();
-                    Dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
+                    Globals.Dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
                 }
                 //SpeciesThresholdHistogram.Process(timeStepRecord);
                 logBuffer.Post(timeStepRecord);
@@ -272,23 +270,23 @@ namespace ESME.Simulator
                 //var distance = Scenario.ScenarioSpecies[0].Animat.Locations[0].DistanceKilometers(firstAnimatPosition);
                 //if (distance > 0.01) Debug.WriteLine(string.Format("{0}: First animat has moved {1:0.##} km from initial location", DateTime.Now, distance));
                 //Debug.WriteLine(string.Format("{0}: Finished time step {1} of {2}: {3:0%} complete", DateTime.Now, timeStepIndex, timeStepCount, Math.Round((float)timeStepIndex / timeStepCount, 3)));
-                if (MovingAnimats & AnimateSimulation) Dispatcher.InvokeIfRequired(() => { foreach (var species in Scenario.ScenarioSpecies) species.UpdateMapLayers(); });
+                if (MovingAnimats & AnimateSimulation) Globals.Dispatcher.InvokeIfRequired(() => { foreach (var species in Scenario.ScenarioSpecies) species.UpdateMapLayers(); });
                 if (token.IsCancellationRequested) break;
             }
             if (processTask != null) processTask.Wait();
-            Dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
+            Globals.Dispatcher.InvokeIfRequired(UpdateHistogramDisplay);
             foreach (var layer in _modeFootprintMapLayers.SelectMany(layerSet => layerSet))
             {
                 var curLayer = layer;
-                Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.RemoveMapLayer, curLayer));
+                Globals.Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.RemoveMapLayer, curLayer));
             }
-            Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.RefreshMap, true));
+            Globals.Dispatcher.InvokeIfRequired(() => MediatorMessage.Send(MediatorMessage.RefreshMap, true));
             logBuffer.Complete();
             logBlock.Completion.Wait();
             if (MovingAnimats) Shutdown3MB();
-            Debug.WriteLine(string.Format("{0}: Simulation complete. Exposure count: {1}", DateTime.Now, _totalExposureCount));
-            Debug.WriteLine(string.Format("{0}: Exposures by species:", DateTime.Now));
-            for (var i = 0; i < _exposuresBySpecies.Length; i++) Debug.WriteLine(string.Format("{0}: Species: {1}, Exposures: {2}", DateTime.Now, Scenario.ScenarioSpecies[i].LatinName, _exposuresBySpecies[i]));
+            Debug.WriteLine("{0}: Simulation complete. Exposure count: {1}", DateTime.Now, _totalExposureCount);
+            Debug.WriteLine("{0}: Exposures by species:", DateTime.Now);
+            for (var i = 0; i < _exposuresBySpecies.Length; i++) Debug.WriteLine("{0}: Species: {1}, Exposures: {2}", DateTime.Now, Scenario.ScenarioSpecies[i].LatinName, _exposuresBySpecies[i]);
             //SpeciesThresholdHistogram.Display();
             //NewModeThresholdHistogram.DebugDisplay();
         }
@@ -460,7 +458,7 @@ namespace ESME.Simulator
                     mbs.AbortRun();
                     throw new AnimatInterfaceMMBSException("C3mbs::RunScenarioNumIterations FATAL error: " + mbs.ResultToTc(result));
                 }
-                while (mbsRUNSTATE.RUNNING == mbs.GetRunState()) TaskEx.Yield();
+                while (mbsRUNSTATE.RUNNING == mbs.GetRunState()) Task.Yield();
             }, new ExecutionDataflowBlockOptions { BoundedCapacity = -1, MaxDegreeOfParallelism = -1 });
             foreach (var mbs in _mbs) actionBlock.Post(mbs);
             actionBlock.Complete();

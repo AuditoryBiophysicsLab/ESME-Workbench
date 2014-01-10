@@ -1,17 +1,18 @@
-using ESME.Locations;
-using System.Data.Entity;
-using System.Data.Entity.Migrations;
-
 namespace ESME.Migrations
 {
-    internal sealed class Configuration : DbMigrationsConfiguration<LocationContext>
+    using System;
+    using System.Data.Entity;
+    using System.Data.Entity.Migrations;
+    using System.Linq;
+
+    internal sealed class Configuration : DbMigrationsConfiguration<ESME.Locations.LocationContext>
     {
         public Configuration()
         {
-            AutomaticMigrationsEnabled = false;
+            AutomaticMigrationsEnabled = true;
         }
 
-        protected override void Seed(LocationContext context)
+        protected override void Seed(ESME.Locations.LocationContext context)
         {
             //  This method will be called after migrating to the latest version.
 
@@ -26,10 +27,5 @@ namespace ESME.Migrations
             //    );
             //
         }
-    }
-    internal sealed class Initializer
-        : MigrateDatabaseToLatestVersion<LocationContext, Configuration>
-    {
-        // Wrapper to allow easier app.config configuration
     }
 }

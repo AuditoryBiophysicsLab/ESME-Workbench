@@ -3,10 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
-using StandardTransmissionLossEngines;
 using ESME;
 using ESME.Data;
-using ESME.Plugins;
 using HRC.ViewModels;
 using HRC.WPF;
 
@@ -23,8 +21,8 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 return _editOptions ?? (_editOptions = new SimpleCommand<object, object>(obj =>
                 {
-                    var programOptionsViewModel = new ApplicationOptionsViewModel(_plugins);
-                    var result = _visualizer.ShowDialog("ApplicationOptionsView", programOptionsViewModel);
+                    var programOptionsViewModel = new ApplicationOptionsViewModel(ESME.Globals.PluginManagerService);
+                    var result = ESME.Globals.VisualizerService.ShowDialog("ApplicationOptionsView", programOptionsViewModel);
                     if ((result.HasValue) && (result.Value)) ESME.Globals.AppSettings.Save();
                     ESME.Globals.AppSettings = AppSettings.Load();
                     ESME.Globals.AppSettings = ESME.Globals.AppSettings;
@@ -51,10 +49,10 @@ namespace ESMEWorkbench.ViewModels.Main
             var userManual = Directory.GetFiles(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "ESME Workbench*Manual*.pdf");
             if (userManual.Length == 0)
             {
-                _messageBox.ShowError("The user manual was not found!");
+                ESME.Globals.MessageBoxService.ShowError("The user manual was not found!");
                 return;
             }
-            var info = new ProcessStartInfo(userManual[0]) {UseShellExecute = true, Verb = "open"};
+            var info = new ProcessStartInfo(userManual[0]) { UseShellExecute = true, Verb = "open" };
 
             Process.Start(info);
         }
@@ -79,7 +77,7 @@ namespace ESMEWorkbench.ViewModels.Main
 #if false 
                     if (SimulationProgressViewModel != null)
                     {
-                        if (_messageBox.ShowOkCancel("A simulation is currently running.  OK to halt this simulation and exit ESME?", MessageBoxImage.Question) == MessageBoxResult.Cancel)
+                        if (ESME.Globals.MessageBoxService.ShowOkCancel("A simulation is currently running.  OK to halt this simulation and exit ESME?", MessageBoxImage.Question) == MessageBoxResult.Cancel)
                         {
                             ((CancelEventArgs)o.EventArgs).Cancel = true;
                             return;
@@ -87,7 +85,7 @@ namespace ESMEWorkbench.ViewModels.Main
                         SimulationProgressViewModel.Simulation.Cancel();
                     } 
 #endif
-                    if (Database.Context.IsModified) Database.SaveChanges();
+                    if (ESME.Globals.MasterDatabaseService.Context.IsModified) ESME.Globals.MasterDatabaseService.SaveChanges();
                     foreach (var popup in _openPopups.Where(popup => popup != null))
                         popup.Close();
                     
@@ -115,12 +113,12 @@ namespace ESMEWorkbench.ViewModels.Main
 
         void TestHandler(EventToCommandArgs args)
         {
-            if (Scenario != null) _openFile.InitialDirectory = Scenario.StorageDirectoryPath;
-            _openFile.Filter = "PGRID files (*.pgrid)|*.pgrid|All files (*.*)|*.*";
-            var result = _openFile.ShowDialog((Window)_viewAwareStatus.View);
+            if (Scenario != null) ESME.Globals.OpenFileService.InitialDirectory = Scenario.StorageDirectoryPath;
+            ESME.Globals.OpenFileService.Filter = "PGRID files (*.pgrid)|*.pgrid|All files (*.*)|*.*";
+            var result = ESME.Globals.OpenFileService.ShowDialog((Window)ESME.Globals.ViewAwareStatusService.View);
             if (result.HasValue && result.Value)
             {
-                //((RAMGeoEngine)_plugins[PluginType.TransmissionLossCalculator][PluginSubtype.RAMGeo].DefaultPlugin).ReadRamPGrid(_openFile.FileName);
+                //((RAMGeoEngine)ESME.Globals.PluginManagerService[PluginType.TransmissionLossCalculator][PluginSubtype.RAMGeo].DefaultPlugin).ReadRamPGrid(_openFile.FileName);
             }
         }
         #endregion

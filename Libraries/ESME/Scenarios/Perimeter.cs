@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using ESME.Behaviors;
 using ESME.Locations;
@@ -124,9 +125,9 @@ namespace ESME.Scenarios
                 platform.Speed = 0;
                 platform.Perimeter = null;
             }
-            Scenario.Database.Context.LayerSettings.Remove(LayerSettings);
+            Globals.MasterDatabaseService.Context.LayerSettings.Remove(LayerSettings);
             Scenario.Perimeters.Remove(this);
-            foreach (var point in PerimeterCoordinates.ToList()) Scenario.Database.Context.PerimeterCoordinates.Remove(point);
+            foreach (var point in PerimeterCoordinates.ToList()) Globals.MasterDatabaseService.Context.PerimeterCoordinates.Remove(point);
         }
     }
 }

@@ -22,7 +22,7 @@ namespace ESME.Simulator
             Configuration.ProxyCreationEnabled = true;
             Configuration.LazyLoadingEnabled = true;
             Configuration.ValidateOnSaveEnabled = true;
-            System.Data.Entity.Database.SetInitializer(new LocationContext.LocationDatabaseInitializer());
+            System.Data.Entity.Database.SetInitializer(new LocationDatabaseInitializer());
         }
 
         public DbSet<Location> Locations { get; set; }

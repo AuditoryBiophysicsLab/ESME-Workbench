@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -146,8 +147,8 @@ namespace ESME.Scenarios
             RemoveMapLayers();
             foreach (var tl in TransmissionLosses.ToList()) tl.Delete();
             if (Scenario.AnalysisPoints.Contains(this)) Scenario.AnalysisPoints.Remove(this);
-            Scenario.Database.Context.LayerSettings.Remove(LayerSettings);
-            Scenario.Database.Context.AnalysisPoints.Remove(this);
+            Globals.MasterDatabaseService.Context.LayerSettings.Remove(LayerSettings);
+            Globals.MasterDatabaseService.Context.AnalysisPoints.Remove(this);
         }
         #region Layer Move commands
         #region MoveLayerToFrontCommand
@@ -173,7 +174,7 @@ namespace ESME.Scenarios
 
         public void Recalculate()
         {
-            Debug.WriteLine(string.Format("Recalculating analysis point at ({0:0.###}, {1:0.###})", Geo.Latitude, Geo.Longitude));
+            Debug.WriteLine("Recalculating analysis point at ({0:0.###}, {1:0.###})", Geo.Latitude, Geo.Longitude);
 
             foreach (var tl in TransmissionLosses) tl.Recalculate();
         }

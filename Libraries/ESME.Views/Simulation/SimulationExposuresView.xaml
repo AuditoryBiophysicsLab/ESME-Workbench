@@ -5,7 +5,7 @@
         xmlns:l="clr-namespace:ESME.Views.Simulation"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:Plotting="clr-namespace:HRC.Plotting;assembly=HRC.Plotting"
-        Title="{Binding WindowTitle}"
+        xmlns:WPF="clr-namespace:HRC.WPF;assembly=HRC" Title="{Binding WindowTitle}"
         Width="800"
         Height="300"
         d:DataContext="{d:DesignInstance l:SimulationExposuresViewModel}"
@@ -26,11 +26,11 @@
                     DockPanel.Dock="Right" />
         </DockPanel>
         <ListBox DockPanel.Dock="Top" ItemsSource="{Binding HistogramBinsViewModels}" ScrollViewer.HorizontalScrollBarVisibility="Hidden">
-            <Plotting:DataPiping.DataPipes>
-                <Plotting:DataPipeCollection>
-                    <Plotting:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}}, Path=ActualHeight}" Target="{Binding Path=ActualHeight, Mode=OneWayToSource}" />
-                </Plotting:DataPipeCollection>
-            </Plotting:DataPiping.DataPipes>
+            <WPF:DataPiping.DataPipes>
+                <WPF:DataPipeCollection>
+                    <WPF:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}}, Path=ActualHeight}" Target="{Binding Path=ActualHeight, Mode=OneWayToSource}" />
+                </WPF:DataPipeCollection>
+            </WPF:DataPiping.DataPipes>
             <ListBox.ItemContainerStyle>
                 <Style TargetType="ListBoxItem">
                     <Setter Property="Padding" Value="0" />

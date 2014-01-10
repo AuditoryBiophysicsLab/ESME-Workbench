@@ -1,6 +1,7 @@
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Management;
+using System.Xml.Serialization;
 using ESME.Environment;
 using ESME.Locations;
 using ESME.Plugins;

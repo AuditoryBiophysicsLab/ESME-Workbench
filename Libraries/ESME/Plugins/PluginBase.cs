@@ -107,6 +107,7 @@ namespace ESME.Plugins
         [XmlIgnore] public EnvironmentDataType EnvironmentDataType { get; protected set; }
         [XmlIgnore] public object SelectionControlViewModel { get; protected set; }
         [XmlIgnore] public abstract EnvironmentalDataSet SelectedDataSet { get; }
+        [XmlIgnore] public abstract string Xml { get; set; }
 
         protected void CheckResolutionAndTimePeriod(float resolution, TimePeriod timePeriod)
         {
@@ -149,5 +150,4 @@ namespace ESME.Plugins
     {
         public abstract T Extract(GeoRect geoRect, float resolution, TimePeriod timePeriod = TimePeriod.Invalid, PercentProgress progress = null);
     }
-    
 }

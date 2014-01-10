@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Linq;
 using ESME.Database;
@@ -95,7 +96,7 @@ namespace ESME.Scenarios
                 foreach (var waypoint in Waypoints)
                 {
                     var geo = (Geo)waypoint.Geo;
-                    writer.WriteLine(string.Format("{0} {1}{2}", geo.Latitude, geo.Longitude, includeTimestamps ? " " +((TimeSpan)waypoint.TimeAtWaypoint) : ""));
+                    writer.WriteLine("{0} {1}{2}", geo.Latitude, geo.Longitude, includeTimestamps ? " " +((TimeSpan)waypoint.TimeAtWaypoint) : "");
                 }
             }
         }

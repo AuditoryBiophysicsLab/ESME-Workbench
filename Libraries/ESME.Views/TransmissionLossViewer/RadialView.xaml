@@ -57,11 +57,11 @@
                             <WPF:EventToCommandTrigger Command="{Binding ColorBarDoubleClickCommand}" />
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
-                    <Plotting:DataPiping.DataPipes>
-                        <Plotting:DataPipeCollection>
-                            <Plotting:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type controls:ColorBarControl}}, Path=AxisRange}" Target="{Binding Path=AxisRange, Mode=OneWayToSource}" />
-                        </Plotting:DataPipeCollection>
-                    </Plotting:DataPiping.DataPipes>
+                    <WPF:DataPiping.DataPipes>
+                        <WPF:DataPipeCollection>
+                            <WPF:DataPipe Source="{Binding RelativeSource={RelativeSource AncestorType={x:Type controls:ColorBarControl}}, Path=AxisRange}" Target="{Binding Path=AxisRange, Mode=OneWayToSource}" />
+                        </WPF:DataPipeCollection>
+                    </WPF:DataPiping.DataPipes>
                 </controls:ColorBarControl>
                 <TextBlock DockPanel.Dock="Top" />
             </DockPanel>

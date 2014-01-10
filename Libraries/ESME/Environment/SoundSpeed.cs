@@ -73,7 +73,7 @@ namespace ESME.Environment
 
         public static Task<SoundSpeed> LoadAsync(string filename)
         {
-            return TaskEx.Run(() => Load(filename));
+            return Task.Run(() => Load(filename));
         }
 #if false
         bool _isExtended;

@@ -9,7 +9,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Threading;
 using ESME;
 using ESME.Environment;
 using ESME.Environment.NAVO;
@@ -17,7 +16,6 @@ using ESME.Locations;
 using ESME.Plugins;
 using ESME.Scenarios;
 using ESME.TransmissionLoss;
-using ESME.Views.Scenarios;
 using ESME.Views.TransmissionLossViewer;
 using ESMEWorkbench.ViewModels.Map;
 using ESMEWorkbench.ViewModels.Tree;
@@ -36,16 +34,7 @@ namespace ESMEWorkbench.ViewModels.Main
     public partial class MainViewModel : ViewModelBase
     {
         #region Private fields
-        readonly IHRCSaveFileService _saveFile;
-        readonly IHRCOpenFileService _openFile;
-        readonly IPluginManagerService _plugins;
-        readonly EnvironmentalCacheService _cache;
-        readonly TransmissionLossCalculatorService _transmissionLoss;
-        readonly IViewAwareStatus _viewAwareStatus;
-        readonly IMessageBoxService _messageBox;
-        readonly IUIVisualizerService _visualizer;
         public const bool ExperimentsCurrentlySupported = false;
-        Dispatcher _dispatcher;
 
         readonly List<Window> _openPopups = new List<Window>();
         #endregion
@@ -71,88 +60,85 @@ namespace ESMEWorkbench.ViewModels.Main
                 Debug.WriteLine("***********\nMainViewModel: Mediator registration failed: " + ex.Message + "\n***********");
                 throw;
             }
-            _viewAwareStatus = viewAwareStatus;
-            _messageBox = messageBox;
-            Database = database;
-            _visualizer = visualizer;
-            _saveFile = saveFile;
-            _openFile = openFile;
-            _transmissionLoss = transmissionLoss;
-            _transmissionLoss.PluginManagerService = plugins;
-            ScenarioExensions.TransmissionLossCalculator = _transmissionLoss;
-            Radial.TransmissionLossCalculator = _transmissionLoss;
-            _plugins = plugins;
-            _cache = cache;
-            MapViewModel = new MapViewModel(_viewAwareStatus, _messageBox, this, _visualizer, _saveFile);
             Cursor = Cursors.Arrow;
-            
-            _transmissionLoss.WorkQueue.PropertyChanged +=
+
+            ESME.Data.AppSettings.ApplicationName = App.Name;
+            Globals.AppSettings = ESME.Data.AppSettings.Load(ESME.Data.AppSettings.AppSettingsFile);
+            Globals.AppSettings.Save();
+
+            Globals.PluginManagerService = plugins;
+            Globals.TransmissionLossCalculatorService = transmissionLoss;
+            Globals.MasterDatabaseService = database;
+            Globals.VisualizerService = visualizer;
+            Globals.SaveFileService = saveFile;
+            Globals.OpenFileService = openFile;
+            Globals.EnvironmentalCacheService = cache;
+            Globals.ViewAwareStatusService = viewAwareStatus;
+            Globals.MessageBoxService = messageBox;
+
+            MapViewModel = new MapViewModel(this);
+
+            Globals.TransmissionLossCalculatorService.WorkQueue.PropertyChanged +=
                 (s, e) =>
                 {
                     if (e.PropertyName == "Count")
                     {
-                            TransmissionLossActivity = _transmissionLoss.WorkQueue.Keys.Count > 0
-                                                           ? string.Format("Acoustic Simulator: {0} items", _transmissionLoss.WorkQueue.Keys.Count)
-                                                           : "Acoustic Simulator: idle";
-                            // Debug.WriteLine(string.Format("TransmissionLossActivity: {0}", TransmissionLossActivity));
-                            var isBusy = _transmissionLoss.WorkQueue.Keys.Count > 0;
-                            IsTransmissionLossBusy = isBusy;
-                            if(!isBusy && IsSaveSampleDataRequested)
-                            {
-                                Database.SaveChanges();
-                                IsSaveSampleDataRequested = false;
-                            }
-                        
+                        TransmissionLossActivity = Globals.TransmissionLossCalculatorService.WorkQueue.Keys.Count > 0
+                            ? string.Format("Acoustic Simulator: {0} items", Globals.TransmissionLossCalculatorService.WorkQueue.Keys.Count)
+                            : "Acoustic Simulator: idle";
+                        // Debug.WriteLine(string.Format("TransmissionLossActivity: {0}", TransmissionLossActivity));
+                        var isBusy = Globals.TransmissionLossCalculatorService.WorkQueue.Keys.Count > 0;
+                        IsTransmissionLossBusy = isBusy;
+                        if (!isBusy && IsSaveSampleDataRequested)
+                        {
+                            Globals.MasterDatabaseService.SaveChanges();
+                            IsSaveSampleDataRequested = false;
+                        }
+
                     }
                 };
 
             if (Designer.IsInDesignMode) return;
 
-            _viewAwareStatus.ViewLoaded += () =>
-            {
-                if (Designer.IsInDesignMode) return;
-
-                MapViewModel.MouseGeo.Subscribe(SetMouseEarthCoordinate);
-                MapViewModel.Click.Subscribe(MapClick);
-
-                if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"))) Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"));
-                var databaseDirectory = Globals.AppSettings.DatabaseDirectory ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database");
-                var databaseFile = Path.Combine(databaseDirectory, "esme.db.sdf");
-                if (Directory.Exists(databaseDirectory) && File.Exists(databaseFile))
-                {
-                    var fileInfo = new FileInfo(databaseFile);
-                    var cutoffTime = new DateTime(2013, 5, 1, 00, 00, 00);
-                    if (fileInfo.CreationTime < cutoffTime) Directory.Delete(databaseDirectory, true);
-                }
-                Database.MasterDatabaseDirectory = databaseDirectory;
-
-                Scenarios = Database.Context.Scenarios.Local;
-                LocationsTreeViewModel = new LocationsTreeViewModel(Database.Context.Locations.Local);
-
-                _dispatcher = ((Window)_viewAwareStatus.View).Dispatcher;
-                ScenarioExensions.Dispatcher = _dispatcher;
-                _plugins.PluginDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-                Globals.AppSettings.PluginManagerService = _plugins;
-                ModePropertiesViewModel.PluginManagerService = _plugins;
-                _transmissionLoss.Dispatcher = _dispatcher;
-                _transmissionLoss.Start();
-                NAVOImporter.PluginManagerService = _plugins;
-                GeoRect locationsExtent = null;
-                if (!Database.Context.Locations.Any()) _dispatcher.InvokeInBackgroundIfRequired(CreateSampleScenariosIfRequested);
-                else foreach (var location in Database.Context.Locations.Local)
-                {
-                    locationsExtent = locationsExtent == null ? new GeoRect(location.GeoRect) : GeoRect.Union(locationsExtent, (GeoRect)location.GeoRect);
-                    location.UpdateMapLayers();
-                }
-                if (Database.Context.Locations.Local.Count > 0) MediatorMessage.Send(MediatorMessage.SetMapExtent, locationsExtent);
-            };
+            Globals.ViewAwareStatusService.ViewLoaded += ViewLoaded;
             //_appTracker = new ApplicationTracker("UA-44329261-1", "TestWPFApp");
             //_appTracker.StartSession();
             //_appTracker.TrackEvent(ApplicationTrackerCategories.Command, "ApplicationStartup");
         }
 
+        void ViewLoaded()
+        {
+            if (Designer.IsInDesignMode) return;
+
+            MapViewModel.MouseGeo.Subscribe(SetMouseEarthCoordinate);
+            MapViewModel.Click.Subscribe(MapClick);
+
+            var databaseFile = Path.Combine(Globals.MasterDatabaseService.MasterDatabaseDirectory, "esme.db.sdf");
+            if (Directory.Exists(Globals.MasterDatabaseService.MasterDatabaseDirectory) && File.Exists(databaseFile))
+            {
+                var fileInfo = new FileInfo(databaseFile);
+                var cutoffTime = new DateTime(2013, 5, 1, 00, 00, 00);
+                if (fileInfo.CreationTime < cutoffTime) Directory.Delete(Globals.MasterDatabaseService.MasterDatabaseDirectory, true);
+            }
+
+            Scenarios = Globals.MasterDatabaseService.Context.Scenarios.Local;
+            LocationsTreeViewModel = new LocationsTreeViewModel(Globals.MasterDatabaseService.Context.Locations.Local);
+
+            Globals.Dispatcher = ((Window)Globals.ViewAwareStatusService.View).Dispatcher;
+            Globals.PluginManagerService.PluginDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            Globals.AppSettings.PluginManagerService = Globals.PluginManagerService;
+            Globals.TransmissionLossCalculatorService.Start();
+            GeoRect locationsExtent = null;
+            if (!Globals.MasterDatabaseService.Context.Locations.Any()) Globals.Dispatcher.InvokeInBackgroundIfRequired(CreateSampleScenariosIfRequested);
+            else foreach (var location in Globals.MasterDatabaseService.Context.Locations.Local)
+                {
+                    locationsExtent = locationsExtent == null ? new GeoRect(location.GeoRect) : GeoRect.Union(locationsExtent, (GeoRect)location.GeoRect);
+                    location.UpdateMapLayers();
+                }
+            if (Globals.MasterDatabaseService.Context.Locations.Local.Count > 0) MediatorMessage.Send(MediatorMessage.SetMapExtent, locationsExtent);
+            
+        }
         public ObservableCollection<Scenario> Scenarios { get; private set; }
-        public IMasterDatabaseService Database { get; private set; }
         [Affects("IsRunSimulationCommandEnabled")] public bool IsTransmissionLossBusy { get; set; }
         protected override void OnDispose()
         {
@@ -167,25 +153,6 @@ namespace ESMEWorkbench.ViewModels.Main
         void SetMouseEarthCoordinate(Geo mouseGeo)
         {
             MouseGeo = mouseGeo;
-#if false
-            if (IsInAnalysisPointMode)
-            {
-                if (_fakeAnalysisPoint == null)
-                {
-                    _fakeAnalysisPoint = new AnalysisPoint { Geo = MouseGeo, Scenario = Scenario };
-                    Database.AddFakeMapLayer(_fakeAnalysisPoint);
-                    _fakeAnalysisPoint.CreateMapLayers();
-                    _fakeAnalysisPoint.LayerSettings.IsChecked = true;
-                }
-                else
-                {
-                    _fakeAnalysisPoint.Geo = MouseGeo;
-                    MediatorMessage.Send(MediatorMessage.RemoveMapLayer, _fakeAnalysisPoint.LayerSettings.MapLayerViewModel);
-                    ((OverlayShapeMapLayer)_fakeAnalysisPoint.LayerSettings.MapLayerViewModel).DrawAction();
-                    MediatorMessage.Send(MediatorMessage.AddMapLayer, _fakeAnalysisPoint.LayerSettings.MapLayerViewModel);
-                }
-            }
-#endif
             if (MouseGeo != null)
             {
                 var lat = mouseGeo.Latitude;
@@ -220,7 +187,7 @@ namespace ESMEWorkbench.ViewModels.Main
                     Cursor = Cursors.Arrow;
                 }
             }
-            if (Scenario != null && Scenario.Bathymetry != null && _cache.IsCached(Scenario.Bathymetry) && Scenario.Bathymetry.SampleCount > 0)
+            if (Scenario != null && Scenario.Bathymetry != null && Globals.EnvironmentalCacheService.IsCached(Scenario.Bathymetry) && Scenario.Bathymetry.SampleCount > 0)
             {
                 if (_bathymetryTask == null)
                 {
@@ -228,12 +195,13 @@ namespace ESMEWorkbench.ViewModels.Main
                     if (!_bathymetryTask.IsCompleted)
                     {
                         MouseDepthInfo = string.Format("Depth: <loading>");
-                        _bathymetryTask.ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
+                        _bathymetryTask.ContinueWith(t => Globals.Dispatcher.InvokeInBackgroundIfRequired(() =>
                         {
                             MouseDepthInfo = string.Format("Depth: <loaded>");
                             _bathymetryTask = null;
                         }));
-                    } else _bathymetryTask.ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
+                    }
+                    else _bathymetryTask.ContinueWith(t => Globals.Dispatcher.InvokeInBackgroundIfRequired(() =>
                     {
                         MouseDepth = t.Result.Data;
                         MouseDepthInfo = string.Format("Depth: {0}m", -MouseDepth);
@@ -246,7 +214,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 MouseDepth = null;
                 MouseDepthInfo = string.Format("Depth: N/A");
             }
-            if (Scenario != null && Scenario.Wind != null && _cache.IsCached(Scenario.Wind) && Scenario.Wind.SampleCount > 0)
+            if (Scenario != null && Scenario.Wind != null && Globals.EnvironmentalCacheService.IsCached(Scenario.Wind) && Scenario.Wind.SampleCount > 0)
             {
                 if (_windTask == null)
                 {
@@ -254,12 +222,13 @@ namespace ESMEWorkbench.ViewModels.Main
                     if (!_windTask.IsCompleted)
                     {
                         MouseWindSpeedInfo = string.Format("Wind: <loading>");
-                        _windTask.ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
+                        _windTask.ContinueWith(t => Globals.Dispatcher.InvokeInBackgroundIfRequired(() =>
                         {
                             MouseWindSpeedInfo = string.Format("Wind: <loaded>");
                             _windTask = null;
                         }));
-                    } else _windTask.ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
+                    }
+                    else _windTask.ContinueWith(t => Globals.Dispatcher.InvokeInBackgroundIfRequired(() =>
                     {
                         MouseWindSpeed = t.Result.Data;
                         MouseWindSpeedInfo = string.Format("Wind: {0:0.0}m/s", MouseWindSpeed);
@@ -272,7 +241,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 MouseWindSpeed = null;
                 MouseWindSpeedInfo = string.Format("Wind: N/A");
             }
-            if (Scenario != null && Scenario.SoundSpeed != null && _cache.IsCached(Scenario.SoundSpeed) && Scenario.SoundSpeed.SampleCount > 0)
+            if (Scenario != null && Scenario.SoundSpeed != null && Globals.EnvironmentalCacheService.IsCached(Scenario.SoundSpeed) && Scenario.SoundSpeed.SampleCount > 0)
             {
                 if (_soundSpeedTask == null)
                 {
@@ -280,12 +249,13 @@ namespace ESMEWorkbench.ViewModels.Main
                     if (!_soundSpeedTask.IsCompleted)
                     {
                         MouseSoundSpeedInfo = string.Format("Sound Speed: <loading>");
-                        _soundSpeedTask.ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
+                        _soundSpeedTask.ContinueWith(t => Globals.Dispatcher.InvokeInBackgroundIfRequired(() =>
                         {
                             MouseSoundSpeedInfo = string.Format("Sound Speed: <loaded>");
                             _soundSpeedTask = null;
                         }));
-                    } else _soundSpeedTask.ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
+                    }
+                    else _soundSpeedTask.ContinueWith(t => Globals.Dispatcher.InvokeInBackgroundIfRequired(() =>
                     {
                         MouseSoundSpeed = t.Result;
                         MouseSoundSpeedInfo = string.Format("Sound Speed: {0:0} samples", MouseSoundSpeed.Data.Count);
@@ -300,7 +270,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 MouseSoundSpeedInfo = string.Format("Sound Speed: N/A");
                 MapViewModel.MouseSoundSpeedProfile = MouseSoundSpeed;
             }
-            if (Scenario != null && Scenario.Sediment != null && _cache.IsCached(Scenario.Sediment) && Scenario.Sediment.SampleCount > 0)
+            if (Scenario != null && Scenario.Sediment != null && Globals.EnvironmentalCacheService.IsCached(Scenario.Sediment) && Scenario.Sediment.SampleCount > 0)
             {
                 if (_sedimentTask == null)
                 {
@@ -308,12 +278,13 @@ namespace ESMEWorkbench.ViewModels.Main
                     if (!_sedimentTask.IsCompleted)
                     {
                         MouseSedimentInfo = string.Format("Sediment: <loading>");
-                        _sedimentTask.ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
+                        _sedimentTask.ContinueWith(t => Globals.Dispatcher.InvokeInBackgroundIfRequired(() =>
                         {
                             MouseSedimentInfo = string.Format("Sediment: <loaded>");
                             _sedimentTask = null;
                         }));
-                    } else _sedimentTask.ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
+                    }
+                    else _sedimentTask.ContinueWith(t => Globals.Dispatcher.InvokeInBackgroundIfRequired(() =>
                     {
                         MouseSediment = t.Result;
                         MouseSedimentInfo = string.Format("Sediment: {0}", BottomSedimentTypeTable.SedimentNames[MouseSediment.Data.SampleValue]);
@@ -333,7 +304,7 @@ namespace ESMEWorkbench.ViewModels.Main
         Task<SoundSpeedProfile> _soundSpeedTask;
         Task<SedimentSample> _sedimentTask;
 
-        public bool IsModified { get { return Database.Context.IsModified; } }
+        public bool IsModified { get { return Globals.MasterDatabaseService.Context.IsModified; } }
 
 
 
@@ -371,7 +342,7 @@ namespace ESMEWorkbench.ViewModels.Main
         void ShowAboutView()
         {
             var aboutViewModel = new AboutViewModel();
-            _visualizer.ShowDialog("AboutView", aboutViewModel);
+            Globals.VisualizerService.ShowDialog("AboutView", aboutViewModel);
         }
 
         #region PreviewKeyDownCommand
@@ -409,15 +380,15 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.ShowTransmissionLossQueueView), UsedImplicitly]
         void ShowTransmissionLossQueueView(bool isVisible)
         {
-            if (_dispatcher == null) return;
+            if (Globals.Dispatcher == null) return;
             lock (LockObject)
             {
                 if (isVisible)
                 {
                     if (_queueView == null)
                     {
-                        _dispatcher.InvokeIfRequired(() => _queueView = _visualizer.ShowWindow("TransmissionLossQueueView",
-                                                                                               _transmissionLoss.WorkQueue,
+                        Globals.Dispatcher.InvokeIfRequired(() => _queueView = Globals.VisualizerService.ShowWindow("TransmissionLossQueueView",
+                                                                                               Globals.TransmissionLossCalculatorService.WorkQueue,
                                                                                                false,
                                                                                                (sender, args) =>
                                                                                                {
@@ -430,7 +401,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 {
                     if (_queueView != null)
                     {
-                        _dispatcher.InvokeIfRequired(() =>
+                        Globals.Dispatcher.InvokeIfRequired(() =>
                         {
                             _queueView.Close();
                             _queueView = null;
@@ -451,7 +422,7 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 if (Scenario != null && geo != null && Scenario.GeoRect.Contains(geo))
                 {
-                    TaskEx.Run(() =>
+                    Task.Run(() =>
                     {
                         var analysisPoint = new AnalysisPoint { Geo = new Geo(geo), Scenario = Scenario };
                         Scenario.AnalysisPoints.Add(analysisPoint);
@@ -477,14 +448,14 @@ namespace ESMEWorkbench.ViewModels.Main
             try
             {
                 var transmissionLossViewModel = new TransmissionLossViewModel { TransmissionLoss = transmissionLoss };
-                var window = _visualizer.ShowWindow("TransmissionLossWindowView", transmissionLossViewModel);
+                var window = Globals.VisualizerService.ShowWindow("TransmissionLossWindowView", transmissionLossViewModel);
                 _openPopups.Add(window);
                 transmissionLossViewModel.Window = window;
-                transmissionLossViewModel.SaveFileService = _saveFile;
+                transmissionLossViewModel.SaveFileService = Globals.SaveFileService;
             }
             catch (InvalidOperationException ex)
             {
-                _messageBox.ShowError(string.Format("Error displaying transmission loss: {0}", ex.Message));
+                Globals.MessageBoxService.ShowError(string.Format("Error displaying transmission loss: {0}", ex.Message));
             }
         }
 
@@ -494,14 +465,14 @@ namespace ESMEWorkbench.ViewModels.Main
             try
             {
                 var analysisPointViewModel = new AnalysisPointViewModel(analysisPoint);
-                var window = _visualizer.ShowWindow("AnalysisPointWindowView", analysisPointViewModel);
+                var window = Globals.VisualizerService.ShowWindow("AnalysisPointWindowView", analysisPointViewModel);
                 _openPopups.Add(window);
                 analysisPointViewModel.TransmissionLossViewModel.Window = window;
-                analysisPointViewModel.TransmissionLossViewModel.SaveFileService = _saveFile;
+                analysisPointViewModel.TransmissionLossViewModel.SaveFileService = Globals.SaveFileService;
             }
             catch (InvalidOperationException ex)
             {
-                _messageBox.ShowError(string.Format("Error displaying analysis point: {0}", ex.Message));
+                Globals.MessageBoxService.ShowError(string.Format("Error displaying analysis point: {0}", ex.Message));
             }
         }
     }

@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Text;
 using System.Windows;
 using ESME.Views.Misc;
-using HRC.Aspects;
 using HRC.Services;
 using HRC.ViewModels;
 
@@ -17,11 +16,6 @@ namespace ESMEWorkbench.ViewModels.Main
         public AboutViewModel()
         {
             RegisterMediator();
-            var versionString = String.Format("{0}.{1}.{2}.{3}",
-                                              Assembly.GetEntryAssembly().GetName().Version.Major,
-                                              Assembly.GetEntryAssembly().GetName().Version.Minor,
-                                              Assembly.GetEntryAssembly().GetName().Version.Build,
-                                              BuildInformation.GitHash);
             WorkbenchModuleBuildInfo = new ModuleBuildInfoViewModel("ESME Workbench", BuildInformation.BuildDateTime, BuildInformation.BuildEngineer, Assembly.GetEntryAssembly().GetName().Version);
             ESMEModuleBuildInfo = new ModuleBuildInfoViewModel("ESME.dll", ESME.BuildInformation.BuildDateTime, ESME.BuildInformation.BuildEngineer);
             HRCModuleBuildInfo = new ModuleBuildInfoViewModel("HRC.dll", HRC.BuildInformation.BuildDateTime, HRC.BuildInformation.BuildEngineer);
@@ -105,7 +99,7 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 sb.AppendLine(moduleBuildInfoViewModel.ModuleName);
                 sb.AppendLine(string.Format("  Build Date : {0}", moduleBuildInfoViewModel.BuildDateTime));
-                sb.AppendLine(string.Format("  SVN Build  : {0}", moduleBuildInfoViewModel.VersionString));
+                sb.AppendLine(string.Format("     Version : {0}", moduleBuildInfoViewModel.VersionString));
             }
             sb.AppendLine("----- Component Version Info -----");
             sb.AppendLine("");

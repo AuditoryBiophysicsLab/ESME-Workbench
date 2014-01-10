@@ -14,7 +14,7 @@
   <?else ?>
   <?define Bitness="32-bit"?>
   <?endif ?>
-  <?define ProductName = "ESME 2012 $(var.Bitness) Application and Databases" ?>
+  <?define ProductName = "ESME 2014 $(var.Bitness) Application and Databases" ?>
   <Bundle Name="$(var.ProductName)" 
           Version="$(var.ProductFullVersion)" 
           Manufacturer="$(var.Manufacturer)" 
@@ -25,7 +25,7 @@
           UpdateUrl="http://esme.bu.edu"
           Compressed="no">
     <Variable Name="BundleLongName" Value="Effects of Sound on the Marine Environment" />
-    <Variable Name="BundleShortName" Value="ESME 2012" />
+    <Variable Name="BundleShortName" Value="ESME 2014" />
     <Variable Name="ProductLongName" Value="$(var.ProductName)" />
     <Variable Name="ProductShortName" Value="$(var.Bitness) Application and Databases" />
     <Variable Name="ProductFullVersion" Value="$(var.ProductFullVersion)" />

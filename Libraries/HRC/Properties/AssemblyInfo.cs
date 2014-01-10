@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Boston University Hearing Research Center")]
 [assembly: AssemblyProduct("HRC Class Library")]
-[assembly: AssemblyCopyright("Copyright © 2010-2012, Boston University")]
+[assembly: AssemblyCopyright("Copyright © 2010-2014, Boston University")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

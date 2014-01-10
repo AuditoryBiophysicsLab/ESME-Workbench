@@ -3,8 +3,6 @@ using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,7 +15,6 @@ using ESME.Plugins;
 using ESME.Scenarios;
 using ESME.Simulator;
 using ESME.Views.Controls;
-using ESME.Views.Misc;
 using ESME.Views.Scenarios;
 using ESME.Views.Simulation;
 using ESMEWorkbench.ViewModels.Map;
@@ -59,36 +56,36 @@ namespace ESMEWorkbench.ViewModels.Main
                     _mouseHoverSubscription = MapViewModel.MouseHoverGeo.ObserveOnDispatcher().Subscribe(g => _scenario.MouseHoverGeo = g);
                     _scenario.PropertyChanged += ScenarioPropertyChangedMonitor;
                     _scenario.UpdateMapLayers();
-                    _cache[_scenario.Wind].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
+                    Globals.EnvironmentalCacheService[_scenario.Wind].ContinueWith(t => Globals.Dispatcher.InvokeInBackgroundIfRequired(() =>
                     {
-                        if (_scenario.Wind.SampleCount == 0) _messageBox.ShowError(string.Format("No wind data was found in this location using source {0}", _plugins[_scenario.Wind.SourcePlugin].PluginName));
+                        if (_scenario.Wind.SampleCount == 0) Globals.MessageBoxService.ShowError(string.Format("No wind data was found in this location using source {0}", Globals.PluginManagerService[_scenario.Wind.SourcePlugin].PluginName));
                         else
                         {
                             _scenario.Wind.UpdateMapLayers();
                             _scenario.Wind.LayerSettings.MoveLayerToBack();
                         }
                     }));
-                    _cache[_scenario.SoundSpeed].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
+                    Globals.EnvironmentalCacheService[_scenario.SoundSpeed].ContinueWith(t => Globals.Dispatcher.InvokeInBackgroundIfRequired(() =>
                     {
-                        if (_scenario.SoundSpeed.SampleCount == 0) _messageBox.ShowError(string.Format("No sound speed data was found in this location using source {0}", _plugins[_scenario.SoundSpeed.SourcePlugin].PluginName));
+                        if (_scenario.SoundSpeed.SampleCount == 0) Globals.MessageBoxService.ShowError(string.Format("No sound speed data was found in this location using source {0}", Globals.PluginManagerService[_scenario.SoundSpeed.SourcePlugin].PluginName));
                         else
                         {
                             _scenario.SoundSpeed.UpdateMapLayers();
                             _scenario.SoundSpeed.LayerSettings.MoveLayerToBack();
                         }
                     }));
-                    _cache[_scenario.Bathymetry].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
+                    Globals.EnvironmentalCacheService[_scenario.Bathymetry].ContinueWith(t => Globals.Dispatcher.InvokeInBackgroundIfRequired(() =>
                     {
-                        if (_scenario.Bathymetry.SampleCount == 0) _messageBox.ShowError(string.Format("No bathymetry data was found in this location using source {0}", _plugins[_scenario.Bathymetry.SourcePlugin].PluginName));
+                        if (_scenario.Bathymetry.SampleCount == 0) Globals.MessageBoxService.ShowError(string.Format("No bathymetry data was found in this location using source {0}", Globals.PluginManagerService[_scenario.Bathymetry.SourcePlugin].PluginName));
                         else
                         {
                             _scenario.Bathymetry.UpdateMapLayers();
                             _scenario.Bathymetry.LayerSettings.MoveLayerToBack();
                         }
                     }));
-                    _cache[_scenario.Sediment].ContinueWith(t => _dispatcher.InvokeInBackgroundIfRequired(() =>
+                    Globals.EnvironmentalCacheService[_scenario.Sediment].ContinueWith(t => Globals.Dispatcher.InvokeInBackgroundIfRequired(() =>
                     {
-                        if (_scenario.Sediment.SampleCount == 0) _messageBox.ShowError(string.Format("No sediment data was found in this location using source {0}", _plugins[_scenario.Sediment.SourcePlugin].PluginName));
+                        if (_scenario.Sediment.SampleCount == 0) Globals.MessageBoxService.ShowError(string.Format("No sediment data was found in this location using source {0}", Globals.PluginManagerService[_scenario.Sediment.SourcePlugin].PluginName));
                         else
                         {
                             _scenario.Sediment.UpdateMapLayers();
@@ -103,7 +100,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 }
                 catch (Exception e)
                 {
-                    _messageBox.ShowError(e.Message);
+                    Globals.MessageBoxService.ShowError(e.Message);
                     _scenario = null;
                     OnPropertyChanged("Scenario");
                 }
@@ -154,7 +151,7 @@ namespace ESMEWorkbench.ViewModels.Main
 
         public bool IsInAnalysisPointMode { get; set; }
 
-        public string MainWindowTitle { get { return string.Format("ESME 2012: {0}", _scenario == null ? "<No scenario loaded>" : _scenario.Name); } }
+        public string MainWindowTitle { get { return string.Format("ESME 2014: {0}", _scenario == null ? "<No scenario loaded>" : _scenario.Name); } }
 
         #region CreateScenarioCommand
         public SimpleCommand<object, EventToCommandArgs> CreateScenarioCommand { get { return _createScenario ?? (_createScenario = new SimpleCommand<object, EventToCommandArgs>(o => IsCreateScenarioCommandEnabled, o => CreateScenarioHandler())); } }
@@ -164,7 +161,7 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             get
             {
-                return Database != null && Database.Context != null && Database.Context.Locations.Local.Count > 0;
+                return Globals.MasterDatabaseService != null && Globals.MasterDatabaseService.Context != null && Globals.MasterDatabaseService.Context.Locations.Local.Count > 0;
             }
         }
 
@@ -174,16 +171,16 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             try
             {
-                if (_lastCreateScenarioLocation == null) _lastCreateScenarioLocation = Database.Context.Locations.Local.First();
+                if (_lastCreateScenarioLocation == null) _lastCreateScenarioLocation = Globals.MasterDatabaseService.Context.Locations.Local.First();
                 var vm = new CreateScenarioViewModel
                 {
-                    Locations = Database.Context.Locations.Local,
-                    PluginManager = _plugins,
+                    Locations = Globals.MasterDatabaseService.Context.Locations.Local,
+                    PluginManager = Globals.PluginManagerService,
                     Location = location ?? _lastCreateScenarioLocation,
                     TimePeriod = (TimePeriod)DateTime.Today.Month,
                     IsLocationSelectable = location == null
                 };
-                var result = _visualizer.ShowDialog("CreateScenarioView", vm);
+                var result = Globals.VisualizerService.ShowDialog("CreateScenarioView", vm);
                 if ((!result.HasValue) || (!result.Value)) return;
                 if (location == null) _lastCreateScenarioLocation = vm.Location;
                 var scenario = CreateScenario(vm.Location,
@@ -199,7 +196,7 @@ namespace ESMEWorkbench.ViewModels.Main
             }
             catch (DuplicateNameException exception)
             {
-                _messageBox.ShowError("Error creating this Scenario: " + exception.Message);
+                Globals.MessageBoxService.ShowError("Error creating this Scenario: " + exception.Message);
             }
         }
 
@@ -207,10 +204,10 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             var scenario = new Scenario
             {
-                Wind = Database.LoadOrCreateEnvironmentalDataSet(location, wind.Resolution, timePeriod, wind.SourcePlugin),
-                SoundSpeed = Database.LoadOrCreateEnvironmentalDataSet(location, soundSpeed.Resolution, timePeriod, soundSpeed.SourcePlugin),
-                Bathymetry = Database.LoadOrCreateEnvironmentalDataSet(location, bathymetry.Resolution, TimePeriod.Invalid, bathymetry.SourcePlugin),
-                Sediment = Database.LoadOrCreateEnvironmentalDataSet(location, sediment.Resolution, TimePeriod.Invalid, sediment.SourcePlugin),
+                Wind = Globals.MasterDatabaseService.LoadOrCreateEnvironmentalDataSet(location, wind.Resolution, timePeriod, wind.SourcePlugin),
+                SoundSpeed = Globals.MasterDatabaseService.LoadOrCreateEnvironmentalDataSet(location, soundSpeed.Resolution, timePeriod, soundSpeed.SourcePlugin),
+                Bathymetry = Globals.MasterDatabaseService.LoadOrCreateEnvironmentalDataSet(location, bathymetry.Resolution, TimePeriod.Invalid, bathymetry.SourcePlugin),
+                Sediment = Globals.MasterDatabaseService.LoadOrCreateEnvironmentalDataSet(location, sediment.Resolution, TimePeriod.Invalid, sediment.SourcePlugin),
                 Name = scenarioName,
                 Location = location,
                 Comments = comments,
@@ -226,7 +223,7 @@ namespace ESMEWorkbench.ViewModels.Main
                             select s).FirstOrDefault();
             if (existing != null) throw new DuplicateNameException(String.Format("a Scenario named \"{0}\" already exists in the Location \"{1}\"; please select another name.", scenario.Name, scenario.Location.Name));
             location.Scenarios.Add(scenario);
-            Database.Context.Scenarios.Add(scenario);
+            Globals.MasterDatabaseService.Context.Scenarios.Add(scenario);
             return scenario;
         }
         #endregion
@@ -240,7 +237,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 {
                     if (IsSaveScenarioCommandEnabled)
                     {
-                        Database.SaveChanges();
+                        Globals.MasterDatabaseService.SaveChanges();
                         OnPropertyChanged("IsSaveScenarioCommandEnabled");
                     }
                 }));
@@ -248,7 +245,7 @@ namespace ESMEWorkbench.ViewModels.Main
         }
 
         SimpleCommand<object, object> _save;
-        public bool IsSaveScenarioCommandEnabled { get { return (!IsTransmissionLossBusy) && Database != null && Database.Context != null && Database.Context.IsModified; } }
+        public bool IsSaveScenarioCommandEnabled { get { return (!IsTransmissionLossBusy) && Globals.MasterDatabaseService != null && Globals.MasterDatabaseService.Context != null && Globals.MasterDatabaseService.Context.IsModified; } }
         #endregion
 
         #region Handlers for Scenario-related MediatorMessages
@@ -258,7 +255,7 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.DeleteAllScenarios), UsedImplicitly]
         void DeleteAllScenarios(Location location)
         {
-            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete all scenarios in location \"{0}\"?", location.Name), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            if (Globals.MessageBoxService.ShowYesNo(string.Format("Are you sure you want to delete all scenarios in location \"{0}\"?", location.Name), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             foreach (var scenario in location.Scenarios.ToList()) scenario.Delete();
         }
 
@@ -267,11 +264,11 @@ namespace ESMEWorkbench.ViewModels.Main
         {
             if (IsSimulationRunning || IsTransmissionLossBusy)
             {
-                _messageBox.ShowInformation("A scenario cannot be deleted while a simulation is running or transmission losses are being calculated.  Please wait until these tasks finish.");
+                Globals.MessageBoxService.ShowInformation("A scenario cannot be deleted while a simulation is running or transmission losses are being calculated.  Please wait until these tasks finish.");
             }
             else
             {
-                if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the scenario \"{0}\"?", scenario.Name), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+                if (Globals.MessageBoxService.ShowYesNo(string.Format("Are you sure you want to delete the scenario \"{0}\"?", scenario.Name), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
                 scenario.Delete();
             }
         }
@@ -279,7 +276,7 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.ViewScenarioProperties), UsedImplicitly]
         void ViewScenarioProperties(Scenario scenario)
         {
-            _visualizer.ShowDialog("ScenarioPropertiesView", new ScenarioPropertiesViewModel(scenario));
+            Globals.VisualizerService.ShowDialog("ScenarioPropertiesView", new ScenarioPropertiesViewModel(scenario));
         }
 
         [MediatorMessageSink(MediatorMessage.SaveScenarioCopy), UsedImplicitly]
@@ -291,7 +288,7 @@ namespace ESMEWorkbench.ViewModels.Main
                     where s.Name == copy.Name
                     select s).FirstOrDefault() != null) copy.Name = "Copy " + copyNumber++ + " of " + scenario.Name;
             scenario.Location.Scenarios.Add(copy);
-            Database.Context.Scenarios.Add(copy);
+            Globals.MasterDatabaseService.Context.Scenarios.Add(copy);
         }
         #endregion
 
@@ -299,10 +296,10 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.DeleteAnalysisPoint), UsedImplicitly]
         void DeleteAnalysisPoint(AnalysisPoint analysisPoint)
         {
-            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete this analysis point \"{0}\"?", analysisPoint.Geo), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            if (Globals.MessageBoxService.ShowYesNo(string.Format("Are you sure you want to delete this analysis point \"{0}\"?", analysisPoint.Geo), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             //analysisPoint.LayerSettings.IsChecked = false;
             //analysisPoint.RemoveMapLayers();
-            //await TaskEx.Delay(50);
+            //await Task.Delay(50);
             analysisPoint.Delete();
             OnPropertyChanged("IsRunSimulationCommandEnabled");
             OnPropertyChanged("IsSaveScenarioCommandEnabled");
@@ -311,10 +308,10 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.DeleteAllAnalysisPoints), UsedImplicitly]
         void DeleteAllAnalysisPoints(bool dummy)
         {
-            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete all analysis points from the scenario {0} ?", Scenario.Name), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            if (Globals.MessageBoxService.ShowYesNo(string.Format("Are you sure you want to delete all analysis points from the scenario {0} ?", Scenario.Name), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             //foreach (var analysisPoint in Scenario.AnalysisPoints) analysisPoint.LayerSettings.IsChecked = false;
             //foreach (var analysisPoint in Scenario.AnalysisPoints) analysisPoint.RemoveMapLayers();
-            //await TaskEx.Delay(50);
+            //await Task.Delay(50);
             foreach (var analysisPoint in Scenario.AnalysisPoints.ToList()) analysisPoint.Delete();
             OnPropertyChanged("IsRunSimulationCommandEnabled");
         }
@@ -322,37 +319,37 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.RecalculateAnalysisPoint), UsedImplicitly]
         void RecalculateAnalysisPoint(AnalysisPoint analysisPoint)
         {
-            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to recalculate this analysis point \"{0}\"?", analysisPoint.Geo), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            if (Globals.MessageBoxService.ShowYesNo(string.Format("Are you sure you want to recalculate this analysis point \"{0}\"?", analysisPoint.Geo), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             analysisPoint.Recalculate();
         }
 
         [MediatorMessageSink(MediatorMessage.ViewAnalysisPointProperties), UsedImplicitly]
-        void ViewAnalysisPointProperties(AnalysisPoint analysisPoint) { _visualizer.ShowDialog("TreeViewItemPropertiesView", new AnalysisPointPropertiesViewModel { PropertyObject = analysisPoint }); }
+        void ViewAnalysisPointProperties(AnalysisPoint analysisPoint) { Globals.VisualizerService.ShowDialog("TreeViewItemPropertiesView", new AnalysisPointPropertiesViewModel { PropertyObject = analysisPoint }); }
 
         [MediatorMessageSink(MediatorMessage.RecalculateAllAnalysisPoints), UsedImplicitly]
         void RecalculateAllAnalysisPoints(bool dummy)
         {
-            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to recalculate all analysis points from the scenario {0} ?", Scenario.Name), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            if (Globals.MessageBoxService.ShowYesNo(string.Format("Are you sure you want to recalculate all analysis points from the scenario {0} ?", Scenario.Name), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             foreach (var analysisPoint in Scenario.AnalysisPoints) analysisPoint.Recalculate();
         }
         #endregion
 
         #region Handlers for TransmissionLoss-related MediatorMessages
         [MediatorMessageSink(MediatorMessage.DeleteTransmissionLoss), UsedImplicitly]
-        void DeleteTransmissionLoss(ESME.Scenarios.TransmissionLoss transmissionLoss)
+        void DeleteTransmissionLoss(TransmissionLoss transmissionLoss)
         {
-            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete this transmission loss \"{0}\"?", transmissionLoss.AnalysisPoint.Geo), MessageBoxImage.Warning) !=
+            if (Globals.MessageBoxService.ShowYesNo(string.Format("Are you sure you want to delete this transmission loss \"{0}\"?", transmissionLoss.AnalysisPoint.Geo), MessageBoxImage.Warning) !=
                 MessageBoxResult.Yes) return;
             //transmissionLoss.LayerSettings.IsChecked = false;
             //transmissionLoss.RemoveMapLayers();
-            //await TaskEx.Delay(50);
+            //await Task.Delay(50);
             transmissionLoss.Delete();
         }
 
         [MediatorMessageSink(MediatorMessage.RecalculateTransmissionLoss), UsedImplicitly]
-        void RecalculateTransmissionLoss(ESME.Scenarios.TransmissionLoss transmissionLoss)
+        void RecalculateTransmissionLoss(TransmissionLoss transmissionLoss)
         {
-            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to recalculate this transmission loss \"{0}\"?", transmissionLoss.AnalysisPoint.Geo), MessageBoxImage.Warning) !=
+            if (Globals.MessageBoxService.ShowYesNo(string.Format("Are you sure you want to recalculate this transmission loss \"{0}\"?", transmissionLoss.AnalysisPoint.Geo), MessageBoxImage.Warning) !=
                 MessageBoxResult.Yes) return;
             transmissionLoss.Recalculate();
         }
@@ -360,7 +357,7 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.TransmissionLossLayerChanged), UsedImplicitly]
         void TransmissionLossLayerChanged(IHaveLayerSettings transmissionLoss)
         {
-            _dispatcher.InvokeInBackgroundIfRequired(() =>
+            Globals.Dispatcher.InvokeInBackgroundIfRequired(() =>
             {
                 transmissionLoss.RemoveMapLayers();
                 if (!transmissionLoss.IsDeleted) transmissionLoss.UpdateMapLayers();
@@ -404,14 +401,14 @@ namespace ESMEWorkbench.ViewModels.Main
             if (!platform.IsNew) return;
             platform.IsNew = false;
             ((LayerControl)platform.LayerControl).Select();
-            await TaskEx.Delay(50);
+            await Task.Delay(50);
             ((LayerControl)platform.LayerControl).Edit();
         }
 
         [MediatorMessageSink(MediatorMessage.DeletePlatform), UsedImplicitly]
         void DeletePlatform(Platform platform)
         {
-            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the platform \"{0}\"?", platform.PlatformName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            if (Globals.MessageBoxService.ShowYesNo(string.Format("Are you sure you want to delete the platform \"{0}\"?", platform.PlatformName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             platform.Delete();
             OnPropertyChanged("CanPlaceAnalysisPoint");
             OnPropertyChanged("IsSaveScenarioCommandEnabled");
@@ -420,9 +417,9 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.PlatformProperties), UsedImplicitly]
         void PlatformProperties(Platform platform)
         {
-            var vm = new PlatformPropertiesViewModel(platform, _openFile, _messageBox, Database);
-            _visualizer.ShowDialog("PlatformPropertiesView", vm);
-            //_visualizer.ShowDialog("TreeViewItemPropertiesView", new PlatformPropertiesViewModel { Platform = platform });
+            var vm = new PlatformPropertiesViewModel(platform);
+            Globals.VisualizerService.ShowDialog("PlatformPropertiesView", vm);
+            //ESME.Globals.VisualizerService.ShowDialog("TreeViewItemPropertiesView", new PlatformPropertiesViewModel { Platform = platform });
         }
         #endregion
 
@@ -431,7 +428,7 @@ namespace ESMEWorkbench.ViewModels.Main
         void AddSource(Platform platform)
         {
             //var vm = new CreateSourceViewModel();
-            //var result = _visualizer.ShowDialog("CreateSourceView", vm);
+            //var result = ESME.Globals.VisualizerService.ShowDialog("CreateSourceView", vm);
             //if (!result.HasValue || !result.Value) return;
             ((LayerControl)platform.LayerControl).Expand();
             AddSource(platform, "New Source", true);
@@ -457,14 +454,14 @@ namespace ESMEWorkbench.ViewModels.Main
             if (!source.IsNew) return;
             source.IsNew = false;
             ((LayerControl)source.LayerControl).Select();
-            await TaskEx.Delay(50);
+            await Task.Delay(50);
             ((LayerControl)source.LayerControl).Edit();
         }
 
         [MediatorMessageSink(MediatorMessage.DeleteSource), UsedImplicitly]
         void DeleteSource(Source source)
         {
-            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the source \"{0}\"?", source.SourceName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            if (Globals.MessageBoxService.ShowYesNo(string.Format("Are you sure you want to delete the source \"{0}\"?", source.SourceName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             source.Delete();
             OnPropertyChanged("CanPlaceAnalysisPoint");
             OnPropertyChanged("IsSaveScenarioCommandEnabled");
@@ -473,9 +470,9 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.SourceProperties), UsedImplicitly]
         void SourceProperties(Source source)
         {
-            //_visualizer.ShowDialog("TreeViewItemPropertiesView", new SourcePropertiesViewModel { Source = source });
+            //ESME.Globals.VisualizerService.ShowDialog("TreeViewItemPropertiesView", new SourcePropertiesViewModel { Source = source });
             var vm = new PropertiesViewModel { PropertyObject = source, WindowTitle = "Source Properties: " + source.SourceName };
-            _visualizer.ShowDialog("SourcePropertiesView", vm);
+            Globals.VisualizerService.ShowDialog("SourcePropertiesView", vm);
         }
         #endregion
 
@@ -484,7 +481,7 @@ namespace ESMEWorkbench.ViewModels.Main
         void AddMode(Source source)
         {
             //var vm = new CreateModeViewModel();
-            //var result = _visualizer.ShowDialog("CreateModeView", vm);
+            //var result = ESME.Globals.VisualizerService.ShowDialog("CreateModeView", vm);
             //if (!result.HasValue || !result.Value) return;
             ((LayerControl)source.LayerControl).Expand();
             AddMode(source, "New Mode", true);
@@ -512,7 +509,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 VerticalBeamWidth = 180f,
                 HorizontalBeamWidth = 90,
                 IsNew = isNew,
-                TransmissionLossPluginType = _plugins[PluginType.TransmissionLossCalculator][PluginSubtype.Bellhop].DefaultPlugin.PluginIdentifier.Type,
+                TransmissionLossPluginType = Globals.PluginManagerService[PluginType.TransmissionLossCalculator][PluginSubtype.Bellhop].DefaultPlugin.PluginIdentifier.Type,
             };
             source.Modes.Add(mode);
             //source.Platform.Scenario.Add(mode);
@@ -525,14 +522,14 @@ namespace ESMEWorkbench.ViewModels.Main
             if (!mode.IsNew) return;
             mode.IsNew = false;
             ((LayerControl)mode.LayerControl).Select();
-            await TaskEx.Delay(50);
+            await Task.Delay(50);
             ((LayerControl)mode.LayerControl).Edit();
         }
 
         [MediatorMessageSink(MediatorMessage.DeleteMode), UsedImplicitly]
         void DeleteMode(Mode mode)
         {
-            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the mode \"{0}\"?", mode.ModeName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            if (Globals.MessageBoxService.ShowYesNo(string.Format("Are you sure you want to delete the mode \"{0}\"?", mode.ModeName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             mode.Delete();
             OnPropertyChanged("CanPlaceAnalysisPoint");
             OnPropertyChanged("IsSaveScenarioCommandEnabled");
@@ -541,7 +538,7 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.RecalculateMode), UsedImplicitly]
         void RecalculateMode(Mode mode)
         {
-            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to recalculate all transmission losses for the mode \"{0}\"?", mode.ModeName), MessageBoxImage.Warning) !=
+            if (Globals.MessageBoxService.ShowYesNo(string.Format("Are you sure you want to recalculate all transmission losses for the mode \"{0}\"?", mode.ModeName), MessageBoxImage.Warning) !=
                 MessageBoxResult.Yes) return;
             foreach (var transmissionLoss in mode.TransmissionLosses) transmissionLoss.Recalculate();
         }
@@ -550,7 +547,7 @@ namespace ESMEWorkbench.ViewModels.Main
         void ModeProperties(Mode mode)
         {
             var vm = new ModePropertiesViewModel(mode);
-            var result = _visualizer.ShowDialog("ModePropertiesWindowView", vm);
+            var result = Globals.VisualizerService.ShowDialog("ModePropertiesWindowView", vm);
             if (!(result.HasValue && result.Value)) return;
             mode.LowFrequency = mode.HighFrequency;
             Scenario.UpdateAnalysisPoints();
@@ -570,7 +567,7 @@ namespace ESMEWorkbench.ViewModels.Main
             {
                 WindowTitle = "Add new species"
             };
-            var result = _visualizer.ShowDialog("SpeciesPropertiesView", vm);
+            var result = Globals.VisualizerService.ShowDialog("SpeciesPropertiesView", vm);
             if ((!result.HasValue) || (!result.Value)) return;
             var species = new ScenarioSpecies
             {
@@ -591,7 +588,7 @@ namespace ESMEWorkbench.ViewModels.Main
             catch (Exception e)
             {
                 scenario.ScenarioSpecies.Remove(species);
-                _messageBox.ShowError(e.Message);
+                Globals.MessageBoxService.ShowError(e.Message);
             }
             OnPropertyChanged("IsRunSimulationCommandEnabled");
             OnPropertyChanged("IsSaveScenarioCommandEnabled");
@@ -600,7 +597,7 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.DeleteAllSpecies), UsedImplicitly]
         void DeleteAllSpecies(Scenario scenario)
         {
-            if (_messageBox.ShowYesNo("Are you sure you want to delete ALL the species from this scenario?", MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            if (Globals.MessageBoxService.ShowYesNo("Are you sure you want to delete ALL the species from this scenario?", MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             foreach (var species in scenario.ScenarioSpecies.ToList())
             {
                 species.Delete();
@@ -619,7 +616,7 @@ namespace ESMEWorkbench.ViewModels.Main
         [MediatorMessageSink(MediatorMessage.DeleteSpecies), UsedImplicitly]
         void DeleteSpecies(ScenarioSpecies species)
         {
-            if (_messageBox.ShowYesNo(string.Format("Are you sure you want to delete the species \"{0}\"?", species.LatinName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+            if (Globals.MessageBoxService.ShowYesNo(string.Format("Are you sure you want to delete the species \"{0}\"?", species.LatinName), MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
             species.Delete();
             OnPropertyChanged("IsRunSimulationCommandEnabled");
             OnPropertyChanged("IsSaveScenarioCommandEnabled");
@@ -644,7 +641,7 @@ namespace ESMEWorkbench.ViewModels.Main
         void SpeciesProperties(ScenarioSpecies species)
         {
             var vm = new SpeciesPropertiesViewModel(species) { WindowTitle = "Species Properties" };
-            var result = _visualizer.ShowDialog("SpeciesPropertiesView", vm);
+            var result = Globals.VisualizerService.ShowDialog("SpeciesPropertiesView", vm);
             if ((result.HasValue) && (result.Value))
             {
                 if (Math.Abs(vm.PopulationDensity - species.PopulationDensity) > 0.0001 || species.SpeciesDefinitionFilename != vm.SpeciesDefinitionFilename)
@@ -674,7 +671,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 MapViewModel.EditablePolygonOverlayViewModel.LocationBounds = locationGeoRect;
                 MapViewModel.EditablePolygonOverlayViewModel.AreCrossingSegmentsAllowed = false;
 
-                _visualizer.ShowWindow("CreateOrEditPerimeterView",
+                Globals.VisualizerService.ShowWindow("CreateOrEditPerimeterView",
                                        new CreateOrEditPerimeterViewModel { EditablePolygonOverlayViewModel = MapViewModel.EditablePolygonOverlayViewModel, PerimeterName = "New perimeter", DialogTitle = "Create perimeter" },
                                        true,
                                        (sender, args) =>
@@ -691,7 +688,7 @@ namespace ESMEWorkbench.ViewModels.Main
                                        });
                 OnPropertyChanged("IsSaveScenarioCommandEnabled");
             }
-            catch (Exception e) { _messageBox.ShowError(e.Message); }
+            catch (Exception e) { Globals.MessageBoxService.ShowError(e.Message); }
         }
 
         [MediatorMessageSink(MediatorMessage.DeletePerimeter), UsedImplicitly]
@@ -713,7 +710,7 @@ namespace ESMEWorkbench.ViewModels.Main
                 MapViewModel.EditablePolygonOverlayViewModel.AreCrossingSegmentsAllowed = false;
                 perimeter.RemoveMapLayers();
                 foreach (var platform in Scenario.Platforms.Where(platform => (platform.Perimeter!=null && platform.Perimeter.Guid == perimeter.Guid))) platform.RemoveMapLayers();
-                _visualizer.ShowWindow("CreateOrEditPerimeterView",
+                Globals.VisualizerService.ShowWindow("CreateOrEditPerimeterView",
                                        new CreateOrEditPerimeterViewModel { EditablePolygonOverlayViewModel = MapViewModel.EditablePolygonOverlayViewModel, PerimeterName = perimeter.Name, DialogTitle = "Edit perimeter" },
                                        true,
                                        (sender, args) =>
@@ -730,7 +727,7 @@ namespace ESMEWorkbench.ViewModels.Main
                                        });
                 OnPropertyChanged("IsSaveScenarioCommandEnabled");
             }
-            catch (Exception e) { _messageBox.ShowError(e.Message); }
+            catch (Exception e) { Globals.MessageBoxService.ShowError(e.Message); }
         }
         #endregion
 
@@ -777,10 +774,10 @@ namespace ESMEWorkbench.ViewModels.Main
             var simulationDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ESME Simulations", name, string.Format("{0}-{1}-{2}-{3}-{4}-{5}",now.Year,now.Month,now.Day,now.Hour,now.Minute,now.Second));
             if (Directory.Exists(simulationDirectory)) try { Directory.Delete(simulationDirectory, true); } catch{}
 
-            var simulation = Simulation.Create(Scenario, simulationDirectory, _dispatcher);
-            SimulationProgressViewModel = new SimulationProgressViewModel(_visualizer,_messageBox) {Simulation = simulation};
+            var simulation = Simulation.Create(Scenario, simulationDirectory);
+            SimulationProgressViewModel = new SimulationProgressViewModel(Globals.VisualizerService,Globals.MessageBoxService) {Simulation = simulation};
             SimulationProgressViewModel.SimulationStarting += (s, e) => IsSimulationRunning = true;
-            var window = _visualizer.ShowWindow("SimulationProgressView", SimulationProgressViewModel, false, (s, e) => IsSimulationRunning = false);
+            var window = Globals.VisualizerService.ShowWindow("SimulationProgressView", SimulationProgressViewModel, false, (s, e) => IsSimulationRunning = false);
             SimulationProgressViewModel.Window = window;
         }
             

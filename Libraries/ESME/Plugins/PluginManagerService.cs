@@ -10,6 +10,7 @@ using HRC;
 using HRC.Collections;
 using HRC.Composition;
 using MEFedMVVM.ViewModelLocator;
+using FilteredCatalog = HRC.Composition.FilteredCatalog;
 
 namespace ESME.Plugins
 {

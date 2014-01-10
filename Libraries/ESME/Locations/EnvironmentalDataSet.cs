@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -47,6 +48,22 @@ namespace ESME.Locations
         public string FileName { get; set; }
         public DbPluginIdentifier SourcePlugin { get; set; }
 
+        // Added by Dave on 12-Dec-2013 to support the new data source plugins
+        public string PluginXml
+        {
+            get
+            {
+                var sourcePlugin = (EnvironmentalDataSourcePluginBase)Globals.PluginManagerService[PluginType.EnvironmentalDataSource, SourcePlugin.PluginSubtype];
+                return sourcePlugin == null ? null : sourcePlugin.Xml;
+            }
+            set
+            {
+                var sourcePlugin = (EnvironmentalDataSourcePluginBase)Globals.PluginManagerService[PluginType.EnvironmentalDataSource, SourcePlugin.PluginSubtype];
+                if (sourcePlugin == null) return;
+                sourcePlugin.Xml = value;
+            }
+        }
+
         public virtual Location Location { get; set; }
         [Initialize] public virtual LayerSettings LayerSettings { get; set; }
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
@@ -73,14 +90,16 @@ namespace ESME.Locations
         }
         [NotMapped] public bool IsDeleted { get; set; }
 
+
         protected static readonly Random Random = new Random();
-        public void UpdateMapLayers()
+        public async void UpdateMapLayers()
         {
             var dataType = ((PluginIdentifier)SourcePlugin).PluginSubtype;
+            await Globals.EnvironmentalCacheService[this];
             switch (dataType)
             {
                 case PluginSubtype.SoundSpeed:
-                    if (Location.Cache[this].Result == null || ((SoundSpeed)Location.Cache[this].Result).SoundSpeedFields[0].EnvironmentData.Count == 0) break;
+                    if (Globals.EnvironmentalCacheService[this].Result == null || ((SoundSpeed)Globals.EnvironmentalCacheService[this].Result).SoundSpeedFields[0].EnvironmentData.Count == 0) break;
                     var mapLayer = (LayerSettings.MapLayerViewModel != null)
                                          ? (OverlayShapeMapLayer)LayerSettings.MapLayerViewModel
                                          : new OverlayShapeMapLayer
@@ -90,7 +109,7 @@ namespace ESME.Locations
                                          };
                     while (mapLayer.PointSymbolType == PointSymbolType.Cross) mapLayer.PointSymbolType = (PointSymbolType)(Random.Next(8));
                     mapLayer.PointStyle = MapLayerViewModel.CreatePointStyle(mapLayer.PointSymbolType, LayerSettings.LineOrSymbolColor, (int)LayerSettings.LineOrSymbolSize);
-                    var geos = (from s in ((SoundSpeed)Location.Cache[this].Result).SoundSpeedFields[0].EnvironmentData
+                    var geos = (from s in ((SoundSpeed)Globals.EnvironmentalCacheService[this].Result).SoundSpeedFields[0].EnvironmentData
                                 select (Geo)s).ToArray();
                     mapLayer.Clear();
                     mapLayer.AddPoints(geos);
@@ -98,16 +117,16 @@ namespace ESME.Locations
                     LayerSettings.MapLayerViewModel = mapLayer;
                     break;
                 case PluginSubtype.Wind:
-                    if (Location.Cache[this].Result == null || ((Wind)Location.Cache[this].Result).TimePeriods[0].EnvironmentData.Count == 0) break;
+                    if (Globals.EnvironmentalCacheService[this].Result == null || ((Wind)Globals.EnvironmentalCacheService[this].Result).TimePeriods[0].EnvironmentData.Count == 0) break;
                     UpdateRasterLayer(Path.Combine(Location.StorageDirectoryPath, Path.GetFileNameWithoutExtension(FileName) + ".bmp"), Location.GeoRect);
                     break;
                 case PluginSubtype.Bathymetry:
-                    if (Location.Cache[this].Result == null || ((Bathymetry)Location.Cache[this].Result).Samples.Count == 0) break;
-                    UpdateRasterLayer(Path.Combine(Location.StorageDirectoryPath, Path.GetFileNameWithoutExtension(FileName) + ".bmp"), ((Bathymetry)Location.Cache[this].Result).Samples.GeoRect);
+                    if (Globals.EnvironmentalCacheService[this].Result == null || ((Bathymetry)Globals.EnvironmentalCacheService[this].Result).Samples.Count == 0) break;
+                    UpdateRasterLayer(Path.Combine(Location.StorageDirectoryPath, Path.GetFileNameWithoutExtension(FileName) + ".bmp"), ((Bathymetry)Globals.EnvironmentalCacheService[this].Result).Samples.GeoRect);
                     break;
                 case PluginSubtype.Sediment:
-                    if (Location.Cache[this].Result == null || ((Sediment)Location.Cache[this].Result).Samples.Count == 0) break;
-                    UpdateRasterLayer(Path.Combine(Location.StorageDirectoryPath, Path.GetFileNameWithoutExtension(FileName) + ".bmp"), ((Sediment)Location.Cache[this].Result).Samples.GeoRect);
+                    if (Globals.EnvironmentalCacheService[this].Result == null || ((Sediment)Globals.EnvironmentalCacheService[this].Result).Samples.Count == 0) break;
+                    UpdateRasterLayer(Path.Combine(Location.StorageDirectoryPath, Path.GetFileNameWithoutExtension(FileName) + ".bmp"), ((Sediment)Globals.EnvironmentalCacheService[this].Result).Samples.GeoRect);
                     break;
                 default:
                     throw new ApplicationException(string.Format("Unknown layer type: {0}", ((PluginIdentifier)SourcePlugin).PluginSubtype));
@@ -132,8 +151,8 @@ namespace ESME.Locations
             var fileName = Path.Combine(Location.StorageDirectoryPath, FileName);
             var files = Directory.GetFiles(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName) + ".*");
             foreach (var file in files) File.Delete(file);
-            Location.Database.Context.LayerSettings.Remove(LayerSettings);
-            Location.Database.Context.EnvironmentalDataSets.Remove(this);
+            Globals.MasterDatabaseService.Context.LayerSettings.Remove(LayerSettings);
+            Globals.MasterDatabaseService.Context.EnvironmentalDataSets.Remove(this);
         }
 
         public void RemoveMapLayers() { LayerSettings.MapLayerViewModel = null; }

@@ -58,7 +58,7 @@ namespace NAVODatabaseAdapter
                             WorkingDirectory = Path.GetDirectoryName(lfblExePath),
                         });
                         //process.PriorityClass = ProcessPriorityClass.Normal;
-                        while (!process.HasExited) await TaskEx.Delay(50);
+                        while (!process.HasExited) await Task.Delay(50);
                         if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
                         //var stderr = process.StandardError.ReadToEnd();
                         curPoint = ParseLowFrequencyOutput(process.StandardOutput);
@@ -78,7 +78,7 @@ namespace NAVODatabaseAdapter
                             WorkingDirectory = Path.GetDirectoryName(hfblExePath),
                         });
                         //process.PriorityClass = ProcessPriorityClass.Normal;
-                        while (!process.HasExited) await TaskEx.Delay(50);
+                        while (!process.HasExited) await Task.Delay(50);
                         if (progress != null) lock (progress) progress.Report(totalProgress += progressStep);
                         //var stderr = process.StandardError.ReadToEnd();
                         curPoint = ParseHighFrequencyOutput(process.StandardOutput, curPoint);

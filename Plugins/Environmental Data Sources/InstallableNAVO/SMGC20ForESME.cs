@@ -45,6 +45,7 @@ namespace InstallableNAVOPlugin
             };
             SelectionControl = new MultipleSelectionsView { DataContext = SelectionControlViewModel };
         }
+        public override string Xml { get; set; }
 
         readonly string _dataDirectory;
 

@@ -81,7 +81,7 @@ namespace ESMEWorkbench
                     Trace.Unindent();
                 }
                 Trace.Unindent();
-                throw;
+                Current.Shutdown(-1);
             }
             InitializeComponent();
         }

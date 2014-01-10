@@ -1,14 +1,17 @@
 using System;
-using System.Data;
 using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
+using System.Data.Entity.SqlServerCompact;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using ESME.Migrations;
 using ESME.Scenarios;
 
 namespace ESME.Locations
 {
+    [DbConfigurationType(typeof(MyDbConfiguration))]
     public class LocationContext : DbContext, IDbConnectionFactory
     {
         public LocationContext(DbConnection connection, bool contextOwnsConnection)
@@ -143,14 +146,31 @@ namespace ESME.Locations
                 .WillCascadeOnDelete(true);
         }
 
-        public class LocationDatabaseInitializer : CreateDatabaseIfNotExists<LocationContext>
-        {
-            protected override void Seed(LocationContext context)
-            {
-                //context.Database.ExecuteSqlCommand("");
-            }
-        }
-
         public DbConnection CreateConnection(string nameOrConnectionString) { throw new NotImplementedException(); }
+    }
+
+    internal class LocationDatabaseInitializer : MigrateDatabaseToLatestVersion<LocationContext, Configuration>
+    {
+    }
+
+    public class MyDbConfiguration : DbConfiguration
+    {
+        public MyDbConfiguration()
+        {
+            SetProviderServices(SqlCeProviderServices.ProviderInvariantName, SqlCeProviderServices.Instance);
+            SetDefaultConnectionFactory(new SqlCeConnectionFactory("System.Data.SqlServerCe.4.0"));
+        }
+    }
+
+    public class LocationContextFactory : IDbContextFactory<LocationContext>
+    {
+        public LocationContext Create()
+        {
+            string databaseDirectory;
+            if (Globals.AppSettings == null || Globals.AppSettings.DatabaseDirectory == null) databaseDirectory = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database");
+            else databaseDirectory = Globals.AppSettings.DatabaseDirectory;
+            var connection = new SqlCeConnectionFactory("System.Data.SqlServerCe.4.0").CreateConnection(Path.Combine(databaseDirectory, "esme.db"));
+            return new LocationContext(connection, true);
+        }
     }
 }
