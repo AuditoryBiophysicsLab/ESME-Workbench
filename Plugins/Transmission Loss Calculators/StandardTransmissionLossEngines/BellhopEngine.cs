@@ -123,12 +123,12 @@ namespace StandardTransmissionLossEngines
             {
                 if (soundSpeedProfilesAlongRadial.Count == 1) soundSpeedProfilesAlongRadial.Add(Tuple.Create(Geo.RadiansToKilometers(radial.Segment.LengthRadians), new SoundSpeedProfile(soundSpeedProfilesAlongRadial[0].Item2)));
                 sspFile.WriteLine("{0}", soundSpeedProfilesAlongRadial.Count);
-                foreach (var rangeProfileTuple in soundSpeedProfilesAlongRadial) sspFile.Write("{0,-10:0.###}", rangeProfileTuple.Item1);
+                foreach (var rangeProfileTuple in soundSpeedProfilesAlongRadial) sspFile.Write(string.Format(CultureInfo.InvariantCulture, "{0,-10:0.###}", rangeProfileTuple.Item1));
                 sspFile.WriteLine();
                 //sspFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0,-10:0.###}{1,-10:0.###}{2,-10:0.###}", 0.0, bottomProfile.Profile[bottomProfile.Profile.Count / 2].Range, bottomProfile.Profile[bottomProfile.Profile.Count - 1].Range));
                 for (var depthIndex = 0; depthIndex < startProfile.Data.Count; depthIndex++)
                 {
-                    foreach (var rangeProfileTuple in soundSpeedProfilesAlongRadial) sspFile.Write("{0,-10:0.###}", rangeProfileTuple.Item2.Data[depthIndex].SoundSpeed);
+                    foreach (var rangeProfileTuple in soundSpeedProfilesAlongRadial) sspFile.Write(string.Format(CultureInfo.InvariantCulture, "{0,-10:0.###}", rangeProfileTuple.Item2.Data[depthIndex].SoundSpeed));
                     sspFile.WriteLine();
                 }
                 //sspFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0,-10:0.###}{1,-10:0.###}{2,-10:0.###}", startProfile.Data[depthIndex].SoundSpeed, middleProfile.Data[depthIndex].SoundSpeed, endProfile.Data[depthIndex].SoundSpeed));

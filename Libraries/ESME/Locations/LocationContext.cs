@@ -3,6 +3,7 @@ using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Data.Entity.SqlServerCompact;
+using System.Data.Entity.Validation;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -35,11 +36,101 @@ namespace ESME.Locations
                 }
                 catch (Exception e)
                 {
-                    Debug.WriteLine(string.Format("{0}: Caught (and discarded) exception in LocationContext.IsModified: {1}", DateTime.Now, e.Message));
+                    Debug.WriteLine("{0}: Caught (and discarded) exception in LocationContext.IsModified: {1}", DateTime.Now, e.Message);
                     return true;
                 }
             }
         }
+
+        static LocationContext Open(string filename)
+        {
+            var connection = new SqlCeConnectionFactory("System.Data.SqlServerCe.4.0").CreateConnection(filename);
+            return new LocationContext(connection, true);
+        }
+
+        static string _databaseDirectory;
+        public static string DatabaseDirectory
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(_databaseDirectory)) return _databaseDirectory;
+                if (!Directory.Exists(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"))) Directory.CreateDirectory(Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database"));
+                _databaseDirectory = Globals.AppSettings.DatabaseDirectory ?? Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "ESME Workbench", "Database");
+                return _databaseDirectory;
+            }
+        }
+
+        static string _databaseFile;
+        public static string DatabaseFile
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(_databaseFile)) return _databaseFile;
+                if (!Directory.Exists(DatabaseDirectory)) Directory.CreateDirectory(DatabaseDirectory);
+                _databaseFile = Path.Combine(DatabaseDirectory, "esme.db.sdf");
+                return _databaseFile;
+            }
+        }
+
+        /// <summary>
+        /// This is the main application interface to the database backing code for changing the state of the database
+        ///  
+        /// All changes to the database context are validated and saved on successful execution.
+        /// </summary>
+        /// <param name="action">a lambda expression, usually of the form c => {}, where c is an instance of the LocationContext.</param>
+        public static void Modify(Action<LocationContext> action)
+        {
+            try
+            {
+                using (var c = Open(DatabaseFile))
+                {
+                    action(c);
+                    c.SaveChanges();
+                }
+            }
+            catch (DbEntityValidationException e)
+            {
+                foreach (var eve in e.EntityValidationErrors)
+                {
+                    Debug.WriteLine("Entity of type \"{0}\" in state \"{1}\" has the following validation errors:",
+                        eve.Entry.Entity.GetType().Name, eve.Entry.State);
+                    foreach (var ve in eve.ValidationErrors)
+                    {
+                        Debug.WriteLine("- Property: \"{0}\", Error: \"{1}\"",
+                            ve.PropertyName, ve.ErrorMessage);
+                    }
+                }
+                throw;
+            }
+            catch (DbUpdateException dbUpdateException)
+            {
+                Console.WriteLine("SaveChanges caught DbUpdateException");
+                Console.WriteLine("  {0}", dbUpdateException.InnerException.Message);
+                if (dbUpdateException.InnerException.InnerException != null) Console.WriteLine("    {0}", dbUpdateException.InnerException.InnerException.Message);
+                throw;
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+                Debug.WriteLine(e.InnerException.Message);
+            }
+        }
+
+        /// <summary>
+        /// This is the main application interface to the database backing code for querying the current state of the database. 
+        /// The state of the database will not change through the use of this method.
+        /// </summary>
+        /// <typeparam name="TResult">The desired return type</typeparam>
+        /// <param name="action">a lambda expression usually of the form c => {}, where c is an instance of the LocationContext.</param>
+        /// <returns></returns>
+        public static TResult Query<TResult>(Func<LocationContext, TResult> action)
+        {
+            using (var c = Open(DatabaseFile))
+            {
+                return action(c);
+            }
+        }
+
 
         public DbSet<Location> Locations { get; set; }
         public DbSet<EnvironmentalDataSet> EnvironmentalDataSets { get; set; }

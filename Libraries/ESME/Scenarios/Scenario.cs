@@ -535,7 +535,7 @@ namespace ESME.Scenarios
                 };
                 //Debug.WriteLine(string.Format("Adding new radial [{0}] to mode [{1}] at {2}", radial, transmissionLoss.Modes.First(), (Geo)transmissionLoss.AnalysisPoint.Geo));
                 // Add the new Radial to the TransmissionLoss
-                transmissionLoss.Radials.Add(radial);
+                //transmissionLoss.Radials.Add(radial);
                 // Queue the new Radial for calculation
                 Globals.TransmissionLossCalculatorService.Add(radial);
             }

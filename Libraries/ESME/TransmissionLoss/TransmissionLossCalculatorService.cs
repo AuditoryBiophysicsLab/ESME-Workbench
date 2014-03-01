@@ -109,6 +109,23 @@ namespace ESME.TransmissionLoss
             _calculatorQueue.Post(radial);
         }
 #else
+#if false
+        public void Add(Scenarios.TransmissionLoss transmissionLoss, double bearing)
+        {
+            var geoRect = (GeoRect)transmissionLoss.AnalysisPoint.Scenario.Location.GeoRect;
+            var segment = new GeoSegment(transmissionLoss.AnalysisPoint.Geo, transmissionLoss.Modes[0].MaxPropagationRadius, bearing);
+            if (!geoRect.Contains(segment[0]) || !geoRect.Contains(segment[1]))
+            {
+                //radial.Errors.Add("This radial extends beyond the location boundaries");
+                return;
+            }
+            //Debug.WriteLine("{0}: Queueing calculation of transmission loss for radial bearing {1} degrees, of mode {2} in analysis point {3}", DateTime.Now, radial.Bearing, radial.TransmissionLoss.Mode.ModeName, (Geo)radial.TransmissionLoss.AnalysisPoint.Geo); 
+            Radial outRadial;
+            if (WorkQueue.TryGetValue(radial.Guid, out outRadial)) return;
+            WorkQueue.Add(radial.Guid, radial);
+            _calculatorQueue.Post(radial);
+        }
+#endif
         public void Add(Radial radial)
         {
             var geoRect = (GeoRect)radial.TransmissionLoss.AnalysisPoint.Scenario.Location.GeoRect;
@@ -198,6 +215,14 @@ namespace ESME.TransmissionLoss
                     radial.CalculationCompleted = DateTime.Now;
                     radial.Length = mode.MaxPropagationRadius;
                     radial.IsCalculated = true;
+                    LocationContext.Modify(c =>
+                    {
+                        var transmissionLoss = (from tl in c.TransmissionLosses
+                                                where tl.Guid == radial.TransmissionLoss.Guid
+                                                select tl).Single();
+                        transmissionLoss.Radials.Add(radial);
+                        radial.TransmissionLoss = transmissionLoss;
+                    });
                 }
                 else Debug.WriteLine("TransmissionLossCalculatorService: PluginManagerService is not initialized, or there are no transmission loss calculator plugins defined");
             }

@@ -135,7 +135,7 @@ namespace ESME.Views.TransmissionLossViewer
                     MaxRadialBearing = Radials.Max(r => r.Bearing);
                     RadialBearingChange = (MaxRadialBearing - MinRadialBearing) / RadialCount;
                     SelectedRadialBearing = MinRadialBearing;
-                    Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} TransmissionLossViewModel: SelectedRadialIndex set to -1", DateTime.Now));
+                    Debug.WriteLine("{0:HH:mm:ss.fff} TransmissionLossViewModel: SelectedRadialIndex set to -1", DateTime.Now);
                     _transmissionLossObserver = Observable.FromEventPattern<PropertyChangedEventArgs>(transmissionLoss, "PropertyChanged")
                         .ObserveOnDispatcher()
                         .Select(e => TransmissionLoss)
