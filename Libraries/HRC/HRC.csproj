@@ -75,9 +75,6 @@
     <Reference Include="EntityFramework.SqlServer">
       <HintPath>..\..\Solutions\ESME Workbench\packages\EntityFramework.6.0.2\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
-    <Reference Include="fftwlib">
-      <HintPath>..\..\..\..\Users\Dave Anderson\Downloads\fftwlib\fftwlib.dll</HintPath>
-    </Reference>
     <Reference Include="ILNumerics">
       <HintPath>..\..\Solutions\ESME Workbench\packages\ILNumerics.3.3.2.0\lib\ILNumerics.dll</HintPath>
     </Reference>

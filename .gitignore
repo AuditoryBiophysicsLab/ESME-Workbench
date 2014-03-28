@@ -162,3 +162,6 @@ packages/
 # Built installer packages
 EXE\ Packages/
 MSI\ Packages/
+
+# DOXYGEN stuff
+docs/
