@@ -1,14 +1,17 @@
 ﻿using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 using GitSharp;
 using Microsoft.CSharp;
 
 namespace ProjectBuildInfo
 {
-    // ReSharper disable BitwiseOperatorOnEnumWihtoutFlags
+    // ReSharper disable BitwiseOperatorOnEnumWithoutFlags
     internal class Program
     {
         static int Main(string[] args)
@@ -25,6 +28,10 @@ namespace ProjectBuildInfo
             string versionNumber = null;
             string assemblyVersionFile = null;
             string wixVersionFile = null;
+            string webVersionFile = null;
+            string installer32 = null;
+            string installer64 = null;
+            string productName = null;
             for (var i = 0; i < args.Length; i++)
             {
                 switch (args[i])
@@ -47,6 +54,18 @@ namespace ProjectBuildInfo
                     case "-wixversion":
                         wixVersionFile = args[++i].Trim();
                         break;
+                    case "-webversion":
+                        webVersionFile = args[++i].Trim();
+                        break;
+                    case "-installer32bit":
+                        installer32 = args[++i].Trim();
+                        break;
+                    case "-installer64bit":
+                        installer64 = args[++i].Trim();
+                        break;
+                    case "-productName":
+                        productName = args[++i].Trim();
+                        break;
                     default:
                         Usage();
                         return -1;
@@ -62,22 +81,28 @@ namespace ProjectBuildInfo
 
                 if (versionFile != null)
                 {
-                    var inputLines = File.ReadAllLines(versionFile);
-                    foreach (var inputLine in inputLines)
+                    foreach (var versionFields in from curLine in File.ReadAllLines(versionFile)
+                                                  select curLine.Trim()
+                                                  into trimmedLine
+                                                  where !string.IsNullOrEmpty(trimmedLine) && !trimmedLine.StartsWith("//")
+                                                  select trimmedLine.Split('.'))
                     {
-                        var curLine = inputLine.Trim();
-                        if (string.IsNullOrEmpty(curLine) || curLine.StartsWith("//")) continue;
-                        var versionFields = curLine.Split('.');
                         switch (versionFields.Length)
                         {
                             case 4:
                             case 3:
                                 int major, minor, build;
-                                if (!int.TryParse(versionFields[0], out major) || !int.TryParse(versionFields[1], out minor) || !int.TryParse(versionFields[2], out build) || major < 0 || minor < 0 || build < 0) throw new FormatException(string.Format("Version file not in expected format. There should be only one line that does not begin with a comment mark ('//') and that line should contain a version number template in the form 1.2.3 where 1 is the Major version number of this application, 2 is the Minor version number and 3 is the Build number.  A fourth field, taken from the Subversion revision number of the output directory, will be appended to this and used for assembly and installer version numbers later in the build process."));
+                                if (!int.TryParse(versionFields[0], out major) || !int.TryParse(versionFields[1], out minor) || !int.TryParse(versionFields[2], out build) || major < 0 || minor < 0 ||
+                                    build < 0)
+                                    throw new FormatException(
+                                        string.Format(
+                                            "Version file not in expected format. There should be only one line that does not begin with a comment mark ('//') and that line should contain a version number template in the form 1.2.3 where 1 is the Major version number of this application, 2 is the Minor version number and 3 is the Build number.  A fourth field, taken from the Subversion revision number of the output directory, will be appended to this and used for assembly and installer version numbers later in the build process."));
                                 versionNumber = string.Format("{0}.{1}.{2}", versionFields[0], versionFields[1], versionFields[2]);
                                 break;
                             default:
-                                throw new FormatException(string.Format("Version file not in expected format. There should be only one line that does not begin with a comment mark ('//') and that line should contain a version number template in the form 1.2.3 where 1 is the Major version number of this application, 2 is the Minor version number and 3 is the Build number.  A fourth field, taken from the git hash of the output directory, will be appended to this and used for assembly and installer version numbers later in the build process."));
+                                throw new FormatException(
+                                    string.Format(
+                                        "Version file not in expected format. There should be only one line that does not begin with a comment mark ('//') and that line should contain a version number template in the form 1.2.3 where 1 is the Major version number of this application, 2 is the Minor version number and 3 is the Build number.  A fourth field, taken from the git hash of the output directory, will be appended to this and used for assembly and installer version numbers later in the build process."));
                         }
                     }
                 }
@@ -105,7 +130,31 @@ namespace ProjectBuildInfo
                     }
                 }
                 if (namespaceName != null && className != null) GenerateCode(namespaceName, className, target.Hash, outputFilename);
-
+                if (webVersionFile != null)
+                {
+                    using (var writer = new StreamWriter(webVersionFile))
+                    {
+                        writer.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+                        writer.WriteLine("<product>");
+                        if (productName != null)
+                        {
+                            writer.WriteLine("  <name>{0}</name>", productName);
+                        }
+                        if (installer32 != null)
+                        {
+                            writer.WriteLine("  <x86>");
+                            writer.WriteLine(GenerateWebVersionXml(installer32));
+                            writer.WriteLine("  </x86>");
+                        }
+                        if (installer64 != null)
+                        {
+                            writer.WriteLine("  <x64>");
+                            writer.WriteLine(GenerateWebVersionXml(installer64));
+                            writer.WriteLine("  </x64>");
+                        }
+                        writer.WriteLine("</product>");
+                    }
+                }
             }
             catch (Exception e)
             {
@@ -194,6 +243,15 @@ namespace ProjectBuildInfo
             Console.WriteLine("       <wixVersionFile> (optional) is the path to a file usually called version.wxi");
             Console.WriteLine("                        This file will be created or updated with the version in the versionNumberFile");
             Console.WriteLine("       <outputFilename> is the filename that will contain the generated code");
+        }
+
+        static string GenerateWebVersionXml(string installerFilename)
+        {
+            var versionString = FileVersionInfo.GetVersionInfo(installerFilename).FileVersion;
+            string md5Sum;
+            using (var stream = File.Open(installerFilename, FileMode.Open, FileAccess.Read))
+                md5Sum = Convert.ToBase64String(new MD5CryptoServiceProvider().ComputeHash(stream));
+            return string.Format("    <installer>{0}</installer>\n    <version>{1}</version>\n    <md5SumBase64>{2}</md5SumBase64>", Path.GetFileName(installerFilename), versionString, md5Sum);
         }
 
         static void GenerateCode(string namespaceName, string className, string svnVersionString, string outputFilename)

@@ -156,6 +156,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="Test Files\Simulation Areas\Jacksonville\Sim Areas\Jacksonville\Areas\Jax_Ops_Area.ovr" />
     <None Include="Test Files\Simulation Areas\Jacksonville\Sim Areas\Jacksonville\Areas\Jax_Sim_Area.ovr" />

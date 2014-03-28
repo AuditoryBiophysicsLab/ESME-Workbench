@@ -250,29 +250,29 @@ namespace StandardTransmissionLossEngines
 
             using (var envFile = new StreamWriter(envFileName, false))
             {
-                envFile.WriteLine("Scenario: '{0}' Mode: '{2}' Analysis point: {1} Bearing: {3}",
+                envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "Scenario: '{0}' Mode: '{2}' Analysis point: {1} Bearing: {3}",
                                   radial.TransmissionLoss.AnalysisPoint.Scenario.Name,
                                   radial.TransmissionLoss.AnalysisPoint.Geo,
                                   radial.TransmissionLoss.Modes[0].ModeName,
-                                  radial.Bearing);
-                envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2:0.000000}\t\tf [Frequency (Hz)], zs [Source Depth (m)], zrec0 [First receiever depth (m)]",
+                                  radial.Bearing));
+                envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0:0.000000}\t{1:0.000000}\t{2:0.000000}\t\tf [Frequency (Hz)], zs [Source Depth (m)], zrec0 [First receiever depth (m)]",
                                   frequency,
                                   sourceDepth,
-                                  0.1);
-                envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2}\t\t\trmax[Max range (m)], dr [Range resolution (m)], ndr [Range grid decimation factor]",
+                                  0.1));
+                envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0:0.000000}\t{1:0.000000}\t{2}\t\t\trmax[Max range (m)], dr [Range resolution (m)], ndr [Range grid decimation factor]",
                                   mode.MaxPropagationRadius + (dr * ndr),
                                   dr,
-                                  ndr);
-                envFile.WriteLine("{0:0.000000}\t{1:0.000000}\t{2}\t{3:0.000000}\tzmax [Max computational depth (m)], dz [Depth resolution (m)], ndz [Depth grid decimation factor], zmplot [Maximum depth to plot (m)]",
+                                  ndr));
+                envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0:0.000000}\t{1:0.000000}\t{2}\t{3:0.000000}\tzmax [Max computational depth (m)], dz [Depth resolution (m)], ndz [Depth grid decimation factor], zmplot [Maximum depth to plot (m)]",
                                   zmax,
                                   dz,
                                   ndz,
-                                  zmplt);
-                envFile.WriteLine("{0:0.000000}\t{1}\t{2}\t{3:0.000000}\t\tc0 [Reference sound speed (m/s)], np [Number of terms in Padé expansion], ns [Number of stability constraints], rs [Maximum range of stability constraints (m)]",
+                                  zmplt));
+                envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0:0.000000}\t{1}\t{2}\t{3:0.000000}\t\tc0 [Reference sound speed (m/s)], np [Number of terms in Padé expansion], ns [Number of stability constraints], rs [Maximum range of stability constraints (m)]",
                                   ReferenceSoundSpeed,
                                   PadeExpansionTerms,
                                   StabilityConstraints,
-                                  StabilityConstraintMaxRange);
+                                  StabilityConstraintMaxRange));
                 // todo: different stuff goes here for RAMSGeo
 
                 // bathymetry data
@@ -293,16 +293,16 @@ namespace StandardTransmissionLossEngines
                 foreach (var rangeProfileTuple in soundSpeedProfilesAlongRadial)
                 {
                     // Range of profile only written for second and subsequent profiles
-                    if (!firstRangeProfile) envFile.WriteLine("{0:0.#}\t\t\t\t\t\t\tProfile range (m)", rangeProfileTuple.Item1 * 1000);
+                    if (!firstRangeProfile) envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0:0.#}\t\t\t\t\t\t\tProfile range (m)", rangeProfileTuple.Item1 * 1000));
 
                     var firstSoundSpeedProfile = true;
                     foreach (var profilePoint in rangeProfileTuple.Item2.Data)
                     {
                         if (double.IsNaN(profilePoint.SoundSpeed)) break;
-                        envFile.WriteLine("{0:0.######}\t{1:0.######}{2}",
+                        envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0:0.######}\t{1:0.######}{2}",
                                           profilePoint.Depth,
                                           profilePoint.SoundSpeed,
-                                          firstSoundSpeedProfile ? "\t\t\t\t\tsound speed profile in water [depth (m), sound speed (m/s)]" : "");
+                                          firstSoundSpeedProfile ? "\t\t\t\t\tsound speed profile in water [depth (m), sound speed (m/s)]" : ""));
                         firstSoundSpeedProfile = false;
                     }
                     envFile.WriteLine("-1\t-1");
@@ -312,12 +312,12 @@ namespace StandardTransmissionLossEngines
                     // A sediment layer is analogous to a sound speed profile point
                     // For range-dependent sediment, the sediment samples have to be at the same ranges as the sound speed profiles
                     // so we might want to change the API to include sediment properties in what is the current range and sound speed profile tuple
-                    envFile.WriteLine("{0:0.######}\t{1:0.######}\t\t\t\t\t\tcompressive sound speed profile in substrate [depth (m), sound speed (m/s)]", 0.0, sedimentType.CompressionWaveSpeed);
+                    envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0:0.######}\t{1:0.######}\t\t\t\t\t\tcompressive sound speed profile in substrate [depth (m), sound speed (m/s)]", 0.0, sedimentType.CompressionWaveSpeed));
                     envFile.WriteLine("-1\t-1");
-                    envFile.WriteLine("{0:0.######}\t{1:0.######}\t\t\t\t\t\tdensity profile in substrate [depth (m), rhob (g/cm³)]", 0.0, sedimentType.Density);
+                    envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0:0.######}\t{1:0.######}\t\t\t\t\t\tdensity profile in substrate [depth (m), rhob (g/cm³)]", 0.0, sedimentType.Density));
                     envFile.WriteLine("-1\t-1");
-                    envFile.WriteLine("{0:0.######}\t{1:0.######}\t\t\t\t\t\tcompressive attenuation profile in substrate [depth (m), attnp (db/lambda)]", 0.0, 0.0);
-                    envFile.WriteLine("{0:0.######}\t{1:0.######}", attenuationLayerDz, 40);
+                    envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0:0.######}\t{1:0.######}\t\t\t\t\t\tcompressive attenuation profile in substrate [depth (m), attnp (db/lambda)]", 0.0, 0.0));
+                    envFile.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0:0.######}\t{1:0.######}", attenuationLayerDz, 40));
                     envFile.WriteLine("-1\t-1");
                     firstRangeProfile = false;
                 }
@@ -472,6 +472,7 @@ namespace StandardTransmissionLossEngines
         }
 
         static Complex Acosh(Complex x) { return Complex.Log(x + Complex.Sqrt(x + 1) * Complex.Sqrt(x - 1)); }
+
 
         static readonly string AssemblyLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
