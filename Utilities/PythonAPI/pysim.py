@@ -97,12 +97,22 @@ class PySim(object):
                 result.ActorExposureRecords.append(ActorExposureRecord(b.readInt32(), b.readInt32(), b.readFloat(), b.readFloat()))
             return result
 
-    def GetTypeRecord(self, actorID):
-        pass
+    def CalculateSEL(self,speciesRecord, platformRecord, dutyCycle):
+        """
+        @param speciesRecord: The species
+        @param platformRecord:
+        @param dutyCycle:
+        @return:
+        """
+        return
 
-    def GetAssociatedModes(self, platformID):
-        pass
-
+    def CalculateSPL(self, speciesRecord, platformRecord):
+        """
+        @param speciesRecord:
+        @param platformRecord:
+        @return:
+        """
+        return
 
 class PlatformRecord(object):
     def __init__(self, actorID, name, guid):
