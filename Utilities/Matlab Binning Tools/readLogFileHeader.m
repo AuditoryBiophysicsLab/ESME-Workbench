@@ -98,6 +98,9 @@ for i = 1:numTimeStepOffsets,
     timeStepRecords(i).offsets=cast(readuint64(fid),'int64');
 end
 logStruct.timeStepRecords = timeStepRecords;
+%% seek back to the beginning of the file.
+status = fseek(fid,0,'bof');
+assert(status~=-1,ferror(fid));
 end
 
 %% helper functions to read ESME data classes into structs

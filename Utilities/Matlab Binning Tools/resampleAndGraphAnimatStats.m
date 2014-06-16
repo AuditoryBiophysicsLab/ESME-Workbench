@@ -1,0 +1,106 @@
+function [species] = resampleAndGraphAnimatStats(sels, spls,samplePercentage,resampleCount,selThreshholds, splThreshholds, scenarioName)
+% account for single-value threshholds
+if(length(selThreshholds)==1)
+    selThreshholds = selThreshholds*ones(1,length(sels));
+end
+
+if(length(splThreshholds)==1)
+    splThreshholds = splThreshholds*ones(1,length(spls));
+end
+%% SELs
+    %for each species
+    species = struct;
+   
+    for i = 1:length(sels)
+        %make sure we're looking at the right species
+        assert(strcmp(species(i).name,sels(i).speciesName))
+        resampledSELs = struct;
+         for c = 1:resampleCount
+            %generate a random sample from the total population
+            animatIDs = sort(randsample(length(sels(i).energies),ceil(samplePercentage*length(sels(i).energies))));
+            %plot line graph            
+            vals = [];
+            inds = [];
+            takes = 0;
+                for a = 1:length(animatIDs)
+                    animatID = animatIDs(a);
+                    value = sels(i).energies(animatID);
+                        if(isfinite(value) && value > 0)
+                            vals = [vals, value];
+                            inds = [inds,animatID];
+                                if(value >=selThreshholds(i))
+                                    takes = takes +1;
+                                end
+                        end
+                end
+            resampledSELs(c).values = vals;
+            resampledSELs(c).inds = inds;
+            resampledSELs(c).takes = takes;
+         end
+         species(i).name = sels(i).speciesName;
+         species(i).resampledSELs = resampledSELs;     
+    end
+    
+%% SPLs   
+    for i = 1:length(spls)
+        assert(strcmp(species(i).name,spls(i).speciesName))
+        resampledSPLs = struct;
+         for c = 1:resampleCount
+            %generate a random sample from the total population
+            animatIDs = sort(randsample(length(spls(i).peakSPLs),ceil(samplePercentage*length(spls(i).peakSPLs))));
+            %plot line graph            
+            vals = [];
+            inds = [];
+            takes = 0;
+                for a = 1:length(animatIDs)
+                    animatID = animatIDs(a);
+                    value = spls(i).peakSPLs(animatID);
+                        if(isfinite(value) && value > 0)
+                            vals = [vals, value];
+                            inds = [inds,animatID];
+                                if(value >=splThreshholds(i))
+                                    takes = takes +1;
+                                end
+                        end
+                end
+            resampledSPLs(c).values = vals;
+            resampledSPLs(c).inds = inds;
+            resampledSPLs(c).takes = takes;
+         end         
+         species(i).resampledSPLs = resampledSPLs;     
+    end
+     
+    %% compute take statistics from resampled structs
+   means = zeros(1,length(species));
+   bars = means;
+   causes = {};
+   barlabels={};
+   for i = 1:length(species)
+        tempSEL = species(i).resampledSELs;
+        tempSPL = species(i).resampledSPLs;
+        meanSEL = mean([tempSEL.takes]);
+        stderrSEL = std([tempSEL.takes])/sqrt(length(tempSEL));
+        meanSPL = mean([tempSPL.takes]);
+        stderrSPL = std([tempSPL.takes])/sqrt(length(tempSEL));
+                
+        if(meanSEL >= meanSPL)
+            causes{i} = [species(i).name,': SEL-driven takes'];
+            barlabels{i} = [species(i).name,' (',num2str(selThreshholds(i)),' dB SEL)'];
+            means(i) = meanSEL;
+            bars(i) = stderrSEL;
+        else
+            causes{i} = [species(i).name,': SPL-driven takes'];
+            barlabels{i} = [species(i).name,' (',num2str(splThreshholds(i)),' dB SPL)'];
+            means(i) = meanSPL;
+            bars(i) = stderrSPL;
+        end        
+   end
+   
+   figure(1); hold on; 
+   barwitherr(bars,means);
+   set(gca,'XTick',[1:length(species)],'XTickLabel',barlabels);
+   title(['Estimated Takes (',scenarioName,'):',num2str(resampleCount),' resamplings at ',num2str(samplePercentage*100),'% total population']);
+   ylabel('Take count');   
+   th = annotation(1,'textbox',[.688 .848 .211 .067],'String',causes);
+   saveas(1,'takes.fig');            
+end

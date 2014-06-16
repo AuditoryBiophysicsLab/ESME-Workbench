@@ -27,7 +27,7 @@ for i=1:speciesCount
         for k = 1:length(timeStepRecord.exposureRecords)
             exposureRecord = timeStepRecord.exposureRecords(k);
             %check if this exposure record pertains to an animat of this species
-            if((exposureRecord.actorID >= startID) && (exposureRecord.actorID < endID))
+            if((exposureRecord.actorID > startID) && (exposureRecord.actorID <= endID))
                 %it does! is the spl logged greater than what we've
                 %already logged? if so, overwrite the old value.  
                 if(animatSPLs(exposureRecord.actorID-startID) < exposureRecord.peakSPL)
