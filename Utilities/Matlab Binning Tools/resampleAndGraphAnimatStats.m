@@ -1,24 +1,19 @@
-function [species] = resampleAndGraphAnimatStats(sels, spls,samplePercentage,resampleCount,selThreshholds, splThreshholds, scenarioName)
-% account for single-value threshholds
-if(length(selThreshholds)==1)
-    selThreshholds = selThreshholds*ones(1,length(sels));
-end
-
-if(length(splThreshholds)==1)
-    splThreshholds = splThreshholds*ones(1,length(spls));
-end
+function [species] = resampleAndGraphAnimatStats(sels, spls,isImpulsive,samplePercentage,resampleCount,scenarioName)
+% accumulate threshholds
+selThreshholds = zeros(1,length(sels));
+splThreshholds = zeros(1,length(spls));    
+species = struct;
 %% SELs
-    %for each species
-    species = struct;
-   
+    %for each species        
     for i = 1:length(sels)
-        %make sure we're looking at the right species
-        assert(strcmp(species(i).name,sels(i).speciesName))
+        %look up the threshhold for takes
+        selThreshholds(i) = getSELThreshhold(sels(i).speciesName,isImpulsive);
+        %resample and look up exposures
         resampledSELs = struct;
-         for c = 1:resampleCount
+            for c = 1:resampleCount
             %generate a random sample from the total population
             animatIDs = sort(randsample(length(sels(i).energies),ceil(samplePercentage*length(sels(i).energies))));
-            %plot line graph            
+            %write down the exposures
             vals = [];
             inds = [];
             takes = 0;
@@ -28,6 +23,7 @@ end
                         if(isfinite(value) && value > 0)
                             vals = [vals, value];
                             inds = [inds,animatID];
+                                % and note the takes when they happen
                                 if(value >=selThreshholds(i))
                                     takes = takes +1;
                                 end
@@ -36,14 +32,17 @@ end
             resampledSELs(c).values = vals;
             resampledSELs(c).inds = inds;
             resampledSELs(c).takes = takes;
-         end
+            end
+         %create a standard nested struct of data
          species(i).name = sels(i).speciesName;
          species(i).resampledSELs = resampledSELs;     
     end
     
 %% SPLs   
     for i = 1:length(spls)
+        %make sure the species are ordered the same for SEL and SPLs
         assert(strcmp(species(i).name,spls(i).speciesName))
+        splThreshholds(i) = getSPLThreshhold(spls(i).speciesName);
         resampledSPLs = struct;
          for c = 1:resampleCount
             %generate a random sample from the total population
@@ -75,13 +74,14 @@ end
    bars = means;
    causes = {};
    barlabels={};
+   
    for i = 1:length(species)
         tempSEL = species(i).resampledSELs;
         tempSPL = species(i).resampledSPLs;
         meanSEL = mean([tempSEL.takes]);
         stderrSEL = std([tempSEL.takes])/sqrt(length(tempSEL));
         meanSPL = mean([tempSPL.takes]);
-        stderrSPL = std([tempSPL.takes])/sqrt(length(tempSEL));
+        stderrSPL = std([tempSPL.takes])/sqrt(length(tempSPL));
                 
         if(meanSEL >= meanSPL)
             causes{i} = [species(i).name,': SEL-driven takes'];
