@@ -1,4 +1,4 @@
-function [species] = resampleAndGraphAnimatStats(sels, spls,isImpulsive,samplePercentage,resampleCount,scenarioName)
+function [species] = resampleAndGraphAnimatStats(sels, spls,isImpulsive,samplePercentage,resampleCount,isSELOnly,scenarioName)
 % accumulate threshholds
 selThreshholds = zeros(1,length(sels));
 splThreshholds = zeros(1,length(spls));    
@@ -82,18 +82,30 @@ species = struct;
         stderrSEL = std([tempSEL.takes])/sqrt(length(tempSEL));
         meanSPL = mean([tempSPL.takes]);
         stderrSPL = std([tempSPL.takes])/sqrt(length(tempSPL));
-                
-        if(meanSEL >= meanSPL)
-            causes{i} = [species(i).name,': SEL-driven takes'];
-            barlabels{i} = [species(i).name,' (',num2str(selThreshholds(i)),' dB SEL)'];
-            means(i) = meanSEL;
-            bars(i) = stderrSEL;
-        else
+        
+        if(meanSPL > meanSEL && ~isSELOnly)
             causes{i} = [species(i).name,': SPL-driven takes'];
             barlabels{i} = [species(i).name,' (',num2str(splThreshholds(i)),' dB SPL)'];
             means(i) = meanSPL;
             bars(i) = stderrSPL;
-        end        
+        else
+            causes{i} = [species(i).name,': SEL-driven takes'];
+            barlabels{i} = [species(i).name,' (',num2str(selThreshholds(i)),' dB SEL)'];
+            means(i) = meanSEL;
+            bars(i) = stderrSEL;
+        end
+        
+%         if(meanSEL >= meanSPL)
+%             causes{i} = [species(i).name,': SEL-driven takes'];
+%             barlabels{i} = [species(i).name,' (',num2str(selThreshholds(i)),' dB SEL)'];
+%             means(i) = meanSEL;
+%             bars(i) = stderrSEL;
+%         else
+%             causes{i} = [species(i).name,': SPL-driven takes'];
+%             barlabels{i} = [species(i).name,' (',num2str(splThreshholds(i)),' dB SPL)'];
+%             means(i) = meanSPL;
+%             bars(i) = stderrSPL;
+%         end        
    end
    
    figure(1); hold on; 
