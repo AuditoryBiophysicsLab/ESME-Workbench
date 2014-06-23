@@ -111,8 +111,15 @@ species = struct;
    figure(1); hold on; 
    barwitherr(bars,means);
    set(gca,'XTick',[1:length(species)],'XTickLabel',barlabels);
-   title(['Estimated Takes (',scenarioName,'):',num2str(resampleCount),' resamplings at ',num2str(samplePercentage*100),'% total population']);
-   ylabel('Take count');   
-   th = annotation(1,'textbox',[.688 .848 .211 .067],'String',causes);
+   fix_xticklabels(gca,0.1,{'FontSize',14});
+   tt = title(['Estimated Takes (',scenarioName,'):',num2str(resampleCount),' resamplings at ',num2str(samplePercentage*100),'% total population']); set(tt,'FontSize',16);
+   yy = ylabel('Take count'); set(yy,'FontSize',16);
+   if(~isSELOnly)
+    th = annotation(1,'textbox',[.688 .848 .211 .067],'String',causes);
+   end
+   set(1,'PaperPosition',[0 0 12 6]);
+   %set (1, 'Units', 'normalized', 'Position', [0,0,1,1]);
    saveas(1,'takes.fig');            
+   saveas(1,'takes.png');  
+   close(1);
 end

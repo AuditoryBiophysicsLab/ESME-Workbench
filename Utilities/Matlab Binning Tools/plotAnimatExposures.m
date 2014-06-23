@@ -1,5 +1,5 @@
-function plotAnimatExposures(filename)
-[spls, sels] = calculateStats(filename,1/1000);
+function plotAnimatExposures(filename, dutyCycle)
+[spls, sels] = calculateStats(filename,dutyCycle);
 save('alldata.mat','sels','spls');
 end
 

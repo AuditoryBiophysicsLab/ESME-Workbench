@@ -45,19 +45,19 @@ function threshholdValue = getSELThreshhold(speciesName,isImpulsive)
                 threshholdValue = nonImpulsiveMap('PHOCID');
             end
         case 'Mirounga angustirostris (female)'
-             if(isImpulsive)
+            if(isImpulsive)
                 threshholdValue = impulsiveMap('PHOCID');
             else
                 threshholdValue = nonImpulsiveMap('PHOCID');
             end
         case 'Phoca vitulina'
-             if(isImpulsive)
+            if(isImpulsive)
                 threshholdValue = impulsiveMap('PHOCID');
             else
                 threshholdValue = nonImpulsiveMap('PHOCID');
             end
         case 'Phocoena phocoena (Atlantic)'
-             if(isImpulsive)
+            if(isImpulsive)
                 threshholdValue = impulsiveMap('HF_CETACEAN');
             else
                 threshholdValue = nonImpulsiveMap('HF_CETACEAN');
@@ -69,55 +69,54 @@ function threshholdValue = getSELThreshhold(speciesName,isImpulsive)
                 threshholdValue = nonImpulsiveMap('HF_CETACEAN');
             end
         case 'Physeter macrocephalus (Atlantic)'
-             if(isImpulsive)
+            if(isImpulsive)
                 threshholdValue = impulsiveMap('MF_CETACEAN');
             else
                 threshholdValue = nonImpulsiveMap('MF_CETACEAN');
             end
         case 'Physeter macrocephalus (Gulf of Mexico)'
-             if(isImpulsive)
+            if(isImpulsive)
                 threshholdValue = impulsiveMap('MF_CETACEAN');
             else
                 threshholdValue = nonImpulsiveMap('MF_CETACEAN');
             end
         case 'Physeter macrocephalus (Pacific)'
-             if(isImpulsive)
+            if(isImpulsive)
                 threshholdValue = impulsiveMap('MF_CETACEAN');
             else
                 threshholdValue = nonImpulsiveMap('MF_CETACEAN');
             end
         case 'Tursiops truncatus (coastal_Atlantic)'
-             if(isImpulsive)
+            if(isImpulsive)
                 threshholdValue = impulsiveMap('MF_CETACEAN');
             else
                 threshholdValue = nonImpulsiveMap('MF_CETACEAN');
             end
         case 'Tursiops truncatus (coastal_Pacific)'
-             if(isImpulsive)
+            if(isImpulsive)
                 threshholdValue = impulsiveMap('MF_CETACEAN');
             else
                 threshholdValue = nonImpulsiveMap('MF_CETACEAN');
             end
         case 'Zalophus californianus (female)'
-             if(isImpulsive)
+            if(isImpulsive)
                 threshholdValue = impulsiveMap('ORARIID');
             else
                 threshholdValue = nonImpulsiveMap('ORARIID');
             end
         case 'Zalophus californianus (male)'
-             if(isImpulsive)
+            if(isImpulsive)
                 threshholdValue = impulsiveMap('ORARIID');
             else
                 threshholdValue = nonImpulsiveMap('ORARIID');
             end
         case 'Ziphius cavirostris'
-             if(isImpulsive)
+            if(isImpulsive)
                 threshholdValue = impulsiveMap('MF_CETACEAN');
             else
                 threshholdValue = nonImpulsiveMap('MF_CETACEAN');
             end
         otherwise
             error([speciesName,' is not a recognized species; no threshhold can be assigned']);            
-    end
-   
+    end   
 end
