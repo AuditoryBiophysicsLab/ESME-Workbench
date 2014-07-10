@@ -1,3 +1,14 @@
+%graphAnimatStats(sels, spls)
+%   This function graphs cumulative SEL and SPL estimates as species histograms from a
+%   precomputed collection of them stored in the structs SELS and SPLS.  
+%
+%   Histogram bin size and coverage (start and end points) are specified as
+%   member variables of the function and are currently edited by hand.
+%   Code to generate  a line plot of exposure vs. animat ID is currently
+%   commented-out but present. 
+%
+%   See also CALCULATESTATS to create sels, spls.
+
 function graphAnimatStats(sels, spls)
 % plot SELs
     binSize = 10;

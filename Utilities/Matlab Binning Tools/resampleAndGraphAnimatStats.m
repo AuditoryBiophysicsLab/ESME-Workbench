@@ -1,3 +1,11 @@
+%resampleAndGraphAnimatStats(sels,spls,isImpulsive,samplePercentage,resampleCount,isSELOnly,scenarioName)
+%   This function plots take estimates (based on values specified in
+%   getSELThreshhold and getSPLThreshhold; currently these reflect the
+%   draft SEL and SPL guidelines proposed by NMFS in May 2014 ) as a
+%   labelled histogram.  Optionally, it can also perform a monte-carlo
+%   resampling of large animat populations with replacement over a given
+%   number of trials and produce histograms with variability estimates. 
+
 function [species] = resampleAndGraphAnimatStats(sels, spls,isImpulsive,samplePercentage,resampleCount,isSELOnly,scenarioName)
 % accumulate threshholds
 selThreshholds = zeros(1,length(sels));

@@ -11,8 +11,10 @@ class PySim(object):
     __magicFooter = long("a57d8ee659dc45ec", 16)
     __magicTimeStepRecord = long("d3c603dd0d7a1ee6", 16)
 
-    def __init__(self):
-        self.Filename = None
+    def __init__(self, filename):
+        if not os.path.exists(filename):
+            raise RuntimeError('Simulation file not found')
+        self.Filename = filename
         self.__trailerOffset = None
         self.TimeStepSize = None
         self.StartTime = None
@@ -25,12 +27,7 @@ class PySim(object):
         self.SpeciesRecords = None
         self.TimeStepRecordOffsets = None
 
-    def FromFileName(self, filename):
-        if not os.path.exists(filename):
-            raise RuntimeError('Simulation file not found')
-        self.Filename = filename
         self.__readFooter()
-        return self
 
     def __readFooter(self):
         """
