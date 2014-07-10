@@ -195,16 +195,12 @@
     <Compile Include="Database\DbGeo.cs" />
     <Compile Include="Database\DbGeoRect.cs" />
     <Compile Include="Database\DbTimeSpan.cs" />
-    <Compile Include="Database\Importers\NemoFile.cs" />
-    <Compile Include="Database\Importers\PSMFile.cs" />
-    <Compile Include="Database\Importers\PSMFileRecord.cs" />
     <Compile Include="Environment\AnimatDDBFile.cs" />
     <Compile Include="Environment\Animat3MBFile.cs" />
     <Compile Include="Environment\EnvironmentFileExtensions.cs" />
     <Compile Include="Environment\SoundSpeedProfileExtensions.cs" />
     <Compile Include="Locations\EnvironmentalDataSet.cs" />
     <Compile Include="Locations\Location.cs" />
-    <Compile Include="Database\PSMContext.cs" />
     <Compile Include="Locations\LocationContext.cs" />
     <Compile Include="Locations\LogEntry.cs" />
     <Compile Include="Mapping\CustomEditOverlay.cs" />
@@ -215,7 +211,6 @@
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyVersionInfo.cs" />
-    <Compile Include="PSM\PSMContext.cs" />
     <Compile Include="Scenarios\AnalysisPoint.cs" />
     <Compile Include="Scenarios\AnimatLocation.cs" />
     <Compile Include="Scenarios\LayerSettings.cs" />

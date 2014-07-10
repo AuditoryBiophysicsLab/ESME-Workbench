@@ -1,6 +1,4 @@
-﻿using System;
-using System.ComponentModel.Composition;
-using ESME.Views.PSM;
+﻿using System.ComponentModel.Composition;
 using HRC;
 using HRC.Services;
 using HRC.ViewModels;
@@ -29,14 +27,14 @@ namespace GrahamsWPFTester
             _saveFile = saveFile;
             _viewAwareStatus.ViewLoaded += () =>
             {
-                WindowTitle = "PSM Tester";
-                TreeViewModel = new PSMTreeViewModel(@"C:\Users\Graham Voysey\Desktop\");
-                TreeViewModel.SeedTestValues();
+                //WindowTitle = "PSM Tester";
+               // TreeViewModel = new PSMTreeViewModel(@"C:\Users\Graham Voysey\Desktop\");
+                //TreeViewModel.SeedTestValues();
             };
         }
 
 
         public string WindowTitle { get; set; }
-        public PSMTreeViewModel TreeViewModel { get; set; }
+      //  public PSMTreeViewModel TreeViewModel { get; set; }
     }
 }
