@@ -154,7 +154,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileBasedDataSources", "..\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HRC.MSTest", "HRC.MSTest\HRC.MSTest.csproj", "{08BFF862-991D-4A38-82FB-7A526FCF36FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESME.PSM", "ESME.PSM\ESME.PSM.csproj", "{3F90EE0D-115A-4963-A393-C630E43BC541}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESME.PSM", "..\..\Libraries\ESME.PSM\ESME.PSM.csproj", "{3F90EE0D-115A-4963-A393-C630E43BC541}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
