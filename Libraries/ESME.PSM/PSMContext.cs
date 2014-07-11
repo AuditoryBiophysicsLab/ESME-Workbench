@@ -6,11 +6,12 @@ using System.Data.Entity.Validation;
 using System.Data.SqlServerCe;
 using System.Diagnostics;
 using System.Data.Entity;
+using System.Data.Entity.SqlServerCompact;
 using System.IO;
 
 namespace ESME.PSM
 {
-    [DbConfigurationType(typeof(PSMContext))]
+    [DbConfigurationType(typeof(PSMContextConfiguration))]
     public class PSMContext : DbContext
     {
         public DbSet<Platform> Platforms { get; set; }
@@ -115,6 +116,11 @@ namespace ESME.PSM
             modelBuilder.Entity<Mode>().HasRequired(m => m.Source);
 
         }
+    }
+
+    public class PSMContextConfiguration : DbConfiguration
+    {
+        public PSMContextConfiguration() { SetProviderServices(SqlCeProviderServices.ProviderInvariantName, SqlCeProviderServices.Instance);}
     }
 
     public class Platform

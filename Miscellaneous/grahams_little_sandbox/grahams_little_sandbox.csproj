@@ -54,6 +54,16 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Solutions\ESME Workbench\packages\EntityFramework.6.1.1\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer">
+      <HintPath>..\..\Solutions\ESME Workbench\packages\EntityFramework.6.1.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="ESME.PSM">
+      <HintPath>..\..\Libraries\ESME.PSM\bin\Debug\ESME.PSM.dll</HintPath>
+    </Reference>
     <Reference Include="FileHelpers">
       <HintPath>..\..\ESME WorkBench\External References\FileHelpers.dll</HintPath>
     </Reference>
@@ -69,7 +79,6 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Data.Entity" />
     <Reference Include="System.Data.Linq" />
     <Reference Include="System.Reactive.Core">
       <HintPath>..\..\Solutions\ESME Workbench\packages\Rx-Core.2.2.2\lib\net45\System.Reactive.Core.dll</HintPath>

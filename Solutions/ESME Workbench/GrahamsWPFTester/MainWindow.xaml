@@ -15,6 +15,6 @@
         </i:EventTrigger>
     </i:Interaction.Triggers>
     <Grid>
-        <p:PSMTreeView DataContext="{Binding TreeViewModel}" />
+        
     </Grid>   
 </Window>
