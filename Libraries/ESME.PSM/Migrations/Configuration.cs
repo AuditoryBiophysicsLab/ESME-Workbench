@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Entity.Migrations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace ESME.PSM.Migrations
 {
+    using System.Data.Entity.Migrations;
+
     internal sealed class Configuration : DbMigrationsConfiguration<PSMContext>
     {
         public Configuration()
         {
-            AutomaticMigrationsEnabled = true;
+            AutomaticMigrationsEnabled = false;
         }
 
         protected override void Seed(PSMContext context)

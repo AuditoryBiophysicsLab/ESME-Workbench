@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Linq;
 using ESME.PSM;
 
 namespace grahams_little_sandbox
@@ -26,16 +27,9 @@ namespace grahams_little_sandbox
                 Sources = new Collection<Source>(),
             };
 
-       
 
-            PSMContext.Modify(p =>
-            {
-                platform.Sources.Add(source);
-                source.Modes.Add(mode);
-                source.Platform = platform;
-                mode.Source = source;
-                p.Platforms.Add(platform);
-            });
+            PSMContext.Modify(p => p.Platforms.Add(platform));
+            var result = PSMContext.Query(p => p.Platforms.ToList());
         }
     }
 }

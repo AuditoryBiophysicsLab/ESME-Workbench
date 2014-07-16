@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity.Infrastructure;
 using System.Data.Entity.ModelConfiguration.Conventions;
 using System.Data.Entity.Validation;
@@ -8,6 +9,7 @@ using System.Diagnostics;
 using System.Data.Entity;
 using System.Data.Entity.SqlServerCompact;
 using System.IO;
+using ESME.PSM.Migrations;
 
 namespace ESME.PSM
 {
@@ -169,6 +171,8 @@ namespace ESME.PSM
 
     public class Mode
     {
+        TimeSpan _pulseLength;
+        TimeSpan _pulseInterval;
         //key
         public Guid ModeID { get; set; }
 
@@ -183,8 +187,41 @@ namespace ESME.PSM
         public float DepthOffset { get; set; }
         public float SourceLevel { get; set; }
         public float Frequency { get; set; }
-        public TimeSpan PulseLength { get; set; }
-        public TimeSpan PulseInterval { get; set; }
+        #region PulseLength
+        //this is a workaround because sqlCE can't store TimeSpans natively.  
+        public long PulseLengthTicks { get; set; }
+
+        [NotMapped]
+        public TimeSpan PulseLength
+        {
+            get
+            {
+                return _pulseLength;
+            }
+            set
+            {
+                _pulseLength = value;
+                PulseLengthTicks = _pulseLength.Ticks;
+            }
+        } 
+        #endregion
+
+        public long PulseIntervalTicks { get; set; }
+
+        [NotMapped]
+        public TimeSpan PulseInterval
+        {
+            get
+            {
+                return _pulseInterval;
+            }
+            set
+            {
+                _pulseInterval = value;
+                PulseIntervalTicks = _pulseInterval.Ticks;
+            }
+        }
+
         public float RelativeBeamAngle { get; set; }
         public float HorizontalBeamWidth { get; set; }
         public float VerticalBeamWidth { get; set; }
