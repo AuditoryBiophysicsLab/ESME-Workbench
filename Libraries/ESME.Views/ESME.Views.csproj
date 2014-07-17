@@ -60,6 +60,12 @@
     <Reference Include="EntityFramework.SqlServer">
       <HintPath>..\..\Solutions\ESME Workbench\packages\EntityFramework.6.0.2\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="ESME.PSM">
+      <HintPath>..\ESME.PSM\bin\Debug\ESME.PSM.dll</HintPath>
+    </Reference>
+    <Reference Include="FileHelpers">
+      <HintPath>..\..\ESME WorkBench\External References\FileHelpers.dll</HintPath>
+    </Reference>
     <Reference Include="KMLib">
       <HintPath>..\..\ESME WorkBench\External References\KMLib.dll</HintPath>
     </Reference>
@@ -222,6 +228,10 @@
       <DependentUpon>BasicPropertiesView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyVersionInfo.cs" />
+    <Compile Include="PSM\PSMBrowserView.xaml.cs">
+      <DependentUpon>PSMBrowserView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PSM\PSMBrowserViewModel.cs" />
     <Compile Include="Scenarios\CreateOrEditPerimeterView.xaml.cs">
       <DependentUpon>CreateOrEditPerimeterView.xaml</DependentUpon>
     </Compile>
@@ -353,6 +363,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Misc\BasicPropertiesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PSM\PSMBrowserView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -135,13 +135,14 @@ namespace ESME.PSM
 
         //general attributes
         public PlatformType Type { get; set; }
-        public string Description { get; set; }
+        public string Name { get; set; }
         public float Speed { get; set; }
         //perimeter? 
         //behavior?
         public bool IsRandom { get; set; }
 
         public Platform() { PlatformID = Guid.NewGuid(); }
+        public override string ToString() { return Name; }
     }
 
     public enum PlatformType
@@ -162,6 +163,7 @@ namespace ESME.PSM
         public SourceType Type { get; set; }
 
         public Source() { SourceID = Guid.NewGuid(); }
+        public override string ToString() { return Name; }
     }
 
     public enum SourceType
@@ -171,8 +173,6 @@ namespace ESME.PSM
 
     public class Mode
     {
-        TimeSpan _pulseLength;
-        TimeSpan _pulseInterval;
         //key
         public Guid ModeID { get; set; }
 
@@ -190,7 +190,7 @@ namespace ESME.PSM
         #region PulseLength
         //this is a workaround because sqlCE can't store TimeSpans natively.  
         public long PulseLengthTicks { get; set; }
-
+        TimeSpan _pulseLength;
         [NotMapped]
         public TimeSpan PulseLength
         {
@@ -205,9 +205,9 @@ namespace ESME.PSM
             }
         } 
         #endregion
-
+        #region PulseInterval
         public long PulseIntervalTicks { get; set; }
-
+        TimeSpan _pulseInterval;
         [NotMapped]
         public TimeSpan PulseInterval
         {
@@ -220,8 +220,8 @@ namespace ESME.PSM
                 _pulseInterval = value;
                 PulseIntervalTicks = _pulseInterval.Ticks;
             }
-        }
-
+        } 
+        #endregion
         public float RelativeBeamAngle { get; set; }
         public float HorizontalBeamWidth { get; set; }
         public float VerticalBeamWidth { get; set; }
@@ -229,6 +229,7 @@ namespace ESME.PSM
         public float DepressionElevationAngle { get; set; }
 
         public Mode() { ModeID = Guid.NewGuid();}
+        public override string ToString() { return Name; }
     }
 
     public enum ModeType

@@ -6,7 +6,7 @@ namespace ESME.PSM.Migrations
     {
         public Configuration()
         {
-            AutomaticMigrationsEnabled = false;
+            AutomaticMigrationsEnabled = true;
         }
 
         protected override void Seed(PSMContext context)

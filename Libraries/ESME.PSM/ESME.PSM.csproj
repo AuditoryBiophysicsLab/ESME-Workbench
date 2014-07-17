@@ -65,6 +65,10 @@
     <Compile Include="Migrations\201407161305144_testing0.Designer.cs">
       <DependentUpon>201407161305144_testing0.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201407172046553_testing1.cs" />
+    <Compile Include="Migrations\201407172046553_testing1.Designer.cs">
+      <DependentUpon>201407172046553_testing1.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="PSMContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -79,6 +83,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201407161305144_testing0.resx">
       <DependentUpon>201407161305144_testing0.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201407172046553_testing1.resx">
+      <DependentUpon>201407172046553_testing1.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

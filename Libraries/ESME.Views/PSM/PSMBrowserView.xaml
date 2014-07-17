@@ -1,0 +1,38 @@
+﻿<Window x:Class="ESME.Views.PSM.PSMBrowserView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:psm="clr-namespace:ESME.Views.PSM"
+        d:DataContext="{d:DesignInstance psm:PSMBrowserViewModel}"
+        mc:Ignorable="d"
+        WindowStyle="ToolWindow"
+        SizeToContent="WidthAndHeight"
+        d:DesignHeight="500" d:DesignWidth="400"
+        Title="{Binding WindowTitle}">
+    
+    <DockPanel LastChildFill="True">
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom">
+            <Button Content="Add" />
+            <Button Content="Delete"/>
+        </StackPanel>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Vertical" Grid.Column="0">
+                <GroupBox Header="Platforms">
+                    <ListBox DockPanel.Dock="Left" ItemsSource="{Binding Platforms}" SelectedItem="{Binding SelectedPlatform, Mode=TwoWay}"></ListBox>
+                </GroupBox>
+                <GroupBox Header="Sources">
+                    <ListBox ItemsSource="{Binding Sources}" SelectedItem="{Binding SelectedSource, Mode=TwoWay}"></ListBox>
+                </GroupBox>
+                <GroupBox Header="Modes">
+                    <ListBox ItemsSource="{Binding Modes}" SelectedItem="{Binding SelectedMode, Mode=TwoWay}"></ListBox>
+                </GroupBox>
+            </StackPanel>
+        </Grid>
+    </DockPanel>
+</Window>

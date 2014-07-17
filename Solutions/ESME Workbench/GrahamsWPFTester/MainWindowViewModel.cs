@@ -1,4 +1,8 @@
-﻿using System.ComponentModel.Composition;
+﻿using System;
+using System.ComponentModel.Composition;
+using System.Diagnostics;
+using System.Windows;
+using ESME.Views.PSM;
 using HRC;
 using HRC.Services;
 using HRC.ViewModels;
@@ -20,21 +24,11 @@ namespace GrahamsWPFTester
                                                   IUIVisualizerService visualizer,
                                                   IHRCSaveFileService saveFile)
         {
-
             _viewAwareStatus = viewAwareStatus;
             _messageBox = messageBox;
             _visualizer = visualizer;
             _saveFile = saveFile;
-            _viewAwareStatus.ViewLoaded += () =>
-            {
-                //WindowTitle = "PSM Tester";
-               // TreeViewModel = new PSMTreeViewModel(@"C:\Users\Graham Voysey\Desktop\");
-                //TreeViewModel.SeedTestValues();
-            };
+            _viewAwareStatus.ViewLoaded += () => _visualizer.ShowWindow("PSMBrowserView", new PSMBrowserViewModel(),false,(s, e) => Application.Current.Shutdown());
         }
-
-
-        public string WindowTitle { get; set; }
-      //  public PSMTreeViewModel TreeViewModel { get; set; }
     }
 }
