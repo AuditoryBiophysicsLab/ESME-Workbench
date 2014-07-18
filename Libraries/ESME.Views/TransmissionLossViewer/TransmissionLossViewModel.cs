@@ -103,7 +103,7 @@ namespace ESME.Views.TransmissionLossViewer
                     _transmissionLossObserver = null;
                     Radials = TransmissionLoss == null ? null : TransmissionLoss.Radials.OrderBy(r => r.Bearing).ToList();
                     if (Radials == null) RadialCount = 0;
-                    if (transmissionLoss == null || Radials == null) return;
+                    if (transmissionLoss == null || Radials == null || Radials.Count == 0) return;
                     Debug.WriteLine(string.Format("{0:HH:mm:ss.fff} TransmissionLossViewModel: TransmissionLoss changed to {1}", DateTime.Now, transmissionLoss.ToString()));
                     RadialCount = Radials.Count - 1;
                     SelectedRadialIndex = -1;
