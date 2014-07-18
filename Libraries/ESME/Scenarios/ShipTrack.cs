@@ -38,7 +38,6 @@ namespace ESME.Scenarios
         public bool OverrideTimestamps { get; set; }
 
         [Initialize] public virtual ObservableList<Waypoint> Waypoints { get; set; }
-
         public virtual Platform Platform { get; set; }
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
 

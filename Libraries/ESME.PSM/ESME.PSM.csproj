@@ -9,10 +9,11 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ESME.PSM</RootNamespace>
     <AssemblyName>ESME.PSM</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -43,6 +44,12 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Solutions\ESME Workbench\packages\EntityFramework.SqlServerCompact.6.1.1\lib\net45\EntityFramework.SqlServerCompact.dll</HintPath>
     </Reference>
+    <Reference Include="ESME">
+      <HintPath>..\ESME\bin\Debug\ESME.dll</HintPath>
+    </Reference>
+    <Reference Include="HRC">
+      <HintPath>..\HRC\bin\Debug\HRC.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
@@ -61,13 +68,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Migrations\201407161305144_testing0.cs" />
-    <Compile Include="Migrations\201407161305144_testing0.Designer.cs">
-      <DependentUpon>201407161305144_testing0.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201407172046553_testing1.cs" />
-    <Compile Include="Migrations\201407172046553_testing1.Designer.cs">
-      <DependentUpon>201407172046553_testing1.cs</DependentUpon>
+    <Compile Include="Migrations\201407181948330_switchToScenarioPSM.cs" />
+    <Compile Include="Migrations\201407181948330_switchToScenarioPSM.Designer.cs">
+      <DependentUpon>201407181948330_switchToScenarioPSM.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="PSMContext.cs" />
@@ -81,11 +84,8 @@
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201407161305144_testing0.resx">
-      <DependentUpon>201407161305144_testing0.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201407172046553_testing1.resx">
-      <DependentUpon>201407172046553_testing1.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201407181948330_switchToScenarioPSM.resx">
+      <DependentUpon>201407181948330_switchToScenarioPSM.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

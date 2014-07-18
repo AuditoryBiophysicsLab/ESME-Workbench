@@ -7,13 +7,13 @@ namespace ESME.PSM.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.1.1-30610")]
-    public sealed partial class testing0 : IMigrationMetadata
+    public sealed partial class switchToScenarioPSM : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(testing0));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(switchToScenarioPSM));
         
         string IMigrationMetadata.Id
         {
-            get { return "201407161305144_testing0"; }
+            get { return "201407181948330_switchToScenarioPSM"; }
         }
         
         string IMigrationMetadata.Source

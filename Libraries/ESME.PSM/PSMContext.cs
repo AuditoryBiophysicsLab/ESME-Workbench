@@ -9,7 +9,7 @@ using System.Diagnostics;
 using System.Data.Entity;
 using System.Data.Entity.SqlServerCompact;
 using System.IO;
-using ESME.PSM.Migrations;
+using ESME.Scenarios;
 
 namespace ESME.PSM
 {
@@ -20,7 +20,7 @@ namespace ESME.PSM
         public DbSet<Source> Sources { get; set; }
         public DbSet<Mode> Modes { get; set; }
 
-        static readonly string DatabaseFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "psm.db.sdf");  //for now
+        static readonly string DatabaseFile = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop), "psm.db.sdf");  //for now
         static readonly string ConnectionString = new SqlCeConnectionStringBuilder
         {
             DataSource = DatabaseFile,
@@ -35,7 +35,7 @@ namespace ESME.PSM
             Configuration.ProxyCreationEnabled = true;
             Configuration.LazyLoadingEnabled = true;
             Configuration.ValidateOnSaveEnabled = true;
-            Database.SetInitializer(new MigrateDatabaseToLatestVersion<PSMContext, Migrations.Configuration>());
+            System.Data.Entity.Database.SetInitializer(new MigrateDatabaseToLatestVersion<PSMContext, Migrations.Configuration>());
             //Database.SetInitializer(new CreateDatabaseIfNotExists<GameContext>());
         }
 
@@ -106,6 +106,17 @@ namespace ESME.PSM
             //platform requirements
                 //forward
             modelBuilder.Entity<Platform>().HasMany(p => p.Sources);
+            modelBuilder.Entity<Platform>().HasOptional(p => p.ShipTrack);
+            modelBuilder.Entity<Platform>()
+              .HasOptional(p => p.Perimeter)  // Platform has an optional Perimeter
+              .WithMany();                    // A single perimeter can be attached to many platforms
+            modelBuilder.Entity<Platform>()
+                .HasOptional(p => p.ShipTrack)  // Platform has an optional ShipTrack
+                .WithRequired(p => p.Platform); // The ShipTrack MUST refer back to the platform
+            modelBuilder.Entity<ShipTrack>()
+                .HasMany(p => p.Waypoints)      // A ShipTrack can have many Waypoints
+                .WithRequired()                 // Each Waypoint must refer back to the ShipTrack
+                .WillCascadeOnDelete(true);
 
             //source requirements
                 //forward
@@ -125,6 +136,7 @@ namespace ESME.PSM
         public PSMContextConfiguration() { SetProviderServices(SqlCeProviderServices.ProviderInvariantName, SqlCeProviderServices.Instance);}
     }
 
+#if false
     public class Platform
     {
         //key 
@@ -157,7 +169,7 @@ namespace ESME.PSM
 
         //foreign keys and virtuals
         public virtual Platform Platform { get; set; }
-        public virtual ICollection<Mode> Modes { get; set; }    
+        public virtual ICollection<Mode> Modes { get; set; }
         //general attributes
         public string Name { get; set; }
         public SourceType Type { get; set; }
@@ -203,7 +215,7 @@ namespace ESME.PSM
                 _pulseLength = value;
                 PulseLengthTicks = _pulseLength.Ticks;
             }
-        } 
+        }
         #endregion
         #region PulseInterval
         public long PulseIntervalTicks { get; set; }
@@ -220,7 +232,7 @@ namespace ESME.PSM
                 _pulseInterval = value;
                 PulseIntervalTicks = _pulseInterval.Ticks;
             }
-        } 
+        }
         #endregion
         public float RelativeBeamAngle { get; set; }
         public float HorizontalBeamWidth { get; set; }
@@ -228,7 +240,7 @@ namespace ESME.PSM
         public float SideLobeAttenuation { get; set; }
         public float DepressionElevationAngle { get; set; }
 
-        public Mode() { ModeID = Guid.NewGuid();}
+        public Mode() { ModeID = Guid.NewGuid(); }
         public override string ToString() { return Name; }
     }
 
@@ -238,5 +250,6 @@ namespace ESME.PSM
         Narrowband,
         Broadband,
         Explosive
-    }
+    } 
+#endif
 }

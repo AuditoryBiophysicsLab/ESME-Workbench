@@ -76,6 +76,9 @@
     <Reference Include="EntityFramework.SqlServer">
       <HintPath>..\Solutions\ESME Workbench\packages\EntityFramework.6.0.2\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="FileHelpers">
+      <HintPath>External References\FileHelpers.dll</HintPath>
+    </Reference>
     <Reference Include="Kent.Boogaart.Converters, Version=1.1.0.0, Culture=neutral, PublicKeyToken=cc96fa93a217f7a1, processorArchitecture=MSIL" />
     <Reference Include="MapSuiteCore, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="MEFedMVVM.WPF, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b6db3dc4f5fba1e3, processorArchitecture=MSIL" />
