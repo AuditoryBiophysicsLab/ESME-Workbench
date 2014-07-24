@@ -20,7 +20,8 @@ namespace ESME.PSM
         public DbSet<Source> Sources { get; set; }
         public DbSet<Mode> Modes { get; set; }
 
-        static readonly string DatabaseFile = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop), "psm.db.sdf");  //for now
+        static readonly string DatabaseFile = Path.Combine(Globals.MasterDatabaseService.MasterDatabaseDirectory, "psm.db.sdf"); 
+            // Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop), "psm.db.sdf");  //for now
         static readonly string ConnectionString = new SqlCeConnectionStringBuilder
         {
             DataSource = DatabaseFile,
