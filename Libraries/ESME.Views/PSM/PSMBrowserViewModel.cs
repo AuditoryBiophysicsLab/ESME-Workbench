@@ -10,14 +10,14 @@ namespace ESME.Views.PSM
     {
         public string WindowTitle { get; set; }
 
-        public List<Platform> Platforms { get; set; }
-        public Platform SelectedPlatform { get; set; }
+        public List<PlatformPSM> Platforms { get; set; }
+        public PlatformPSM SelectedPlatform { get; set; }
 
-        public List<Source> Sources { get; set; }
-        public Source SelectedSource { get; set; }
+        public List<SourcePSM> Sources { get; set; }
+        public SourcePSM SelectedSource { get; set; }
 
-        public List<Mode> Modes { get; set; }
-        public Mode SelectedMode { get; set; }
+        public List<ModePSM> Modes { get; set; }
+        public ModePSM SelectedMode { get; set; }
 
         public PSMBrowserViewModel()
         {

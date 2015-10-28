@@ -14,37 +14,11 @@ using HRC.WPF;
 
 namespace ESME.Scenarios
 {
-    [NotifyPropertyChanged]
-    public class Mode : IHaveGuid
+    public abstract class ModeBase : IHaveGuid
     {
-        public Mode() { }
 
-        public Mode(Mode mode) { Copy(mode); }
-
-        void Copy(Mode mode)
-        {
-            PSMModeGuid = mode.PSMModeGuid;
-            ModeName = mode.ModeName;
-            ModeType = mode.ModeType;
-            ActiveTime = mode.ActiveTime;
-            Depth = mode.Depth;
-            SourceLevel = mode.SourceLevel;
-            LowFrequency = mode.LowFrequency;
-            HighFrequency = mode.HighFrequency;
-            PulseInterval = mode.PulseInterval;
-            PulseLength = mode.PulseLength;
-            HorizontalBeamWidth = mode.HorizontalBeamWidth;
-            VerticalBeamWidth = mode.VerticalBeamWidth;
-            DepressionElevationAngle = mode.DepressionElevationAngle;
-            RelativeBeamAngle = mode.RelativeBeamAngle;
-            MaxPropagationRadius = mode.MaxPropagationRadius;
-            TransmissionLossPluginType = mode.TransmissionLossPluginType;
-            RadialCount = mode.RadialCount;
-            Source = mode.Source;
-        }
-        #region Mapped Properties
-        
-        [Key, Initialize] public Guid Guid { get; set; }
+        [Key, Initialize]
+        public Guid Guid { get; set; }
         public string PSMModeGuid { get; set; }
         public string ModeName { get; set; }
         public string ModeType { get; set; }
@@ -120,9 +94,44 @@ namespace ESME.Scenarios
         /// <summary>
         /// The side lobe attenuation, in dB
         /// </summary>
-        [Initialize(40.0f)] public float SideLobeAttenuation { get; set; }
+        [Initialize(40.0f)]
+        public float SideLobeAttenuation { get; set; }
 
         public virtual Source Source { get; set; }
+    }
+
+    public class ModePSM : ModeBase { }
+
+    [NotifyPropertyChanged]
+    public class Mode : ModeBase
+    {
+        public Mode() { }
+
+        public Mode(Mode mode) { Copy(mode); }
+
+        void Copy(Mode mode)
+        {
+            PSMModeGuid = mode.PSMModeGuid;
+            ModeName = mode.ModeName;
+            ModeType = mode.ModeType;
+            ActiveTime = mode.ActiveTime;
+            Depth = mode.Depth;
+            SourceLevel = mode.SourceLevel;
+            LowFrequency = mode.LowFrequency;
+            HighFrequency = mode.HighFrequency;
+            PulseInterval = mode.PulseInterval;
+            PulseLength = mode.PulseLength;
+            HorizontalBeamWidth = mode.HorizontalBeamWidth;
+            VerticalBeamWidth = mode.VerticalBeamWidth;
+            DepressionElevationAngle = mode.DepressionElevationAngle;
+            RelativeBeamAngle = mode.RelativeBeamAngle;
+            MaxPropagationRadius = mode.MaxPropagationRadius;
+            TransmissionLossPluginType = mode.TransmissionLossPluginType;
+            RadialCount = mode.RadialCount;
+            Source = mode.Source;
+        }
+        #region Mapped Properties
+      
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
         [Initialize] public virtual ObservableList<TransmissionLoss> TransmissionLosses { get; set; }
         #endregion
@@ -166,34 +175,7 @@ namespace ESME.Scenarios
         SimpleCommand<object, EventToCommandArgs> _deleteMode;
         #endregion
 
-        #region EditPSMModeCommand
-        public SimpleCommand<object, EventToCommandArgs> EditPSMModeCommand
-        {
-            get { return _editPSMMode ?? (_editPSMMode = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.EditPSMMode, this))); }
-        }
-         
-        SimpleCommand<object, EventToCommandArgs> _editPSMMode;
-        #endregion
-
-        #region CopyPSMModeCommand
-        public SimpleCommand<object, EventToCommandArgs> CopyPSMModeCommand
-        {
-            get { return _copyPSMMode ?? (_copyPSMMode = new SimpleCommand<object, EventToCommandArgs>(o=> MediatorMessage.Send(MediatorMessage.CopyPSMMode,this))); }
-        }
-         
-        SimpleCommand<object, EventToCommandArgs> _copyPSMMode;
-
-        #endregion
-
-        #region DeletePSMModeCommand
-        public SimpleCommand<object, EventToCommandArgs> DeletePSMModeCommand
-        {
-            get { return _deletePSMMode ?? (_deletePSMMode = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeletePSMMode,this))); }
-        }
-         
-        SimpleCommand<object, EventToCommandArgs> _deletePSMMode;
-
-        #endregion
+    
 
         #region RecalculateModeCommand
         public SimpleCommand<object, EventToCommandArgs> RecalculateModeCommand { get { return _recalculateMode ?? (_recalculateMode = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.RecalculateMode, this))); } }
@@ -261,28 +243,7 @@ namespace ESME.Scenarios
 
         #endregion
 
-        public static Mode NewPSMMode(Source source = null)
-        {
-            return new Mode
-            {
-                PSMModeGuid = "",
-                ModeName = "New Mode",
-                ModeType = "new mode",
-                ActiveTime = null,
-                Depth = 0,
-                SourceLevel = 120,
-                LowFrequency = 1000,
-                HighFrequency = 1000,
-                PulseInterval = new TimeSpan(0,0,0,30),
-                PulseLength = new TimeSpan(0,0,0,0,500),
-                HorizontalBeamWidth = 45,
-                VerticalBeamWidth = 90,
-                DepressionElevationAngle = 90,
-                RelativeBeamAngle = 0,
-                MaxPropagationRadius = 50000,
-                Source = source,
-            };
-        }
+   
         
         public void Delete()
         {

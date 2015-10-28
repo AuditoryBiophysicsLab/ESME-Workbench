@@ -10,14 +10,29 @@ using HRC.WPF;
 
 namespace ESME.Scenarios
 {
+    public abstract class SourceBase : IHaveGuid
+    {
+        [Key, Initialize]
+        public Guid Guid { get; set; }
+        
+        public string SourceName { get; set; }
+        public string SourceType { get; set; }
+
+        public Platform Platform { get; set; }
+        [Initialize]
+        public ObservableList<Mode> Modes { get; set; }
+    }
+
+    public class SourcePSM : SourceBase { }
+
     [NotifyPropertyChanged]
-    public sealed class Source : IHaveGuid
+    public sealed class Source : SourceBase
     {
         public Source() { }
 
         public Source(Source source)
         {
-            PSMSourceGuid = source.PSMSourceGuid;
+            
             SourceName = source.SourceName;
             SourceType = source.SourceType;
             if (source.Modes != null)
@@ -33,20 +48,11 @@ namespace ESME.Scenarios
             {
                 SourceName = "New Source",
                 SourceType = "new source",
-                PSMSourceGuid = "",
                 Platform = platform,
             };
         }
         #region Mapped Properties
-        [Key, Initialize]
-        public Guid Guid { get; set; }
-        public string PSMSourceGuid { get; set; }
-        public string SourceName { get; set; }
-        public string SourceType { get; set; }
-
-        public Platform Platform { get; set; }
-        [Initialize]
-        public ObservableList<Mode> Modes { get; set; }
+      
         [Initialize]
         public ObservableList<LogEntry> Logs { get; set; }
         #endregion
@@ -94,54 +100,6 @@ namespace ESME.Scenarios
         }
          
         SimpleCommand<object, EventToCommandArgs> _addMode;
-        #endregion
-
-        #region PSM database commands
-        #region AddPSMModeCommand
-        public SimpleCommand<object, EventToCommandArgs> AddPSMModeCommand
-        {
-            get
-            {
-                return _addPSMMode ?? (_addPSMMode = new SimpleCommand<object, EventToCommandArgs>(o =>
-                {
-                    var mode = Mode.NewPSMMode(this);
-                    MediatorMessage.Send(MediatorMessage.AddPSMMode, mode);
-                }));
-            }
-        }
-         
-        SimpleCommand<object, EventToCommandArgs> _addPSMMode;
-        #endregion
-
-        #region CopyPSMSourceCommand
-        public SimpleCommand<object, EventToCommandArgs> CopyPSMSourceCommand
-        {
-            get { return _copyPSMSource ?? (_copyPSMSource = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.CopyPSMSource, this))); }
-        }
-         
-        SimpleCommand<object, EventToCommandArgs> _copyPSMSource;
-        #endregion
-
-        #region DeletePSMSourceCommand
-        public SimpleCommand<object, EventToCommandArgs> DeletePSMSourceCommand
-        {
-            get { return _deletePSMSource ?? (_deletePSMSource = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeletePSMSource, this))); }
-        }
-         
-        SimpleCommand<object, EventToCommandArgs> _deletePSMSource;
-
-        #endregion
-
-        #region EditPSMSourceCommand
-        public SimpleCommand<object, EventToCommandArgs> EditPSMSourceCommand
-        {
-            get { return _editPSMSource ?? (_editPSMSource = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.EditPSMSource, this))); }
-        }
-         
-        SimpleCommand<object, EventToCommandArgs> _editPSMSource;
-
-        #endregion
-
         #endregion
 
         #region DeleteSourceCommand

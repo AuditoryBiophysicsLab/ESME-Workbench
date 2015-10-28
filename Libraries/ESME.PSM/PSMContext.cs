@@ -16,9 +16,10 @@ namespace ESME.PSM
     [DbConfigurationType(typeof(PSMContextConfiguration))]
     public class PSMContext : DbContext
     {
-        public DbSet<Platform> Platforms { get; set; }
-        public DbSet<Source> Sources { get; set; }
-        public DbSet<Mode> Modes { get; set; }
+        
+        public DbSet<PlatformPSM> Platforms { get; set; }
+        public DbSet<SourcePSM> Sources { get; set; }
+        public DbSet<ModePSM> Modes { get; set; }
 
         static readonly string DatabaseFile = Path.Combine(Globals.MasterDatabaseService.MasterDatabaseDirectory, "psm.db.sdf"); 
             // Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop), "psm.db.sdf");  //for now
@@ -106,28 +107,17 @@ namespace ESME.PSM
 
             //platform requirements
                 //forward
-            modelBuilder.Entity<Platform>().HasMany(p => p.Sources);
-            modelBuilder.Entity<Platform>().HasOptional(p => p.ShipTrack);
-            modelBuilder.Entity<Platform>()
-              .HasOptional(p => p.Perimeter)  // Platform has an optional Perimeter
-              .WithMany();                    // A single perimeter can be attached to many platforms
-            modelBuilder.Entity<Platform>()
-                .HasOptional(p => p.ShipTrack)  // Platform has an optional ShipTrack
-                .WithRequired(p => p.Platform); // The ShipTrack MUST refer back to the platform
-            modelBuilder.Entity<ShipTrack>()
-                .HasMany(p => p.Waypoints)      // A ShipTrack can have many Waypoints
-                .WithRequired()                 // Each Waypoint must refer back to the ShipTrack
-                .WillCascadeOnDelete(true);
+            modelBuilder.Entity<PlatformPSM>().HasMany(p => p.Sources);
 
             //source requirements
                 //forward
-            modelBuilder.Entity<Source>().HasMany(s => s.Modes);
+            modelBuilder.Entity<SourcePSM>().HasMany(s => s.Modes);
                 //reverse
-            modelBuilder.Entity<Source>().HasRequired(s => s.Platform);
+            modelBuilder.Entity<SourcePSM>().HasRequired(s => s.Platform);
 
             //mode requirements
                 //reverse
-            modelBuilder.Entity<Mode>().HasRequired(m => m.Source);
+            modelBuilder.Entity<ModePSM>().HasRequired(m => m.Source);
 
         }
     }

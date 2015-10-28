@@ -21,45 +21,43 @@ using HRC.WPF;
 
 namespace ESME.Scenarios
 {
-    [NotifyPropertyChanged]
-    public class Platform : IHaveGuid, IHaveLayerSettings
+    public abstract class PlatformBase:  IHaveGuid
     {
-        #region Mapped Properties
         [Key, Initialize]
         public Guid Guid { get; set; }
         public string Description { get; set; }
         public bool Launches { get; set; }
         public bool Tows { get; set; }
         public int RepeatCount { get; set; }
-        // Copied from the PSM Platform
-        public string PSMPlatformGuid { get; set; }
         public string PlatformName { get; set; }
         public string PlatformType { get; set; }
+        public float Depth { get; set; }
+        [Initialize]
+        public virtual ObservableList<Source> Sources { get; set; }
+    }
 
+    public class PlatformPSM : PlatformBase
+    {
+    }
+ 
+    [NotifyPropertyChanged]
+    public class Platform : PlatformBase, IHaveLayerSettings
+    {
+        #region Mapped Workbench-specific Properties
         public DbTrackType TrackType { get; set; }
         public DbGeo Geo { get; set; }
-
         public bool IsRandom { get; set; }
-        public float Depth { get; set; }
         public float Course { get; set; }
-
         /// <summary>
         ///   Speed in knots (nautical miles per hour)
         /// </summary>
         [Affects("TrackTypeDisplay")]
         public float Speed { get; set; }
-
         public virtual Scenario Scenario { get; set; }
-
         [Affects("TrackTypeDisplay")]
         public virtual Perimeter Perimeter { get; set; }
-
         public virtual ShipTrack ShipTrack { get; set; }
-
         [Initialize] public virtual LayerSettings LayerSettings { get; set; }
-
-        [Initialize] public virtual ObservableList<Source> Sources { get; set; }
-
         [Initialize] public virtual ObservableList<LogEntry> Logs { get; set; }
         #endregion
 
@@ -174,7 +172,7 @@ namespace ESME.Scenarios
             Launches = platform.Launches;
             Tows = platform.Tows;
             RepeatCount = platform.RepeatCount;
-            PSMPlatformGuid = platform.PSMPlatformGuid;
+            
             PlatformName = platform.PlatformName;
             PlatformType = platform.PlatformType;
             TrackType = (TrackType)platform.TrackType;
@@ -186,27 +184,6 @@ namespace ESME.Scenarios
             LayerSettings = new LayerSettings(platform.LayerSettings);
             if (platform.Sources != null) foreach (var newsource in platform.Sources.Select(source => new Source(source))) Sources.Add(newsource);
             if (platform.ShipTrack != null) ShipTrack = new ShipTrack(this, platform.ShipTrack);
-        }
-
-        public static Platform NewPSMPlatform()
-        {
-            var platform = new Platform
-            {
-                Description = "New Platform",
-                Launches = false,
-                Tows = false,
-                RepeatCount = 0,
-                PlatformName = "New Platform",
-                PlatformType = "New",
-                TrackType = new DbTrackType(Behaviors.TrackType.Stationary),
-                Geo = new DbGeo(),
-                IsRandom = false,
-                Depth = 0,
-                Course = 0,
-                Speed = 0,
-            };
-            platform.ShipTrack.Platform = platform;
-            return platform;
         }
 
         public void Delete()
@@ -319,74 +296,6 @@ namespace ESME.Scenarios
                     return;
             }
         }
-        #endregion
-
-        #region PSM database commands
-
-        #region AddPSMSourceCommand
-        public SimpleCommand<object, EventToCommandArgs> AddPSMSourceCommand
-        {
-            get
-            {
-                return _addPSMSource ?? (_addPSMSource = new SimpleCommand<object, EventToCommandArgs>(o =>
-                {
-                    var source = Source.NewPSMSource(this);
-                    MediatorMessage.Send(MediatorMessage.AddPSMSource, source);
-                }));
-            }
-        }
-         
-        SimpleCommand<object, EventToCommandArgs> _addPSMSource;
-        #endregion
-
-        [MediatorMessageSink(MediatorMessage.CopyPSMSource),UsedImplicitly]
-        void EnablePaste(bool dummy) { IsPastePSMSourceCommandEnabled = true; }
-
-        #region PastePSMSourceCommand
-        public SimpleCommand<object, EventToCommandArgs> PastePSMSourceCommand
-        {
-            get { return _pastePSMSource ?? (_pastePSMSource = new SimpleCommand<object, EventToCommandArgs>(o => IsPastePSMSourceCommandEnabled, PastePSMSourceHandler)); }
-        }
-         
-        SimpleCommand<object, EventToCommandArgs> _pastePSMSource;
-
-        bool IsPastePSMSourceCommandEnabled { get; set; }
-
-        void PastePSMSourceHandler(EventToCommandArgs args)
-        {
-            MediatorMessage.Send(MediatorMessage.PastePSMSource,this);
-        }
-        #endregion
-
-        #region EditPSMPlatformCommand
-        public SimpleCommand<object, EventToCommandArgs> EditPSMPlatformCommand
-        {
-            get { return _editPSMPlatform ?? (_editPSMPlatform = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.EditPSMPlatform, this))); }
-        }
-         
-        SimpleCommand<object, EventToCommandArgs> _editPSMPlatform;
-        #endregion
-
-        #region DeletePSMPlatformCommand
-        public SimpleCommand<object, EventToCommandArgs> DeletePSMPlatformCommand
-        {
-            get { return _deletePSMPlatform ?? (_deletePSMPlatform = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.DeletePSMPlatform,this))); }
-        }
-         
-        SimpleCommand<object, EventToCommandArgs> _deletePSMPlatform;
-
-        #endregion
-
-        #region CopyPSMPlatformCommand
-        public SimpleCommand<object, EventToCommandArgs> CopyPSMPlatformCommand
-        {
-            get { return _copyPSMPlatform ?? (_copyPSMPlatform = new SimpleCommand<object, EventToCommandArgs>(o => MediatorMessage.Send(MediatorMessage.CopyPSMPlatform, this))); }
-        }
-         
-        SimpleCommand<object, EventToCommandArgs> _copyPSMPlatform;
-
-        #endregion
-
         #endregion
 
         #region Layer Move commands
