@@ -4,6 +4,12 @@ The goal of the Effects of Sound on the Marine Environment(ESME) research progra
 
 The ESME Workbench software has the important distinction of being open and peer-reviewed which allows the research community as well as the Navy to be completely aware of the details behind the simulations. In addition, the user interface for these tools is being carefully designed for ease-of-use for the non-expert without sacrificing the capability to model complex scenarios.
 
-The public-facing issues tracker and reporting tool for ESME has moved from bugzilla to github.  Its current home is [here](https://github.com/AuditoryBiophysicsLab/ESME/issues).
+# Issues
 
-The main website is [here](https://esme.bu.edu). 
+If you'd like to file a bug, please create an issue on our [bug tracker](https://github.com/AuditoryBiophysicsLab/ESME-Workbench/issues/new).
+
+Want to see all issues? They're [here](https://github.com/AuditoryBiophysicsLab/ESME-Workbench/issues). 
+
+# Main Website
+
+Downloads of the software, release notes, and full documentation are available at our [project website](https://esme.bu.edu)
