@@ -4,6 +4,8 @@ import uuid
 import sys
 import attr
 
+from esme._version import __version__
+
 MAGIC_FOOTER = int("a57d8ee659dc45ec", 16)
 MAGIC_TIMESTEP_RECORD = int("d3c603dd0d7a1ee6", 16)
 
@@ -16,24 +18,7 @@ def main(args=None):
 
 @attr.s
 class EsmeLog:
-    ## needed to construct a log
     filename = attr.ib()
-
-    # ## these values are read from the footer
-    # trailer_offset = attr.ib(default=None)
-    # timestep_size = attr.ib(default=None)
-    # start_time = attr.ib(default=None)
-    # end_time = attr.ib(default=None)
-    # creating_user = attr.ib(default=None)
-    # creating_computer = attr.ib(default=None)
-    # scenario_record = attr.ib(default=None)
-    #
-    # ## these are
-    # platform_records = attr.ib(default=None)
-    # mode_records = attr.ib(default=None)
-    # species_records = attr.ib(default=None)
-    #
-    # timestep_record_offsets = attr.ib(default=None)
 
     def __attrs_post_init__(self):
         """Read the footer from the log file and populate class attribute values"""
@@ -75,7 +60,7 @@ class EsmeLog:
 
     def timestep_record(self, offset):
         """
-
+        Returns one timestep record
         @param offset: One element of a EsmeLog.TimeStepRecordOffset list.
         @return: A TimeStepRecord object, containing the starting time of this collection of exposures relative to simulation start,
                 the number of actors logged in this time step, a list of actor positions (latitude, longitude, depth), and a list of actor exposure records.

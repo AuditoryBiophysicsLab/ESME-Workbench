@@ -8,6 +8,7 @@ name = "pypi"
 [packages]
 
 attrs = ">=17.4.0"
+vcversioner = "*"
 
 
 [dev-packages]
