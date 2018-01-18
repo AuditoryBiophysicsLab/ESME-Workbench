@@ -86,47 +86,27 @@ class EsmeLog(object):
 
 class BinaryStream:
     """Helper methods for reading values out of the log file at different precisions."""
-    def __init__(self, base_stream):
-        self.base_stream = base_stream
+    def __init__(self, filename):
+        self.filename = filename
 
-    # def readByte(self):
-    #     return self.base_stream.read(1)
+    def __enter__(self):
+        self.base_stream = open(self.filename, 'rb')
+        return self.base_stream
+
+    def __exit__(self, *args):
+        self.base_stream.close()
 
     def readBytes(self, length):
         return self.base_stream.read(length)
 
-    # def readChar(self):
-    #     return self.unpack('b')
-
-    # def readUChar(self):
-    #     return self.unpack('B')
-
-    # def readBool(self):
-    #     return self.unpack('?')
-
-    # def readInt16(self):
-    #     return self.unpack('h', 2)
-
-    # def readUInt16(self):
-    #     return self.unpack('H', 2)
-
     def readInt32(self):
         return self.unpack('i', 4)
-
-    # def readUInt32(self):
-    #     return self.unpack('I', 4)
-
-    # def readInt64(self):
-    #     return self.unpack('q', 8)
 
     def readUInt64(self):
         return self.unpack('Q', 8)
 
     def readFloat(self):
         return self.unpack('f', 4)
-
-    # def readDouble(self):
-    #     return self.unpack('d', 8)
 
     def readString(self):
         length = self.LEB128()
@@ -145,20 +125,8 @@ class BinaryStream:
             shift += 7
         return result
 
-    # def readStringLength(self):
-    #     byte = 0x80
-    #     byteArr = []
-    #     result = 0
-    #     while byte & 0x80:
-    #         byte = ord(self.base_stream.read(1))
-    #         byteArr.append(byte)
-    #     for i in range(0, len(byteArr)):
-    #         result |= (byteArr[i] & 0x7F) << (len(byteArr) - 1 - i) * 7
-    #     return result
-
     def unpack(self, fmt, length=1):
         return struct.unpack(fmt, self.readBytes(length))[0]
-
 
 
 @attr.s
