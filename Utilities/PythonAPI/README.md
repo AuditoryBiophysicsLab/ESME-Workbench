@@ -6,10 +6,6 @@ It requires Python 3.6.
 
 The latest version of this API, and the workbench, can be found at http://esme.bu.edu/download .
 
-## Installation
-
-`pip install git+https://github.com/AuditoryBiophysicsLab/ESME-Workbench/tree/master/Utilities/PythonAPI@master`
-
 ## Usage
 The `esme` module provides the class `EsmeLog`.   
 
