@@ -19,5 +19,6 @@ setup(
                  },
     author='Graham Voysey',
     author_email='gvoysey@bu.edu',
-    description='A python API for reading ESME Workbench simulation results'
+    description='A python API for reading ESME Workbench simulation results',
+    install_requires=['attrs>=17.4.0']
 )
