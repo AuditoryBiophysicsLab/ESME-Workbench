@@ -16,7 +16,7 @@ ex:
 
 sim will now contain non-null header information, including sim.TimeStepRecordOffsets -- a list of indicies of each time step record.
 
-sim.ReadTimeStepRecord(offset)  returns a struct containing a given time step's time, the
+sim.timestep_record(offset)  returns a struct containing a given time step's time, the
     position of every platform and animat in the scenario at that time
     step, and a list of all animats that were exposed to sound at that time
     step along with the ID of the mode that exposed them, the sound level,
@@ -24,7 +24,7 @@ sim.ReadTimeStepRecord(offset)  returns a struct containing a given time step's 
 
 ex:
 
-    recordFirst = sim.ReadTimeStepRecord(sim.TimeStepRecordOffsets[0])
-    recordLast = sim.ReadTimeStepRecord(sim.TimeStepRecordOffsets[-1])
+    recordFirst = sim.timestep_record(sim.TimeStepRecordOffsets[0])
+    recordLast = sim.timestep_record(sim.TimeStepRecordOffsets[-1])
     print "the first record had {0} actors and began at {1}".format(recordFirst.ActorCount, recordFirst.StartTime)
     print "the last record had {0} actors and began at {1}".format(recordLast.ActorCount, recordLast.StartTime)

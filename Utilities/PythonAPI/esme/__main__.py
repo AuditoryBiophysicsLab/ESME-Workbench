@@ -1,32 +1,43 @@
 import datetime
 import struct
 import uuid
-
+import sys
 import attr
 
 MAGIC_FOOTER = int("a57d8ee659dc45ec", 16)
 MAGIC_TIMESTEP_RECORD = int("d3c603dd0d7a1ee6", 16)
 
+
+def main(args=None):
+    if args is None:
+        args = sys.argv[1:]
+    pass
+
+
 @attr.s
-class EsmeLog(object):
+class EsmeLog:
+    ## needed to construct a log
     filename = attr.ib()
-    trailer_offset = attr.ib(default=None)
-    timestep_size = attr.ib(default=None)
-    start_time = attr.ib(default=None)
-    end_time = attr.ib(default=None)
-    creating_user = attr.ib(default=None)
-    creating_computer = attr.ib(default=None)
-    scenario_record = attr.ib(default=None)
-    platform_records = attr.ib(default=None)
-    mode_records = attr.ib(default=None)
-    species_records = attr.ib(default=None)
-    timestep_record_offsets = attr.ib(default=None)
+
+    # ## these values are read from the footer
+    # trailer_offset = attr.ib(default=None)
+    # timestep_size = attr.ib(default=None)
+    # start_time = attr.ib(default=None)
+    # end_time = attr.ib(default=None)
+    # creating_user = attr.ib(default=None)
+    # creating_computer = attr.ib(default=None)
+    # scenario_record = attr.ib(default=None)
+    #
+    # ## these are
+    # platform_records = attr.ib(default=None)
+    # mode_records = attr.ib(default=None)
+    # species_records = attr.ib(default=None)
+    #
+    # timestep_record_offsets = attr.ib(default=None)
 
     def __attrs_post_init__(self):
-        """Read the footer from the log file and populate values"""
-        with open(self.filename, "rb") as l:
-            #  preliminary work; read offset and magic number or die.
-            b = BinaryStream(l)
+        """Read the footer from the log file and populate class attribute values"""
+        with BinaryStream(self.filename) as b:
             b.base_stream.seek(-16, 2)
             self.trailer_offset = b.readUInt64()
             magic = int(b.readUInt64())
@@ -40,7 +51,7 @@ class EsmeLog(object):
             self.end_time = datetime.datetime(1, 1, 1) + datetime.timedelta(microseconds=int(b.readUInt64()) / 10)
             self.creating_user = b.readString()
             self.creating_computer = b.readString()
-            self.scenario_record = b.readString(), uuid.UUID(bytes=b.readBytes(16))
+            self.scenario_record = ScenarioRecord(b.readString(), uuid.UUID(bytes=b.readBytes(16)))
 
             platformCount = b.readInt32()
             self.platform_records = []
@@ -62,25 +73,29 @@ class EsmeLog(object):
             for i in range(0, offsetCount):
                 self.timestep_record_offsets.append(b.readUInt64())
 
-    def ReadTimeStepRecord(self, offset):
+    def timestep_record(self, offset):
         """
 
         @param offset: One element of a EsmeLog.TimeStepRecordOffset list.
         @return: A TimeStepRecord object, containing the starting time of this collection of exposures relative to simulation start,
                 the number of actors logged in this time step, a list of actor positions (latitude, longitude, depth), and a list of actor exposure records.
         """
-        with open(self.filename, "rb") as l:
-            b = BinaryStream(l)
+        with BinaryStream(self.filename) as b:
             # jump to the beginning and read the header.
             b.base_stream.seek(offset, 0)
             if int(b.readUInt64()) != MAGIC_TIMESTEP_RECORD:
                 raise IOError('magic number not seen at expected location')
             result = TimeStepRecord(datetime.datetime(1, 1, 1) + datetime.timedelta(microseconds=int(b.readUInt64()) / 10), b.readInt32())
-            for i in range(0, result.ActorCount):
-                result.ActorPositionRecords.append(ActorPositionRecord(b.readFloat(), b.readFloat(), b.readFloat()))
+            result.actor_position_records = []
+            result.actor_exposure_records = []
+
+            for i in range(0, result.actor_count):
+                result.actor_position_records.append(ActorPositionRecord(b.readFloat(), b.readFloat(), b.readFloat()))
+
             exposureCount = b.readInt32()
             for i in range(0, exposureCount):
-                result.ActorExposureRecords.append(ActorExposureRecord(b.readInt32(), b.readInt32(), b.readFloat(), b.readFloat()))
+                result.actor_exposure_records.append(ActorExposureRecord(b.readInt32(), b.readInt32(), b.readFloat(), b.readFloat()))
+
             return result
 
 
@@ -91,7 +106,7 @@ class BinaryStream:
 
     def __enter__(self):
         self.base_stream = open(self.filename, 'rb')
-        return self.base_stream
+        return self
 
     def __exit__(self, *args):
         self.base_stream.close()
@@ -110,7 +125,7 @@ class BinaryStream:
 
     def readString(self):
         length = self.LEB128()
-        return self.unpack(str(length) + 's', length)
+        return self.unpack(str(length) + 's', length).decode()
 
     def LEB128(self):
         result = 0
@@ -130,24 +145,29 @@ class BinaryStream:
 
 
 @attr.s
+class ScenarioRecord:
+    name = attr.ib(validator=attr.validators.instance_of(str))
+    guid = attr.ib(validator=attr.validators.instance_of(uuid.UUID))
+
+@attr.s
 class PlatformRecord:
-    actorID = attr.ib()
-    name = attr.ib()
-    guid = attr.ib()
+    actorID = attr.ib(validator=attr.validators.instance_of(int))
+    name = attr.ib(validator=attr.validators.instance_of(str))
+    guid = attr.ib(validator=attr.validators.instance_of(uuid.UUID))
 
 @attr.s
 class ModeRecord:
-    name = attr.ib()
-    actorID = attr.ib()
-    guid = attr.ib()
-    platformGuid = attr.ib()
+    name =  attr.ib(validator=attr.validators.instance_of(int))
+    actorID = attr.ib(validator=attr.validators.instance_of(str))
+    guid = attr.ib(validator=attr.validators.instance_of(uuid.UUID))
+    platformGuid = attr.ib(validator=attr.validators.instance_of(uuid.UUID))
 
 @attr.s
 class SpeciesRecord:
-    animatCount = attr.ib()
-    startActorID = attr.ib()
-    name = attr.ib()
-    guid = attr.ib()
+    animatCount = attr.ib(validator=attr.validators.instance_of(int))
+    startActorID = attr.ib(validator=attr.validators.instance_of(int))
+    name = attr.ib(validator=attr.validators.instance_of(str))
+    guid = attr.ib(validator=attr.validators.instance_of(uuid.UUID))
 
 @attr.s
 class ActorPositionRecord:
@@ -164,7 +184,10 @@ class ActorExposureRecord:
 
 @attr.s
 class TimeStepRecord:
-    start_time = attr.ib()
-    actor_count = attr.ib()
+    start_time = attr.ib(validator=attr.validators.instance_of(datetime.datetime))
+    actor_count = attr.ib(validator=attr.validators.instance_of(int))
     actor_position_records = attr.ib(default=None)
     actor_exposure_records = attr.ib(default=None)
+
+if __name__ == "__main__":
+    main()
