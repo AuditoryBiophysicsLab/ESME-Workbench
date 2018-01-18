@@ -1,7 +1,10 @@
 from setuptools import setup, find_packages
 from os import path
+
+
 basepath = path.dirname(path.abspath(__file__))
 root = path.abspath(path.join(basepath,'..','..'))
+
 setup(
     name='esme',
     packages=find_packages(),

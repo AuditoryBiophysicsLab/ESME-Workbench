@@ -40,22 +40,22 @@ class EsmeLog:
 
             platformCount = b.readInt32()
             self.platform_records = []
-            for i in range(0, platformCount):
+            for i in range(platformCount):
                 self.platform_records.append(PlatformRecord(b.readInt32(), b.readString(), uuid.UUID(bytes=b.readBytes(16))))
 
             modeCount = b.readInt32()
             self.mode_records = []
-            for i in range(0, modeCount):
+            for i in range(modeCount):
                 self.mode_records.append(ModeRecord(b.readInt32(), b.readString(), uuid.UUID(bytes=b.readBytes(16)), uuid.UUID(bytes=b.readBytes(16))))
 
             speciesCount = b.readInt32()
             self.species_records = []
-            for i in range(0, speciesCount):
+            for i in range(speciesCount):
                 self.species_records.append(SpeciesRecord(b.readInt32(), b.readInt32(), b.readString(), uuid.UUID(bytes=b.readBytes(16))))
 
             offsetCount = b.readInt32()
             self.timestep_record_offsets = []
-            for i in range(0, offsetCount):
+            for i in range(offsetCount):
                 self.timestep_record_offsets.append(b.readUInt64())
 
     def timestep_record(self, offset):
@@ -74,11 +74,11 @@ class EsmeLog:
             result.actor_position_records = []
             result.actor_exposure_records = []
 
-            for i in range(0, result.actor_count):
+            for i in range(result.actor_count):
                 result.actor_position_records.append(ActorPositionRecord(b.readFloat(), b.readFloat(), b.readFloat()))
 
             exposureCount = b.readInt32()
-            for i in range(0, exposureCount):
+            for i in range(exposureCount):
                 result.actor_exposure_records.append(ActorExposureRecord(b.readInt32(), b.readInt32(), b.readFloat(), b.readFloat()))
 
             return result
