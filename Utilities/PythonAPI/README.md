@@ -7,24 +7,32 @@ It requires Python 3.6.
 The latest version of this API, and the workbench, can be found at http://esme.bu.edu/download .
 
 ## Installation
+
 `pip install git+https://github.com/AuditoryBiophysicsLab/ESME-Workbench/tree/master/Utilities/PythonAPI@master`
 
 ## Usage
-The `esme` module provides the class EsmeLog.   Constructing a new instance of the class with the filename of the simulation.exposures file reads the header of that file and
+The `esme` module provides the class `EsmeLog`.   
+
+Constructing a new instance of the class with the filename of the simulation.exposures file reads the header of that file and
 populates class attributes appropriately via an internal method.
 
 ex:
-    ```
+
+```
     from esme import EsmeLog
     sim = EsmeLog('/path/to/simulation.exposures') #  replace with your path
-    ```
+```
+
 `sim` will now contain non-null header information, including `sim.timestep_record_offsets` -- a list of indicies of each time step record.
 
-`sim.timestep_record(offset)`  returns a struct containing a given time step's time, the
-    position of every platform and animat in the scenario at that time
-    step, and a list of all animats that were exposed to sound at that time
-    step along with the ID of the mode that exposed them, the sound level,
-    and the total energy accumulated at that time step.
+`sim.timestep_record(offset)`  returns a struct containing:
+
+- a given time step's time
+- the position of every platform and animat in the scenario at that time step
+- a list of all animats that were exposed to sound at that time step as well as    
+    - the ID of the mode that exposed them
+    - the sound level
+    - the total energy accumulated at that time step.
 
 ex:
 
